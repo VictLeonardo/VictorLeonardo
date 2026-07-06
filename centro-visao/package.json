@@ -1,0 +1,14 @@
+{
+  "name": "centro-visao",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema interno Centro Visão — conciliação financeira + status de câmeras (fase mock)",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev": "node scripts/dev.js",
+    "start:api": "npm --prefix backend start",
+    "dev:web": "npm --prefix frontend run dev",
+    "test": "npm --prefix backend test",
+    "build": "npm --prefix frontend run build"
+  }
+}
