@@ -60,6 +60,15 @@ npm --prefix frontend run dev     # http://localhost:5173
 npm test        # roda os testes do backend (node:test)
 ```
 
+## Publicar / Deploy
+
+O projeto já vem com `vercel.json` e `netlify.toml` prontos para publicar a
+**visualização estática** (`web-preview/index.html`) sem build e sem backend.
+Caminho mais rápido para um link compartilhável: arraste a pasta `web-preview/`
+em **https://app.netlify.com/drop**. Passo a passo completo (Vercel CLI, deploy
+automático via GitHub, GitHub Pages e como hospedar o app completo com API) em
+**[DEPLOY.md](./DEPLOY.md)**.
+
 ## Telas
 
 - **Dashboard** (`/`) — métricas de topo (% conciliado automático, exceções

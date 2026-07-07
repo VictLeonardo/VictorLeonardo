@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Centro Visão — conciliação financeira e status de câmeras (protótipo).">
+</head>
+<body>
+<title>Centro Visão — Conciliação & Câmeras</title>
+<style>
+  :root {
+    /* Marca */
+    --brand-blue: #1C63A1;
+    --brand-teal: #3897AF;
+    --logo-bg: #0b0f14;
+    /* Neutros com leve viés frio (azul) — luz */
+    --bg: #f5f8fb;
+    --surface: #ffffff;
+    --surface-2: #eef3f8;
+    --border: #dde5ee;
+    --border-strong: #c7d3e0;
+    --ink: #17222e;
+    --muted: #5c6b7c;
+    --faint: #8a97a6;
+    /* Semânticas (separadas do accent da marca) */
+    --ok: #0f9d6a; --ok-bg: #e2f4ec; --ok-ink: #0a7a52;
+    --warn: #c8860a; --warn-bg: #fbf0d8; --warn-ink: #966209;
+    --crit: #d64545; --crit-bg: #fbe4e4; --crit-ink: #a92f2f;
+    --shadow: 0 1px 2px rgba(20,40,70,.05);
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1015; --surface: #141a21; --surface-2: #1b232c;
+      --border: #263039; --border-strong: #33404c;
+      --ink: #e6edf3; --muted: #93a1b0; --faint: #6b7885;
+      --ok: #37c98d; --ok-bg: #12271f; --ok-ink: #57d6a1;
+      --warn: #e0a52e; --warn-bg: #2a2110; --warn-ink: #eec267;
+      --crit: #e86767; --crit-bg: #2c1515; --crit-ink: #f08b8b;
+      --shadow: 0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f8fb; --surface: #ffffff; --surface-2: #eef3f8;
+    --border: #dde5ee; --border-strong: #c7d3e0;
+    --ink: #17222e; --muted: #5c6b7c; --faint: #8a97a6;
+    --ok: #0f9d6a; --ok-bg: #e2f4ec; --ok-ink: #0a7a52;
+    --warn: #c8860a; --warn-bg: #fbf0d8; --warn-ink: #966209;
+    --crit: #d64545; --crit-bg: #fbe4e4; --crit-ink: #a92f2f;
+    --shadow: 0 1px 2px rgba(20,40,70,.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1015; --surface: #141a21; --surface-2: #1b232c;
+    --border: #263039; --border-strong: #33404c;
+    --ink: #e6edf3; --muted: #93a1b0; --faint: #6b7885;
+    --ok: #37c98d; --ok-bg: #12271f; --ok-ink: #57d6a1;
+    --warn: #e0a52e; --warn-bg: #2a2110; --warn-ink: #eec267;
+    --crit: #e86767; --crit-bg: #2c1515; --crit-ink: #f08b8b;
+    --shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 10; background: var(--surface);
+    border-bottom: 1px solid var(--border); }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 12px 0; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { background: var(--logo-bg); border-radius: 10px; padding: 7px; display: grid; place-items: center; }
+  .wordmark { font-weight: 800; letter-spacing: .04em; font-size: 18px; color: var(--brand-blue); line-height: 1; }
+  .wordmark span { color: var(--brand-teal); }
+  .tag { font-size: 11px; font-style: italic; color: var(--faint); margin-top: 3px; }
+  nav { display: flex; gap: 4px; }
+  .tab { font: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+    background: none; border: 0; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  .tab:hover { background: var(--surface-2); }
+  .tab[aria-selected="true"] { background: var(--brand-blue); color: #fff; }
+  .tab:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
+  .right { display: flex; align-items: center; gap: 10px; }
+  .theme-toggle { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 12.5px;
+    font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+    padding: 7px 11px; border-radius: 8px; cursor: pointer; }
+  .theme-toggle:hover { background: var(--surface-2); color: var(--ink); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
+  .theme-toggle svg { width: 15px; height: 15px; }
+
+  main { padding: 26px 0 60px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .section-head { margin-bottom: 18px; }
+
+  /* Cards / tiles */
+  .grid-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent, var(--brand-blue)); }
+  .tile .k { font-size: 12.5px; color: var(--muted); }
+  .tile .v { font-size: 30px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .tile .s { font-size: 11.5px; color: var(--faint); margin-top: 3px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  .card-head { display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 18px; border-bottom: 1px solid var(--border); }
+  .card-head h2 { font-size: 14.5px; margin: 0; }
+
+  /* Table */
+  .tbl-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--faint); font-weight: 700; padding: 10px 16px; white-space: nowrap; }
+  tbody tr { border-top: 1px solid var(--border); cursor: pointer; }
+  tbody tr:hover { background: var(--surface-2); }
+  td { padding: 12px 16px; vertical-align: middle; }
+  .strong { font-weight: 600; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .idcell .sub2 { font-size: 11px; color: var(--faint); }
+  .sev { border-left: 3px solid transparent; }
+  .sev.low { border-left-color: var(--crit); }
+  .sev.medium { border-left-color: var(--warn); }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge .pct { font-family: var(--mono); }
+  .b-high { background: var(--ok-bg); color: var(--ok-ink); }
+  .b-medium { background: var(--warn-bg); color: var(--warn-ink); }
+  .b-low { background: var(--crit-bg); color: var(--crit-ink); }
+
+  .link-btn { font: inherit; font-size: 13px; font-weight: 600; color: var(--brand-blue);
+    background: none; border: 0; cursor: pointer; padding: 0; }
+  .link-btn:hover { text-decoration: underline; }
+
+  /* Exceptions layout */
+  .split { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+  .exlist { max-height: 72vh; overflow-y: auto; }
+  .exitem { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+    width: 100%; text-align: left; font: inherit; background: none; border: 0;
+    border-top: 1px solid var(--border); padding: 11px 14px; cursor: pointer; }
+  .exitem:first-child { border-top: 0; }
+  .exitem:hover { background: var(--surface-2); }
+  .exitem[aria-current="true"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--brand-teal); }
+  .exitem .nm { display: block; font-size: 13.5px; font-weight: 600; }
+  .exitem .mt { display: block; font-size: 11.5px; color: var(--faint); margin-top: 2px; }
+
+  .detail { padding: 20px; }
+  .detail-empty { display: grid; place-items: center; min-height: 320px; color: var(--faint); font-size: 13.5px; text-align: center; }
+  .dh { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .dh h3 { margin: 0; font-size: 17px; }
+  .dh .meta { font-size: 11.5px; color: var(--faint); margin-top: 3px; }
+  .reason { border-radius: 9px; padding: 11px 14px; font-size: 13px; margin: 16px 0; border: 1px solid; }
+  .reason.low { background: var(--crit-bg); color: var(--crit-ink); border-color: color-mix(in srgb, var(--crit) 35%, transparent); }
+  .reason.medium { background: var(--warn-bg); color: var(--warn-ink); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .reason.high { background: var(--ok-bg); color: var(--ok-ink); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+
+  .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; margin: 0 0 8px; }
+  .sources { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .src { border: 1px solid var(--border); border-radius: 9px; padding: 11px; font-size: 12.5px; }
+  .src.absent { border-style: dashed; background: var(--surface-2); }
+  .src .st { display: flex; align-items: baseline; justify-content: space-between; }
+  .src .st b { font-size: 13px; }
+  .src .st small { font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--faint); }
+  .src dl { margin: 9px 0 0; display: grid; gap: 4px; }
+  .src .row { display: flex; justify-content: space-between; gap: 8px; }
+  .src .row dt { color: var(--faint); }
+  .src .row dd { margin: 0; }
+  .src .diff { color: var(--crit-ink); font-weight: 700; }
+  .src .absent-msg { color: var(--faint); font-style: italic; margin-top: 8px; }
+
+  .crit { margin-top: 8px; }
+  .crit + .crit { margin-top: 14px; }
+  .crit .cr-top { display: flex; justify-content: space-between; font-size: 12px; }
+  .crit .cr-top b { font-weight: 600; }
+  .crit .cr-top .pts { font-family: var(--mono); color: var(--faint); }
+  .bar { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin: 5px 0; border: 1px solid var(--border); }
+  .bar > i { display: block; height: 100%; border-radius: 999px; }
+  .f-pass { background: var(--ok); }
+  .f-partial { background: var(--warn); }
+  .f-fail { background: var(--crit); }
+  .crit .cr-detail { font-size: 12px; color: var(--muted); }
+
+  .actions { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .actions textarea { width: 100%; resize: vertical; min-height: 46px; font: inherit; font-size: 13px;
+    padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface);
+    color: var(--ink); margin-bottom: 10px; }
+  .actions textarea:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 1px; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font: inherit; font-size: 13px; font-weight: 600; color: #fff; border: 0;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  .btn:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
+  .btn.approve { background: var(--ok); }
+  .btn.fraud { background: var(--crit); }
+  .btn.ask { background: var(--brand-blue); }
+  .decided { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .decided b { color: var(--ink); }
+
+  .audit { margin-top: 16px; }
+  .audit ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .audit li { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; font-size: 12px; }
+  .audit li .who { color: var(--faint); }
+
+  /* Cameras */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; }
+  .chip:hover { background: var(--surface-2); }
+  .chip[aria-pressed="true"] { background: var(--brand-blue); color: #fff; border-color: var(--brand-blue); }
+  .cam-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .cam { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; box-shadow: var(--shadow); }
+  .cam .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .cam .nm { font-weight: 600; font-size: 14px; }
+  .cam .id { font-size: 11px; color: var(--faint); font-family: var(--mono); }
+  .cam .model { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .cam .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 11px; }
+  .t { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .t.on { background: var(--ok-bg); color: var(--ok-ink); }
+  .t.neutral { background: var(--surface-2); color: var(--muted); }
+  .t.off { background: var(--surface-2); color: var(--faint); text-decoration: line-through; }
+  .t.ip { background: var(--surface-2); color: var(--muted); }
+  .cam .note { margin-top: 11px; background: var(--surface-2); border-radius: 7px; padding: 8px 10px; font-size: 12px; color: var(--muted); }
+  .st-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .st-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .st-online { background: var(--ok-bg); color: var(--ok-ink); }
+  .st-online .dot { background: var(--ok); }
+  .st-instavel { background: var(--warn-bg); color: var(--warn-ink); }
+  .st-instavel .dot { background: var(--warn); }
+  .st-offline { background: var(--crit-bg); color: var(--crit-ink); }
+  .st-offline .dot { background: var(--crit); }
+
+  .banner { font-size: 12px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px; margin-bottom: 18px; }
+  footer { color: var(--faint); font-size: 12px; padding: 22px 0 40px; }
+
+  @media (max-width: 860px) {
+    .grid-tiles { grid-template-columns: repeat(2, 1fr); }
+    .split { grid-template-columns: 1fr; }
+    .sources { grid-template-columns: 1fr; }
+    .cam-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<header>
+  <div class="wrap head">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 100 100">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3897AF"/><stop offset="100%" stop-color="#1C63A1"/>
+          </linearGradient></defs>
+          <path d="M50 12 a38 38 0 1 0 0 76 a38 38 0 0 0 0 -76" fill="none" stroke="url(#g)"
+            stroke-width="12" stroke-linecap="round" stroke-dasharray="150 300" transform="rotate(35 50 50)"/>
+          <circle cx="50" cy="50" r="12" fill="url(#g)"/>
+        </svg>
+      </div>
+      <div>
+        <div class="wordmark">CENTRO <span>VISÃO</span></div>
+        <div class="tag">Essencialmente Mineiro</div>
+      </div>
+    </div>
+    <div class="right">
+      <nav role="tablist" aria-label="Seções">
+        <button class="tab" role="tab" data-view="dashboard" aria-selected="true">Dashboard</button>
+        <button class="tab" role="tab" data-view="excecoes" aria-selected="false">Exceções</button>
+        <button class="tab" role="tab" data-view="cameras" aria-selected="false">Câmeras</button>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema" title="Alternar tema claro/escuro">
+        <span id="themeIcon" aria-hidden="true"></span><span id="themeText"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main><div class="wrap" id="view"></div></main>
+<footer><div class="wrap">Centro Visão — ferramenta operacional interna · protótipo de visualização com dados simulados (fase mock).</div></footer>
+
+<script>
+/* ---------- Tema (claro/escuro) controlado pelo usuário ---------- */
+(function themeSetup() {
+  const root = document.documentElement;
+  const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const store = {
+    get() { try { return localStorage.getItem('cv-theme'); } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem('cv-theme', v); } catch (e) {} },
+  };
+  function effective() {
+    const attr = root.getAttribute('data-theme');
+    if (attr === 'dark' || attr === 'light') return attr;
+    const saved = store.get();
+    if (saved === 'dark' || saved === 'light') return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function paint(theme) {
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    if (icon) icon.innerHTML = theme === 'dark' ? ICON_SUN : ICON_MOON;
+    if (text) text.textContent = theme === 'dark' ? 'Claro' : 'Escuro';
+  }
+  function apply(theme, persist) {
+    root.setAttribute('data-theme', theme);
+    if (persist) store.set(theme);
+    paint(theme);
+  }
+  // estado inicial: preferência salva > tema do viewer > preferência do SO
+  apply(effective(), false);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', () => {
+    apply(effective() === 'dark' ? 'light' : 'dark', true);
+  });
+  // acompanha o SO enquanto o usuário não tiver escolhido manualmente
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!store.get()) apply(effective(), false);
+  });
+})();
+
+const DATA ={"transactions":[{"id":"TX0001","storeId":"L001","storeName":"BH Centro","date":"2026-07-01","amount":890,"nsu":"NSU100001","method":"credito","sources":{"pos":{"present":true,"amount":890,"date":"2026-07-01","nsu":"NSU100001","storeId":"L001"},"erp":{"present":true,"amount":890,"date":"2026-07-01","nsu":"NSU100001","storeId":"L001"},"banco":{"present":true,"amount":890,"date":"2026-07-01","nsu":"NSU100001","storeId":"L001"}}},{"id":"TX0002","storeId":"L002","storeName":"Savassi","date":"2026-07-01","amount":1250.5,"nsu":"NSU100002","method":"debito","sources":{"pos":{"present":true,"amount":1250.5,"date":"2026-07-01","nsu":"NSU100002","storeId":"L002"},"erp":{"present":true,"amount":1250.5,"date":"2026-07-01","nsu":"NSU100002","storeId":"L002"},"banco":{"present":true,"amount":1250.5,"date":"2026-07-01","nsu":"NSU100002","storeId":"L002"}}},{"id":"TX0003","storeId":"L003","storeName":"Contagem","date":"2026-07-01","amount":430,"nsu":"NSU100003","method":"credito","sources":{"pos":{"present":true,"amount":430,"date":"2026-07-01","nsu":"NSU100003","storeId":"L003"},"erp":{"present":true,"amount":430,"date":"2026-07-01","nsu":"NSU100003","storeId":"L003"},"banco":{"present":true,"amount":430,"date":"2026-07-02","nsu":"NSU100003","storeId":"L003"}}},{"id":"TX0004","storeId":"L005","storeName":"Uberlândia","date":"2026-07-02","amount":599.9,"nsu":"NSU100004","method":"credito","sources":{"pos":{"present":true,"amount":599.9,"date":"2026-07-02","nsu":"NSU100004","storeId":"L005"},"erp":{"present":true,"amount":599.9,"date":"2026-07-02","nsu":"NSU100004","storeId":"L005"},"banco":{"present":true,"amount":599.4,"date":"2026-07-02","nsu":"NSU100004","storeId":"L005"}}},{"id":"TX0005","storeId":"L004","storeName":"Betim","date":"2026-07-02","amount":2100,"nsu":"NSU100005","method":"credito","sources":{"pos":{"present":true,"amount":2100,"date":"2026-07-02","nsu":"NSU100005","storeId":"L004"},"erp":{"present":true,"amount":2100,"date":"2026-07-02","nsu":"NSU100005","storeId":"L004"},"banco":{"present":true,"amount":1890,"date":"2026-07-02","nsu":"NSU100005","storeId":"L004"}}},{"id":"TX0006","storeId":"L006","storeName":"Juiz de Fora","date":"2026-07-03","amount":745,"nsu":"NSU100006","method":"credito","sources":{"pos":{"present":true,"amount":745,"date":"2026-07-03","nsu":"NSU100006","storeId":"L006"},"erp":{"present":true,"amount":745,"date":"2026-07-03","nsu":"NSU100006","storeId":"L006"},"banco":{"present":false,"amount":0,"date":"","nsu":"","storeId":"L006"}}},{"id":"TX0007","storeId":"L007","storeName":"Montes Claros","date":"2026-07-03","amount":1680,"nsu":"NSU100007","method":"credito","sources":{"pos":{"present":true,"amount":1680,"date":"2026-07-03","nsu":"NSU100007","storeId":"L007"},"erp":{"present":true,"amount":1680,"date":"2026-07-03","nsu":"NSU100007","storeId":"L008"},"banco":{"present":true,"amount":1680,"date":"2026-07-04","nsu":"NSU100007","storeId":"L007"}}},{"id":"TX0008","storeId":"L009","storeName":"Gov. Valadares","date":"2026-07-04","amount":320,"nsu":"NSU100008","method":"debito","sources":{"pos":{"present":true,"amount":320,"date":"2026-07-04","nsu":"NSU100008","storeId":"L009"},"erp":{"present":true,"amount":320,"date":"2026-07-04","nsu":"NSU100008","storeId":"L009"},"banco":{"present":true,"amount":320,"date":"2026-07-04","nsu":"NSU100008","storeId":"L009"}}},{"id":"TX0009","storeId":"L010","storeName":"Ipatinga","date":"2026-07-04","amount":980,"nsu":"NSU100008","method":"credito","sources":{"pos":{"present":true,"amount":980,"date":"2026-07-04","nsu":"NSU100008","storeId":"L010"},"erp":{"present":true,"amount":1100,"date":"2026-07-04","nsu":"NSU100008","storeId":"L010"},"banco":{"present":false,"amount":0,"date":"","nsu":"","storeId":"L010"}}},{"id":"TX0010","storeId":"F001","storeName":"Divinópolis","date":"2026-07-04","amount":1499,"nsu":"NSU100010","method":"credito","sources":{"pos":{"present":true,"amount":1499,"date":"2026-07-04","nsu":"NSU100010","storeId":"F001"},"erp":{"present":true,"amount":1499,"date":"2026-07-04","nsu":"NSU100010","storeId":"F001"},"banco":{"present":true,"amount":1499,"date":"2026-07-05","nsu":"NSU100010","storeId":"F001"}}},{"id":"TX0011","storeId":"F002","storeName":"Sete Lagoas","date":"2026-07-05","amount":3200,"nsu":"NSU100011","method":"credito","sources":{"pos":{"present":true,"amount":3200,"date":"2026-07-05","nsu":"NSU100011","storeId":"F002"},"erp":{"present":true,"amount":2800,"date":"2026-07-08","nsu":"NSU100011","storeId":"F003"},"banco":{"present":true,"amount":3200,"date":"2026-07-05","nsu":"NSU100011","storeId":"F002"}}},{"id":"TX0012","storeId":"F004","storeName":"Pouso Alegre","date":"2026-07-05","amount":675,"nsu":"NSU100012","method":"debito","sources":{"pos":{"present":true,"amount":675,"date":"2026-07-05","nsu":"NSU100012","storeId":"F004"},"erp":{"present":true,"amount":675,"date":"2026-07-05","nsu":"NSU100012","storeId":"F004"},"banco":{"present":true,"amount":675,"date":"2026-07-05","nsu":"NSU100012","storeId":"F004"}}},{"id":"TX0013","storeId":"L001","storeName":"BH Centro","date":"2026-07-05","amount":210,"nsu":"NSU100013","method":"dinheiro","sources":{"pos":{"present":true,"amount":210,"date":"2026-07-05","nsu":"NSU100013","storeId":"L001"},"erp":{"present":false,"amount":0,"date":"","nsu":"","storeId":"L001"},"banco":{"present":false,"amount":0,"date":"","nsu":"","storeId":"L001"}}},{"id":"TX0014","storeId":"L002","storeName":"Savassi","date":"2026-07-06","amount":1850,"nsu":"NSU100014","method":"credito","sources":{"pos":{"present":true,"amount":1850,"date":"2026-07-06","nsu":"NSU100014","storeId":"L002"},"erp":{"present":true,"amount":1850,"date":"2026-07-06","nsu":"NSU100014","storeId":"L002"},"banco":{"present":true,"amount":1850,"date":"2026-07-06","nsu":"NSU100014","storeId":"L002"}}},{"id":"TX0015","storeId":"L008","storeName":"Uberaba","date":"2026-07-06","amount":450.75,"nsu":"NSU100015","method":"credito","sources":{"pos":{"present":true,"amount":450.75,"date":"2026-07-06","nsu":"NSU100015","storeId":"L008"},"erp":{"present":true,"amount":450.75,"date":"2026-07-06","nsu":"NSU100015","storeId":"L008"},"banco":{"present":true,"amount":450,"date":"2026-07-07","nsu":"NSU100015","storeId":"L008"}}}],"cameras":[{"id":"CAM-L001-1","storeId":"L001","storeName":"BH Centro","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L001-2","storeId":"L001","storeName":"BH Centro","model":"Intelbras VIP 1230","apiActive":true,"cardLocal":false,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L002-1","storeId":"L002","storeName":"Savassi","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L002-2","storeId":"L002","storeName":"Savassi","model":"Intelbras VIP 1130 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"instavel","notes":"IP dinâmico — cai o acesso remoto ao reiniciar o roteador."},{"id":"CAM-L003-1","storeId":"L003","storeName":"Contagem","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L003-2","storeId":"L003","storeName":"Contagem","model":"Intelbras VIP 1230 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"offline","notes":"Sem API — apenas gravação local em cartão SD."},{"id":"CAM-L004-1","storeId":"L004","storeName":"Betim","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":"Baixa iluminação no período noturno."},{"id":"CAM-L005-1","storeId":"L005","storeName":"Uberlândia","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L005-2","storeId":"L005","storeName":"Uberlândia","model":"Intelbras VIP 1130 B","apiActive":true,"cardLocal":false,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L006-1","storeId":"L006","storeName":"Juiz de Fora","model":"Intelbras VIP 1230 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"instavel","notes":"IP dinâmico sem DDNS configurado."},{"id":"CAM-L007-1","storeId":"L007","storeName":"Montes Claros","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L007-2","storeId":"L007","storeName":"Montes Claros","model":"Intelbras VIP 1130 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"offline","notes":"Câmera do estoque — ângulo ruim, cobre só a porta."},{"id":"CAM-L008-1","storeId":"L008","storeName":"Uberaba","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L009-1","storeId":"L009","storeName":"Gov. Valadares","model":"Intelbras VIP 1230 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"offline","notes":"Depende só de cartão local — sem acesso remoto."},{"id":"CAM-L010-1","storeId":"L010","storeName":"Ipatinga","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-L010-2","storeId":"L010","storeName":"Ipatinga","model":"Intelbras VIP 1130 B","apiActive":true,"cardLocal":false,"ipType":"fixo","status":"instavel","notes":"Perde conexão em horário de pico de rede."},{"id":"CAM-F001-1","storeId":"F001","storeName":"Divinópolis","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":"Franquia — acesso concedido pelo franqueado."},{"id":"CAM-F002-1","storeId":"F002","storeName":"Sete Lagoas","model":"Intelbras VIP 1230 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"offline","notes":"Franquia — sem API liberada ainda."},{"id":"CAM-F003-1","storeId":"F003","storeName":"Poços de Caldas","model":"Intelbras VIP 3230","apiActive":true,"cardLocal":true,"ipType":"fixo","status":"online","notes":""},{"id":"CAM-F004-1","storeId":"F004","storeName":"Pouso Alegre","model":"Intelbras VIP 1130 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"instavel","notes":"Baixa iluminação + IP dinâmico."},{"id":"CAM-F005-1","storeId":"F005","storeName":"Barbacena","model":"Intelbras VIP 1230 B","apiActive":false,"cardLocal":true,"ipType":"dinamico","status":"offline","notes":"Franquia — apenas gravação local."}],"rules":{"weights":{"valueMatch":35,"dateMatch":25,"nsuUnique":25,"storeConsistent":15},"tolerances":{"valuePartialMaxDiff":1,"datePartialMaxDays":1},"criticalCriteria":["nsuUnique"],"criticalFailCap":35,"bands":{"high":75,"medium":40}}};
+const RULES = DATA.rules;
+
+/* ---------- Motor de conciliação (porta fiel do backend) ---------- */
+const FACTOR = { PASS: 1, PARTIAL: 0.5, FAIL: 0 };
+const SRCS = ['pos','erp','banco'];
+const presentSources = s => SRCS.filter(k => s[k] && s[k].present);
+const daysBetween = (a,b) => Math.round(Math.abs(new Date(a)-new Date(b))/86400000);
+
+function evalValueMatch(sources, present, tol) {
+  if (present.length < 2) return { factor: 0, status:'fail', detail:'Menos de duas fontes presentes — não há como cruzar o valor.' };
+  const vals = present.map(k => sources[k].amount);
+  const diff = +(Math.max(...vals) - Math.min(...vals)).toFixed(2);
+  if (diff === 0) return { factor:1, status:'pass', detail:`Valores idênticos (R$ ${Math.max(...vals).toFixed(2)}).` };
+  if (diff <= tol.valuePartialMaxDiff) return { factor:.5, status:'partial', detail:`Diferença de R$ ${diff.toFixed(2)} entre as fontes (dentro da tolerância).` };
+  return { factor:0, status:'fail', detail:`Divergência de R$ ${diff.toFixed(2)} entre as fontes.` };
+}
+function evalDateMatch(sources, present, tol) {
+  if (present.length < 2) return { factor:0, status:'fail', detail:'Fonte insuficiente para comparar datas.' };
+  const dates = present.map(k => sources[k].date);
+  let maxDiff = 0;
+  for (let i=0;i<dates.length;i++) for (let j=i+1;j<dates.length;j++) maxDiff = Math.max(maxDiff, daysBetween(dates[i],dates[j]));
+  if (maxDiff === 0) return { factor:1, status:'pass', detail:'Mesma data em todas as fontes.' };
+  if (maxDiff <= tol.datePartialMaxDays) return { factor:.5, status:'partial', detail:`Diferença de ${maxDiff} dia(s) — comum entre venda (POS) e liquidação bancária.` };
+  return { factor:0, status:'fail', detail:`Diferença de ${maxDiff} dias entre as fontes.` };
+}
+function evalNsuUnique(tx, dupes) {
+  if (!tx.nsu) return { factor:0, status:'fail', detail:'Transação sem NSU informado.' };
+  if (dupes.has(tx.nsu)) return { factor:0, status:'fail', detail:`NSU ${tx.nsu} aparece em mais de uma transação — possível digitação duplicada ou fraude.` };
+  return { factor:1, status:'pass', detail:`NSU ${tx.nsu} é único no lote.` };
+}
+function evalStoreConsistent(sources, present) {
+  if (present.length < 2) return { factor:0, status:'fail', detail:'Fonte insuficiente para checar a loja.' };
+  const st = present.map(k => sources[k].storeId);
+  if (st.every(s => s === st[0])) return { factor:1, status:'pass', detail:'Mesma loja (CNPJ) em todas as fontes.' };
+  return { factor:0, status:'fail', detail:'Loja divergente entre as fontes — venda de uma loja registrada em outra (CNPJs distintos).' };
+}
+const LABELS = { valueMatch:'valor', dateMatch:'data', nsuUnique:'NSU', storeConsistent:'loja' };
+function buildReason(band, breakdown) {
+  const fail = breakdown.filter(b => b.status==='fail');
+  const part = breakdown.filter(b => b.status==='partial');
+  if (band === 'high') return part.length ? `Conciliado automaticamente com pequenas divergências em: ${part.map(b=>LABELS[b.criterion]).join(', ')}.` : 'Todos os critérios batem — conciliado automaticamente.';
+  const probs = fail.map(b=>LABELS[b.criterion]);
+  if (band === 'low') return `Exceção crítica: falha em ${probs.join(', ')}. Possível erro operacional ou fraude.`;
+  return `Revisão sugerida: divergência em ${probs.join(', ') || 'critérios secundários'}.`;
+}
+function classifyBand(score, b) { return score >= b.high ? 'high' : score >= b.medium ? 'medium' : 'low'; }
+function reconcile(tx, dupes) {
+  const { weights, tolerances, bands } = RULES;
+  const s = tx.sources, present = presentSources(s);
+  const c = {
+    valueMatch: evalValueMatch(s, present, tolerances),
+    dateMatch: evalDateMatch(s, present, tolerances),
+    nsuUnique: evalNsuUnique(tx, dupes),
+    storeConsistent: evalStoreConsistent(s, present),
+  };
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+  let weighted = 0; const breakdown = [];
+  for (const k of Object.keys(weights)) {
+    weighted += weights[k]*c[k].factor;
+    breakdown.push({ criterion:k, weight:weights[k], status:c[k].status,
+      score: Math.round(weights[k]*c[k].factor/total*100), maxScore: Math.round(weights[k]/total*100), detail:c[k].detail });
+  }
+  let score = Math.round(weighted/total*100);
+  const failedCrit = (RULES.criticalCriteria||[]).filter(k => c[k] && c[k].status==='fail');
+  if (failedCrit.length && score > RULES.criticalFailCap) score = RULES.criticalFailCap;
+  const band = classifyBand(score, bands);
+  return { score, band, missingSources: SRCS.filter(k => !present.includes(k)), reason: buildReason(band, breakdown), breakdown };
+}
+function reconcileAll() {
+  const counts = new Map();
+  DATA.transactions.forEach(t => { if (t.nsu) counts.set(t.nsu,(counts.get(t.nsu)||0)+1); });
+  const dupes = new Set([...counts].filter(([,n])=>n>1).map(([k])=>k));
+  return DATA.transactions.map(t => ({ ...t, reconciliation: reconcile(t, dupes) }));
+}
+
+/* ---------- Estado + helpers de UI ---------- */
+const ALL = reconcileAll();
+const EXCEPTIONS = ALL.filter(t => t.reconciliation.band !== 'high').sort((a,b)=>a.reconciliation.score-b.reconciliation.score);
+const state = { view:'dashboard', selected: EXCEPTIONS[0]?.id || null };
+const AUDIT = {};       // txId -> [entries]
+const DECISION = {};    // txId -> decision label
+
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const brl = v => (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const ptDate = d => d ? d.split('-').reverse().join('/') : '—';
+const BANDLABEL = { high:'Alta', medium:'Média', low:'Baixa' };
+const badge = r => `<span class="badge b-${r.band}"><span class="dot"></span>${BANDLABEL[r.band]}<span class="pct">${r.score}%</span></span>`;
+
+function metrics() {
+  const total = ALL.length;
+  const auto = ALL.filter(t=>t.reconciliation.band==='high').length;
+  const med = ALL.filter(t=>t.reconciliation.band==='medium').length;
+  const low = ALL.filter(t=>t.reconciliation.band==='low').length;
+  const cams = DATA.cameras;
+  const camApi = cams.filter(c=>c.apiActive).length;
+  const mapped = new Set(cams.map(c=>c.storeId)).size;
+  return { total, auto, autoPct: Math.round(auto/total*100), pending: med+low, med, low,
+    mapped, totalStores: 15, camApi, camTotal: cams.length };
+}
+
+/* ---------- Views ---------- */
+function viewDashboard() {
+  const m = metrics();
+  const rows = EXCEPTIONS.map(t => {
+    const r = t.reconciliation;
+    return `<tr class="sev ${r.band}" data-goto="${t.id}">
+      <td class="idcell"><div class="strong">${esc(t.storeName)}</div><div class="sub2">${t.storeId}</div></td>
+      <td class="mono">${brl(t.amount)}</td>
+      <td>${ptDate(t.date)}</td>
+      <td style="color:var(--muted);max-width:340px">${esc(r.reason)}</td>
+      <td>${badge(r)}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="section-head"><h1>Painel de conciliação</h1>
+      <div class="sub">Visão geral do fechamento — POS × ERP × Banco</div></div>
+    <div class="grid-tiles">
+      <div class="tile" style="--accent:var(--brand-teal)"><div class="k">Conciliado automático</div>
+        <div class="v">${m.autoPct}%</div><div class="s">${m.auto} de ${m.total} transações</div></div>
+      <div class="tile" style="--accent:var(--warn)"><div class="k">Exceções pendentes</div>
+        <div class="v">${m.pending}</div><div class="s">${m.med} média · ${m.low} crítica</div></div>
+      <div class="tile" style="--accent:var(--brand-blue)"><div class="k">Lojas mapeadas</div>
+        <div class="v">${m.mapped}/${m.totalStores}</div><div class="s">com câmeras cadastradas</div></div>
+      <div class="tile" style="--accent:var(--brand-blue)"><div class="k">Câmeras com API ativa</div>
+        <div class="v">${m.camApi}/${m.camTotal}</div><div class="s">acesso via API/IP</div></div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-head"><h2>Fila de exceções</h2>
+        <button class="link-btn" data-nav="excecoes">Abrir revisão →</button></div>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Loja</th><th>Valor</th><th>Data</th><th>Motivo</th><th>Confiança</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function srcCard(title, subtitle, s, tx) {
+  if (!s || !s.present) return `<div class="src absent"><div class="st"><b>${title}</b><small>${subtitle}</small></div>
+    <div class="absent-msg">Sem registro nesta fonte</div></div>`;
+  const base = tx.sources.pos && tx.sources.pos.present ? tx.sources.pos : null;
+  const diffVal = base && s.amount !== base.amount ? ' diff' : '';
+  const diffStore = base && s.storeId !== base.storeId ? ' diff' : '';
+  return `<div class="src"><div class="st"><b>${title}</b><small>${subtitle}</small></div>
+    <dl>
+      <div class="row"><dt>Valor</dt><dd class="mono${diffVal?' diff':''}">${brl(s.amount)}</dd></div>
+      <div class="row"><dt>Data</dt><dd>${ptDate(s.date)}</dd></div>
+      <div class="row"><dt>NSU</dt><dd class="mono">${esc(s.nsu||'—')}</dd></div>
+      <div class="row"><dt>Loja</dt><dd class="mono${diffStore?' diff':''}">${esc(s.storeId)}</dd></div>
+    </dl></div>`;
+}
+const CRITLABEL = { valueMatch:'Valor bate', dateMatch:'Data bate', nsuUnique:'NSU único', storeConsistent:'Loja consistente' };
+
+function detailHTML(tx) {
+  const r = tx.reconciliation;
+  const bars = r.breakdown.map(b => `<div class="crit">
+    <div class="cr-top"><b>${CRITLABEL[b.criterion]}</b><span class="pts">${b.score}/${b.maxScore} pts</span></div>
+    <div class="bar"><i class="f-${b.status}" style="width:${b.maxScore?Math.round(b.score/b.maxScore*100):0}%"></i></div>
+    <div class="cr-detail">${esc(b.detail)}</div></div>`).join('');
+  const log = AUDIT[tx.id] || [];
+  const auditHTML = log.length ? `<div class="audit"><p class="lab">Histórico de auditoria</p><ul>${
+    log.map(a=>`<li><b>${esc(a.label)}</b> <span class="who">· por ${esc(a.user)} · ${a.at}</span>${a.reason?`<div class="who">Motivo: ${esc(a.reason)}</div>`:''}</li>`).join('')
+  }</ul></div>` : '';
+  const decided = DECISION[tx.id] ? `<div class="decided">Decisão atual: <b>${esc(DECISION[tx.id])}</b></div>` : '';
+  return `<div class="detail">
+    <div class="dh"><div><h3>${esc(tx.storeName)}</h3>
+      <div class="meta">${tx.id} · ${tx.storeId} · NSU ${esc(tx.nsu||'—')}</div></div>${badge(r)}</div>
+    <div class="reason ${r.band}">${esc(r.reason)}</div>
+    <p class="lab">Comparação por fonte</p>
+    <div class="sources">
+      ${srcCard('POS','Caixa', tx.sources.pos, tx)}
+      ${srcCard('ERP','Presence Domain', tx.sources.erp, tx)}
+      ${srcCard('Banco','Extrato/adquirente', tx.sources.banco, tx)}
+    </div>
+    <p class="lab" style="margin-top:18px">Critérios de confiança</p>
+    ${bars}
+    <div class="actions">${decided}
+      <textarea id="just" placeholder="Justificativa (registrada na auditoria)…"></textarea>
+      <div class="btns">
+        <button class="btn approve" data-act="Casamento aprovado">Aprovar casamento</button>
+        <button class="btn fraud" data-act="Marcada como suspeita de fraude">Suspeita de fraude</button>
+        <button class="btn ask" data-act="Solicitado mais dados à loja">Pedir dados à loja</button>
+      </div>
+    </div>
+    ${auditHTML}
+  </div>`;
+}
+
+function viewExcecoes() {
+  const items = EXCEPTIONS.map(t => `<button class="exitem" data-sel="${t.id}" aria-current="${state.selected===t.id}">
+    <span><span class="nm">${esc(t.storeName)}</span><span class="mt">${brl(t.amount)} · ${ptDate(t.date)}</span></span>
+    ${badge(t.reconciliation)}</button>`).join('');
+  const sel = EXCEPTIONS.find(t=>t.id===state.selected);
+  return `
+    <div class="section-head"><h1>Fila de exceções</h1>
+      <div class="sub">Transações que não conciliaram automaticamente — clique para revisar.</div></div>
+    <div class="split">
+      <div class="card"><div class="card-head" style="padding:9px 14px"><h2 style="font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)">${EXCEPTIONS.length} exceção(ões)</h2></div>
+        <div class="exlist">${items}</div></div>
+      <div class="card">${ sel ? detailHTML(sel) : '<div class="detail-empty">Selecione uma exceção à esquerda para ver o detalhamento.</div>' }</div>
+    </div>`;
+}
+
+const CAMFILTERS = [
+  { k:'all', f: () => true },
+  { k:'api', f: c => c.apiActive },
+  { k:'card', f: c => !c.apiActive && c.cardLocal },
+  { k:'dinamico', f: c => c.ipType==='dinamico' },
+];
+let camFilter = 'all';
+const STLABEL = { online:'API ativa', instavel:'Instável', offline:'Offline' };
+function viewCameras() {
+  const cams = DATA.cameras;
+  const counts = {
+    all: cams.length, api: cams.filter(c=>c.apiActive).length,
+    card: cams.filter(c=>!c.apiActive&&c.cardLocal).length, dinamico: cams.filter(c=>c.ipType==='dinamico').length,
+  };
+  const labels = { all:`Todas (${counts.all})`, api:`Com API (${counts.api})`, card:`Só cartão local (${counts.card})`, dinamico:`IP dinâmico (${counts.dinamico})` };
+  const chips = CAMFILTERS.map(f => `<button class="chip" data-cam="${f.k}" aria-pressed="${camFilter===f.k}">${labels[f.k]}</button>`).join('');
+  const shown = cams.filter(CAMFILTERS.find(f=>f.k===camFilter).f);
+  const cards = shown.map(c => `<div class="cam">
+    <div class="top"><div><div class="nm">${esc(c.storeName)}</div><div class="id">${c.id}</div></div>
+      <span class="st-pill st-${c.status}"><span class="dot"></span>${STLABEL[c.status]}</span></div>
+    <div class="model">${esc(c.model)}</div>
+    <div class="tags">
+      <span class="t ${c.apiActive?'on':'off'}">${c.apiActive?'API/IP':'Sem API'}</span>
+      <span class="t ${c.cardLocal?'neutral':'off'}">${c.cardLocal?'Cartão local':'Sem cartão'}</span>
+      <span class="t ip">IP ${c.ipType==='fixo'?'fixo':'dinâmico'}</span>
+    </div>
+    ${c.notes?`<div class="note">${esc(c.notes)}</div>`:''}
+  </div>`).join('');
+  return `
+    <div class="section-head"><h1>Status das câmeras</h1>
+      <div class="sub">Infraestrutura por loja — câmeras Intelbras. Fase de mapeamento de acesso (sem vídeo/métricas).</div></div>
+    <div class="banner">Esta fase cobre apenas <b>status de infraestrutura</b> (API/IP, cartão local, tipo de IP). Contagem de pessoas e permanência entram depois que a cobertura de API estiver mapeada.</div>
+    <div class="chips">${chips}</div>
+    <div class="cam-grid">${cards}</div>`;
+}
+
+/* ---------- Render + eventos ---------- */
+const viewEl = document.getElementById('view');
+function render() {
+  if (state.view==='dashboard') viewEl.innerHTML = viewDashboard();
+  else if (state.view==='excecoes') viewEl.innerHTML = viewExcecoes();
+  else viewEl.innerHTML = viewCameras();
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view===state.view)));
+}
+function go(view) { state.view = view; window.scrollTo({top:0}); render(); }
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => go(t.dataset.view)));
+
+viewEl.addEventListener('click', e => {
+  const nav = e.target.closest('[data-nav]'); if (nav) return go(nav.dataset.nav);
+  const goto = e.target.closest('[data-goto]'); if (goto) { state.selected = goto.dataset.goto; return go('excecoes'); }
+  const sel = e.target.closest('[data-sel]'); if (sel) { state.selected = sel.dataset.sel; return render(); }
+  const cam = e.target.closest('[data-cam]'); if (cam) { camFilter = cam.dataset.cam; return render(); }
+  const act = e.target.closest('[data-act]');
+  if (act) {
+    const tx = EXCEPTIONS.find(t=>t.id===state.selected); if (!tx) return;
+    const reason = (document.getElementById('just')||{}).value || '';
+    const label = act.dataset.act;
+    (AUDIT[tx.id] = AUDIT[tx.id] || []).push({ label, user:'operador', reason, at: new Date().toLocaleString('pt-BR') });
+    DECISION[tx.id] = label;
+    render();
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>

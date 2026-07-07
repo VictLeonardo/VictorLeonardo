@@ -1,0 +1,4 @@
+# Deploy estático da visualização Centro Visão (sem build, sem backend).
+[build]
+  publish = "web-preview"
+  command = ""
