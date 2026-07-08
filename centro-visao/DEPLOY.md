@@ -1,72 +1,70 @@
 # Deploy — Centro Visão
 
-O repositório já vem **configurado**. Você escolhe onde publicar; o único passo
-que resta (o que exige a sua conta/login) está marcado com 👉.
+O repositório já vem **configurado**. O único passo que resta (o que exige a
+sua conta/login) está marcado com 👉.
 
-Há dois "produtos" que dá para hospedar:
+Há dois alvos de deploy prontos:
 
-| | O que é | Precisa de backend? | Onde |
+| Alvo | O que publica | Backend? | Config |
 |---|---|---|---|
-| **A. Preview (recomendado p/ compartilhar)** | Visualização navegável das 3 telas com dados mock e a mesma lógica de conciliação | Não — 100% estático | `web-preview/index.html` |
-| **B. App completo** | Front React + API Node/Express com camada de dados desacoplada | Sim | `frontend/` + `backend/` |
+| **Vercel** | **App completo** — front React + API Express (serverless) | Sim (serverless) | `vercel.json` + `api/` |
+| **Netlify** | **Preview estático** — visualização das 3 telas com dados mock | Não | `netlify.toml` + `web-preview/` |
+
+Não precisa do GitHub para nenhum dos dois: dá para publicar **direto do seu
+computador** com a CLI.
 
 ---
 
-## A. Publicar o preview estático (mais fácil e sem custo)
+## Opção 1 — Vercel (app completo, recomendado) 🚀
 
-Já existe `vercel.json` e `netlify.toml` apontando para `web-preview/`.
-Nada para configurar — só publicar.
+Estrutura já pronta:
+- `frontend/` → build estático (Vite) servido na raiz.
+- `api/index.js` → a API Express roda como *serverless function*.
+- `vercel.json` → reescreve `/api/*` para a função e faz o fallback SPA.
 
-### Netlify Drop (sem CLI, ~30s) — mais simples
-1. Abra **https://app.netlify.com/drop**
-2. 👉 Arraste a pasta `web-preview/` para a área indicada.
-3. Sai uma URL pública `https://algo.netlify.app`. Pronto para compartilhar.
-
-### Vercel via CLI
+### Publicar direto do seu computador (sem GitHub)
 Dentro de `centro-visao/`:
 ```bash
-npx vercel --prod
+npm i -g vercel            # ou use: npx vercel
+vercel                     # 👉 login na 1ª vez; aceite os padrões detectados
+vercel --prod              # publica em produção → https://algo.vercel.app
 ```
-👉 login na 1ª vez → gera `https://algo.vercel.app`.
-(O `vercel.json` já diz para servir `web-preview/` sem build.)
+A CLL sobe os arquivos locais direto — não precisa do repositório no GitHub.
+Compartilhe a URL `*.vercel.app` gerada.
 
-### Vercel/Netlify/Cloudflare conectando o GitHub (deploy automático a cada push)
+### Ou conectando o GitHub (deploy automático a cada push)
 1. Suba o repositório para o GitHub.
-2. 👉 No Vercel: *Add New → Project*, importe o repo.
+2. 👉 Vercel → *Add New → Project* → importe o repo.
    - **Root Directory:** `centro-visao`
-   - Framework Preset: **Other** · Build Command: *(vazio)* · Output: `web-preview`
+   - Build Command / Output: **deixe como está** (o `vercel.json` já define
+     `npm run vercel-build` e `frontend/dist`).
 3. Deploy. Cada push republica sozinho.
 
-### GitHub Pages
-1. Suba o repo.
-2. 👉 Settings → Pages → Source: `main` / pasta `docs` ou raiz.
-   (Se usar Pages, copie `web-preview/index.html` para `/docs/index.html`.)
+> Nota: os dados são mock em memória, então o log de auditoria não persiste
+> entre invocações frias da função. Dashboard, fila de exceções, detalhamento
+> e câmeras funcionam normalmente (são determinísticos a partir dos seeds).
+> Para persistir tudo, plugue um banco na camada `backend/src/repositories/`.
 
 ---
 
-## B. Publicar o app completo (front + API)
+## Opção 2 — Netlify Drop (preview estático, sem CLI, ~30s)
 
-O app usa uma camada de repositório desacoplada (`DATA_SOURCE=mock|api`), então
-hoje roda com dados simulados. Para hospedar com backend:
+Para um link de visualização sem backend:
+1. 👉 Abra **https://app.netlify.com/drop**
+2. Arraste a pasta **`web-preview/`** para lá.
+3. Sai `https://algo.netlify.app`. Pronto para compartilhar.
 
-- **Opção mais simples:** rodar o backend em um serviço que aceita Node de longa
-  duração (Render, Railway, Fly.io) e o frontend no Vercel/Netlify apontando
-  `VITE`/proxy para a URL da API.
-- **Vercel serverless:** converter as rotas Express (`backend/src/routes`) em
-  funções em `/api`. O motor (`backend/src/engine`) e os dados
-  (`backend/src/data`) são JS puro e podem ser reaproveitados sem mudança.
-  Observação: como os dados mock vivem em memória, o log de auditoria não
-  persiste entre invocações frias — para produção, plugue um banco na camada
-  `repositories/`.
+(O `netlify.toml` também permite conectar o repo no Netlify apontando
+`publish = web-preview`, se preferir deploy automático do preview.)
 
-Para rodar localmente (as duas partes):
+---
+
+## Rodar localmente (as duas partes)
 ```bash
 npm run install:all
 npm run dev        # API :4000 + web :5173
 ```
 
----
-
 ### Resumo
-- Para **compartilhar um link agora**: opção **A → Netlify Drop** com a pasta `web-preview/`.
-- O repositório já está com `vercel.json` e `netlify.toml` prontos.
+- **App real com API para compartilhar:** Opção 1 → `vercel --prod` (dentro de `centro-visao/`).
+- **Só um link de visualização rápido:** Opção 2 → Netlify Drop com `web-preview/`.

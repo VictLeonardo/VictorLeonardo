@@ -62,12 +62,16 @@ npm test        # roda os testes do backend (node:test)
 
 ## Publicar / Deploy
 
-O projeto já vem com `vercel.json` e `netlify.toml` prontos para publicar a
-**visualização estática** (`web-preview/index.html`) sem build e sem backend.
-Caminho mais rápido para um link compartilhável: arraste a pasta `web-preview/`
-em **https://app.netlify.com/drop**. Passo a passo completo (Vercel CLI, deploy
-automático via GitHub, GitHub Pages e como hospedar o app completo com API) em
-**[DEPLOY.md](./DEPLOY.md)**.
+Dois alvos já configurados:
+
+- **Vercel** (`vercel.json` + `api/`) — publica o **app completo**: front React +
+  API Express como *serverless function*. Direto do seu computador, sem precisar
+  do GitHub: dentro de `centro-visao/`, rode `npx vercel --prod`.
+- **Netlify** (`netlify.toml` + `web-preview/`) — publica a **visualização
+  estática** (sem backend). Mais rápido: arraste `web-preview/` em
+  **https://app.netlify.com/drop**.
+
+Passo a passo completo em **[DEPLOY.md](./DEPLOY.md)**.
 
 ## Telas
 

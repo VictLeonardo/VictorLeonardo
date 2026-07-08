@@ -11,12 +11,21 @@
 
 const DATA_SOURCE = process.env.DATA_SOURCE || 'mock';
 
+// Requires estáticos dos mocks: garante que empacotadores (ex.: o bundler
+// serverless do Vercel) incluam estes arquivos — requires com template string
+// não são rastreados e ficariam de fora do deploy.
+const mock = {
+  transactionRepository: require('./mock/transactionRepository'),
+  cameraRepository: require('./mock/cameraRepository'),
+};
+
 function load(name) {
   if (DATA_SOURCE === 'api') {
-    // Os adapters reais devem ser criados em ./api/<name>.js com a mesma interface.
+    // Adapters reais criados em ./api/<name>.js com a mesma interface.
+    // Carregado dinamicamente só quando explicitamente habilitado.
     return require(`./api/${name}`);
   }
-  return require(`./mock/${name}`);
+  return mock[name];
 }
 
 module.exports = {

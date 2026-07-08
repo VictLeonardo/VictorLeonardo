@@ -9,6 +9,11 @@
     "start:api": "npm --prefix backend start",
     "dev:web": "npm --prefix frontend run dev",
     "test": "npm --prefix backend test",
-    "build": "npm --prefix frontend run build"
+    "build": "npm --prefix frontend run build",
+    "vercel-build": "npm --prefix frontend install && npm --prefix frontend run build"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
