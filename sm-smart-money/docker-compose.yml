@@ -7,7 +7,10 @@
 
 services:
   postgres:
-    image: postgres:16-alpine
+    # A versao acompanha a do banco gerenciado em producao. Um dump de uma versao
+    # maior nao restaura numa menor, entao a divergencia so apareceria no dia da
+    # migracao para a VPS, que e' o pior momento para descobrir.
+    image: postgres:18-alpine
     container_name: sm-postgres
     restart: unless-stopped
     environment:

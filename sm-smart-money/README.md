@@ -11,7 +11,7 @@ somente leitura.
 |---|---|
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript estrito |
 | Estilo | Tailwind CSS sobre tokens CSS próprios, com dark mode |
-| Banco | PostgreSQL + Prisma |
+| Banco | PostgreSQL 18 + Prisma |
 | Auth | JWT de acesso (`jose`) + refresh token opaco rotacionado, em cookies httpOnly |
 | E-mail | Nodemailer / Zoho SMTP |
 | WhatsApp | WAHA (WhatsApp HTTP API) |
