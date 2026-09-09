@@ -31,14 +31,14 @@ async function main() {
   const incluirAdmins = process.env.INCLUIR_ADMINS === '1';
   const antes = await contar();
 
-  console.log('Conteudo atual da base:');
+  console.log('Conteúdo atual da base:');
   console.log(`  membros:       ${antes.membros}`);
-  console.log(`  administradores: ${antes.admins}${incluirAdmins ? ' (serao apagados)' : ' (preservados)'}`);
-  console.log(`  conteudos:     ${antes.conteudos}`);
+  console.log(`  administradores: ${antes.admins}${incluirAdmins ? ' (serão apagados)' : ' (preservados)'}`);
+  console.log(`  conteúdos:     ${antes.conteudos}`);
   console.log(`  palestras:     ${antes.palestras}`);
-  console.log(`  topicos:       ${antes.topicos}`);
-  console.log(`  diagnosticos:  ${antes.diagnosticos}`);
-  console.log(`  notificacoes:  ${antes.notificacoes}`);
+  console.log(`  tópicos:       ${antes.topicos}`);
+  console.log(`  diagnósticos:  ${antes.diagnosticos}`);
+  console.log(`  notificações:  ${antes.notificacoes}`);
   console.log('');
 
   // Confirmacao explicita: a operacao e' irreversivel e costuma rodar contra

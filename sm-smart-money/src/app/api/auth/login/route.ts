@@ -5,7 +5,7 @@ import { verifyPasswordConstantTime } from '@/lib/auth/password';
 import { claimsFromUser, issueSession } from '@/lib/auth/session';
 
 const schema = z.object({
-  email: z.string().email('Informe um e-mail valido'),
+  email: z.string().email('Informe um e-mail válido'),
   password: z.string().min(1, 'Informe a senha'),
   remember: z.boolean().optional().default(false),
 });
@@ -47,8 +47,17 @@ export async function POST(request: Request) {
     data: { lastLoginAt: new Date() },
   });
 
-  return NextResponse.json({
-    ok: true,
-    redirectTo: user.role === 'ADMIN' ? '/admin' : user.status === 'CANCELADO' ? '/reativar' : '/dashboard',
-  });
+  // O destino ja' sai daqui resolvido. Mandar todo mundo para /dashboard faria o
+  // guarda do portal devolver um 307 para quem esta cancelado ou pendente, com
+  // um piscar de tela no meio do caminho.
+  const redirectTo =
+    user.role === 'ADMIN'
+      ? '/admin'
+      : user.status === 'CANCELADO'
+        ? '/reativar'
+        : user.status === 'PENDENTE'
+          ? '/primeiro-acesso'
+          : '/dashboard';
+
+  return NextResponse.json({ ok: true, redirectTo });
 }

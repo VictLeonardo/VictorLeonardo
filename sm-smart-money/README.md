@@ -69,12 +69,16 @@ npm run dev
 
 ### Credenciais do seed
 
-| Perfil | E-mail | Senha |
+Todas as contas de demonstração usam a senha `SmartMoney2026`. O próprio
+`npm run db:seed` imprime esta lista ao terminar, já com os e-mails da execução.
+
+| Perfil | E-mail | Para ver |
 |---|---|---|
-| Admin | `admin@smboard.com.br` | `SmartMoney2026` |
-| Membro VIP | `ricardo-duarte@exemplo.com.br` | `SmartMoney2026` |
-| Membro padrão | `ana-paula-klein@exemplo.com.br` | `SmartMoney2026` |
-| Cancelado | `tatiana-andrade@exemplo.com.br` | `SmartMoney2026` |
+| Admin | `admin@smboard.com.br` | painel completo |
+| Membro VIP | `ricardo-duarte@exemplo.com.br` | conteúdo VIP liberado |
+| Membro padrão | `ana-paula-klein@exemplo.com.br` | conteúdo VIP bloqueado |
+| Cancelado | `juliana-yamamoto@exemplo.com.br` | tela de reativação |
+| Pendente | `henrique-zanetti@exemplo.com.br` | tela de cadastro em análise |
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
 
@@ -126,10 +130,22 @@ Rodar de novo com o mesmo e-mail promove a conta existente e troca a senha.
 
 ### Explorar com dados simulados e depois carregar os reais
 
-O seed existe para conhecer a plataforma cheia, com 36 membros, conteúdo e doze
-meses de histórico. Ele apaga todas as tabelas antes de popular, então só roda
-numa base cujas contas vieram dele próprio. Numa base com dados reais ele
-interrompe e explica o caminho, em vez de destruir.
+O seed existe para conhecer a plataforma cheia e para apresentá-la. Ele apaga
+todas as tabelas antes de popular, então só roda numa base cujas contas vieram
+dele próprio. Numa base com dados reais ele interrompe e explica o caminho, em
+vez de destruir.
+
+O que ele cria:
+
+| Área | Volume |
+|---|---|
+| Membros | 36, sendo 29 ativos, 5 cancelados e 2 pendentes |
+| Conteúdo | 66 peças: 21 artigos, 15 análises, 12 vídeos, 9 podcasts, 9 e-books |
+| Palestras | 14, entre agendadas e realizadas, com 6 palestrantes |
+| Comunidade | 18 tópicos e 87 respostas |
+| Diagnósticos | 28 Smart Money Journey concluídos |
+| Histórico | 12 meses de entradas e cancelamentos, 225 visualizações |
+| Operação | 25 registros de auditoria, 38 e-mails e 18 mensagens de WhatsApp |
 
 O ciclo completo:
 
