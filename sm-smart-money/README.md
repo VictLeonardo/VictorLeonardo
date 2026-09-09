@@ -1,0 +1,158 @@
+# SM Smart Money — Plataforma da comunidade
+
+Portal privado de membros, sistema de perfis públicos e painel administrativo da
+comunidade de inteligência financeira SM Smart Money. Substitui a plataforma atual
+(smboard.com.br), cujo admin é uma página única com 4 KPIs estáticos e uma tabela
+somente leitura.
+
+## Stack
+
+| Camada | Escolha |
+|---|---|
+| Framework | Next.js 16 (App Router) + React 19 + TypeScript estrito |
+| Estilo | Tailwind CSS sobre tokens CSS próprios, com dark mode |
+| Banco | PostgreSQL + Prisma |
+| Auth | JWT de acesso (`jose`) + refresh token opaco rotacionado, em cookies httpOnly |
+| E-mail | Nodemailer / Zoho SMTP |
+| WhatsApp | WAHA (WhatsApp HTTP API) |
+| Editor | Tiptap (CMS integrado ao admin) |
+
+## Como rodar
+
+```bash
+cp .env.example .env          # preencha DATABASE_URL e AUTH_SECRET
+docker compose up -d postgres # ou use um Postgres já existente
+npm install
+npm run db:migrate            # cria o schema
+npm run db:seed               # 36 membros, conteúdo, palestras e 12 meses de histórico
+npm run dev
+```
+
+Credenciais geradas pelo seed:
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Admin | `admin@smboard.com.br` | `SmartMoney2026` |
+| Membro VIP | `ricardo-duarte@exemplo.com.br` | `SmartMoney2026` |
+| Membro padrão | `ana-paula-klein@exemplo.com.br` | `SmartMoney2026` |
+| Cancelado | `tatiana-andrade@exemplo.com.br` | `SmartMoney2026` |
+
+`npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
+
+## Como o acesso é decidido
+
+`plan`, `status` e `tier` são três dimensões independentes. A plataforma atual
+mistura "Cortesia" (comercial), "Ativo" (assinatura) e "VIP" (acesso) num rótulo
+só; aqui cada um tem sua coluna e o badge público é derivado.
+
+| Coluna | Valores | Decide |
+|---|---|---|
+| `plan` | PADRAO · COM_DESCONTO · CORTESIA | a relação comercial e o MRR estimado |
+| `status` | ATIVO · CANCELADO · PENDENTE | se o conteúdo abre |
+| `tier` | PADRAO · VIP | se o conteúdo marcado como VIP abre |
+| `isPartner` | boolean | o selo "SM PARTNER" no perfil público |
+
+Regras aplicadas:
+
+- **Não autenticado** — apenas `/login` e os perfis públicos `/{slug}`.
+- **Cancelado** — redirecionado para `/reativar`; o perfil público continua no ar.
+- **Pendente** — redirecionado para `/primeiro-acesso`.
+- **VIP** — enxerga conteúdos e tópicos marcados como VIP; os demais recebem 404.
+- **Admin** — todas as rotas de membro mais `/admin/*`.
+
+O roteamento por papel roda em `src/proxy.ts` (o antigo `middleware.ts`), no edge:
+ele valida a assinatura do token sem tocar no banco. Quando o access token expira
+e o refresh ainda vale, o usuário é levado a `/api/auth/refresh`, que rotaciona os
+tokens no runtime Node e o devolve à rota original.
+
+Cancelar um membro revoga as sessões na hora — sem isso o token continuaria valendo
+até expirar.
+
+## Lacunas da plataforma atual, e onde foram resolvidas
+
+| # | Lacuna | Onde |
+|---|---|---|
+| G01 | Conteúdo gerenciado fora do sistema | CMS em `/admin/conteudo`, com editor rich text, agendamento e visibilidade |
+| G02 | Tabela de membros somente leitura | CRUD completo + `/admin/membros/{id}` com diagnóstico, atividade e comunicações |
+| G03 | 4 números estáticos | `/admin` com crescimento, churn, engajamento e adesão, filtrável por período |
+| G04 | Diagnósticos invisíveis | `/admin/diagnosticos`: agregado, média por dimensão e resultado individual |
+| G05 | Sem filtros e sem paginação | Filtros por plano, status, perfil e data + ordenação + paginação server-side (25/página) |
+| G06 | Disparo em massa sem confirmação | Seleção explícita, prévia do e-mail, confirmação e histórico por destinatário |
+| G07 | Perfil privado retornava 404 | Página "perfil em breve" mantendo a URL e o link já compartilhado |
+| G08 | Perfil público raso | Bio, especialidades, localização, LinkedIn, site, WhatsApp opcional, cartão digital com QR Code |
+| G09 | Comunidade só no WhatsApp | Fórum por categoria + mural de oportunidades + diretório de membros |
+| G10 | Sem notificações internas | Sino com badge, histórico e composição segmentada no admin |
+| G11 | Sem rastreabilidade | `AuditLog` append-only com autor, ação, entidade e IP, visível em `/admin/auditoria` |
+| G12 | Queda da WAHA passava despercebida | `/api/cron/waha-health` alerta por e-mail na transição para offline |
+| G13 | Admin não usável no celular | Gaveta de navegação, cards no lugar da tabela e KPIs responsivos |
+
+## Decisões que valem registro
+
+**Um único modelo `Content`** cobre artigo, vídeo, podcast, análise e e-book, com
+campos opcionais por tipo. O CMS fica uniforme e uma nova seção não exige migration.
+
+**A pontuação do Journey é recalculada no servidor** a partir das opções salvas no
+banco. O cliente envia apenas o índice escolhido — enviar o `score` deixaria o
+membro definir o próprio resultado.
+
+**Os destinatários de uma notificação são materializados no disparo.** Mudar o plano
+de um membro depois não reescreve quem recebeu o quê.
+
+**Agendamento de conteúdo não precisa de job.** O filtro de leitura do portal exige
+`publishedAt <= agora`, então o conteúdo aparece sozinho na hora marcada. O cron
+serve às notificações, que precisam materializar a lista.
+
+**Os gráficos são SVG escritos à mão**, sem biblioteca: as cores saem dos tokens CSS
+e trocam de tema sem re-render, e o peso de JS no dashboard conta para o LCP.
+Nenhum gráfico usa eixo duplo — contagem e taxa de churn são apresentadas
+separadamente, porque alinhar duas escalas num mesmo plano inventa correlação.
+A cor de série no tema claro é `#9a7a42`, não o dourado de marca: medido, o
+dourado puro fica em 2,24:1 sobre a superfície clara, abaixo do piso de 3:1.
+
+**Sem SMTP ou WAHA configurados, nada quebra.** O envio vai para o console e o log
+registra a tentativa, então o fluxo completo — incluindo o histórico de disparos —
+é exercitável em desenvolvimento.
+
+## Rotinas agendadas
+
+Ambas exigem o header `x-cron-secret` com o valor de `CRON_SECRET`:
+
+```
+GET /api/cron/waha-health    # health check da instância + alerta na queda
+GET /api/cron/agendamentos   # dispara notificações agendadas que venceram
+```
+
+## Estrutura
+
+```
+src/
+├── proxy.ts                    roteamento por papel (edge)
+├── app/
+│   ├── (auth)/                 login, recuperação e redefinição de senha
+│   ├── (portal)/               área do membro, com sidebar e bottom nav
+│   ├── (account)/              conta cancelada ou pendente
+│   ├── admin/                  painel administrativo
+│   ├── [slug]/                 perfil público
+│   └── api/                    auth, portal, admin e cron
+├── components/{ui,portal,admin,charts}/
+├── lib/                        auth, domínio, e-mail, WAHA, auditoria, tokens
+└── server/                     consultas por área (membros, conteúdo, analytics…)
+```
+
+## Fases
+
+**Fase 1 e 2 estão implementadas**: autenticação completa, dashboard do membro,
+todas as seções de conteúdo, Smart Money Journey com visão administrativa, perfis
+públicos, CMS integrado, analytics, notificações in-app e WAHA com alertas.
+
+**Da fase 3** foram entregues o fórum, o diretório de membros, os perfis públicos
+enriquecidos e o cartão digital com QR Code. Ficam fora: mensagens diretas entre
+membros e o app mobile dedicado.
+
+## Ponto em aberto
+
+`npm audit` reporta uma vulnerabilidade alta em `deepmerge-ts`, alcançada por
+`@prisma/config`. O pacote `prisma` entra na árvore de produção porque
+`@prisma/client` depende dele. Não há versão do Prisma sem esse aviso hoje: a
+linha 7.x troca o problema por outro (`mysql2`). O impacto se restringe ao
+carregador de configuração da CLI, que não é alcançável em runtime pela aplicação.

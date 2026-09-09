@@ -1,0 +1,463 @@
+// Modelo de dados da plataforma SM Smart Money.
+//
+// Tres decisoes estruturais que valem registro:
+//  1. `plan`, `status` e `tier` sao dimensoes independentes. A plataforma atual
+//     mistura "Cortesia" (comercial), "Ativo" (assinatura) e "VIP" (acesso) num
+//     unico rotulo; aqui cada um vive na sua coluna e o badge publico e' derivado.
+//  2. Todo conteudo editorial (artigo, video, podcast, analise, e-book) usa um
+//     unico modelo `Content` com campos opcionais por tipo. O CMS do admin fica
+//     uniforme e novas secoes nao exigem migration.
+//  3. `AuditLog` e `EmailLog`/`WhatsappLog` sao append-only: nenhuma rota da
+//     aplicacao expoe update ou delete sobre eles.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum Plan {
+  PADRAO
+  COM_DESCONTO
+  CORTESIA
+}
+
+enum MemberStatus {
+  ATIVO
+  CANCELADO
+  PENDENTE
+}
+
+enum Tier {
+  PADRAO
+  VIP
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String?
+  name         String
+  phone        String?
+  jobTitle     String?
+  company      String?
+  role         Role         @default(MEMBER)
+  plan         Plan         @default(PADRAO)
+  status       MemberStatus @default(PENDENTE)
+  tier         Tier         @default(PADRAO)
+  isPartner    Boolean      @default(false)
+  joinedAt     DateTime     @default(now())
+  canceledAt   DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  profile              Profile?
+  refreshTokens        RefreshToken[]
+  passwordResets       PasswordResetToken[]
+  contentViews         ContentView[]
+  activityLogs         ActivityLog[]
+  journeySubmissions   JourneySubmission[]
+  topics               Topic[]
+  topicReplies         TopicReply[]
+  notifications        NotificationRecipient[]
+  emailLogs            EmailLog[]
+  whatsappLogs         WhatsappLog[]
+  auditLogs            AuditLog[]              @relation("AuditActor")
+  authoredContent      Content[]               @relation("ContentAuthor")
+  createdNotifications Notification[]          @relation("NotificationAuthor")
+
+  @@index([status, plan])
+  @@index([joinedAt])
+  @@index([name])
+}
+
+model Profile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug         String    @unique
+  isPublic     Boolean   @default(false)
+  avatarUrl    String?
+  bio          String?   @db.VarChar(280)
+  city         String?
+  state        String?
+  country      String?   @default("Brasil")
+  specialties  String[]  @default([])
+  linkedinUrl  String?
+  websiteUrl   String?
+  showWhatsapp Boolean   @default(false)
+  inviteSentAt DateTime?
+  activatedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isPublic])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ------------------------------------------------------------------ conteudo
+
+enum ContentType {
+  ARTIGO
+  VIDEO
+  PODCAST
+  ANALISE
+  EBOOK
+}
+
+enum ContentStatus {
+  RASCUNHO
+  PUBLICADO
+  ARQUIVADO
+}
+
+enum Visibility {
+  TODOS
+  VIP
+}
+
+model Content {
+  id             String        @id @default(cuid())
+  type           ContentType
+  slug           String        @unique
+  title          String
+  excerpt        String?
+  body           String? // HTML do editor rich text (artigos e analises)
+  coverUrl       String?
+  category       String
+  status         ContentStatus @default(RASCUNHO)
+  visibility     Visibility    @default(TODOS)
+  publishedAt    DateTime?
+  scheduledFor   DateTime?
+  authorName     String?
+  authorId       String?
+  author         User?         @relation("ContentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  readingMinutes Int?
+  mediaUrl       String? // embed Vimeo/Bunny (video) ou arquivo mp3 (podcast)
+  durationSecs   Int?
+  transcript     String?
+  fileUrl        String? // PDF de analise ou e-book
+  pageCount      Int?
+  seriesName     String? // playlist de podcast
+  episodeNumber  Int?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  views ContentView[]
+
+  @@index([type, status, publishedAt])
+  @@index([category])
+}
+
+model ContentView {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  completed Boolean  @default(false)
+  viewedAt  DateTime @default(now())
+
+  @@unique([userId, contentId])
+  @@index([contentId])
+  @@index([viewedAt])
+}
+
+// ------------------------------------------------------------------ palestras
+
+model Speaker {
+  id        String    @id @default(cuid())
+  name      String
+  jobTitle  String?
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  lectures  Lecture[]
+}
+
+model Lecture {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  title        String
+  description  String?
+  coverUrl     String?
+  theme        String
+  speakerId    String?
+  speaker      Speaker?      @relation(fields: [speakerId], references: [id], onDelete: SetNull)
+  startsAt     DateTime
+  durationMin  Int           @default(60)
+  liveUrl      String?
+  recordingUrl String?
+  status       ContentStatus @default(RASCUNHO)
+  visibility   Visibility    @default(TODOS)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([startsAt])
+  @@index([status])
+}
+
+// ------------------------------------------------- smart money journey
+
+enum JourneyCategory {
+  CONTROLE
+  INVESTIMENTOS
+  PROTECAO
+  TRIBUTACAO
+  SUCESSAO
+}
+
+model JourneyQuestion {
+  id       String          @id @default(cuid())
+  category JourneyCategory
+  order    Int
+  prompt   String
+  helpText String?
+  // [{ "label": "...", "score": 0..4 }] — ordem define o indice salvo na resposta
+  options  Json
+  active   Boolean         @default(true)
+
+  answers JourneyAnswer[]
+
+  @@unique([category, order])
+}
+
+model JourneySubmission {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  overallScore   Int?
+  // { "CONTROLE": 72, "INVESTIMENTOS": 55, ... } — 0 a 100 por categoria
+  categoryScores Json?
+
+  answers JourneyAnswer[]
+
+  @@index([userId, completedAt])
+}
+
+model JourneyAnswer {
+  id           String            @id @default(cuid())
+  submissionId String
+  submission   JourneySubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     JourneyQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionIndex  Int
+  score        Int
+
+  @@unique([submissionId, questionId])
+}
+
+// ------------------------------------------------------------------ comunidade
+
+enum TopicCategory {
+  INVESTIMENTOS
+  MERCADO
+  TRIBUTARIO
+  REDES
+  OPORTUNIDADES
+}
+
+model Topic {
+  id        String        @id @default(cuid())
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category  TopicCategory
+  title     String
+  body      String
+  isVip     Boolean       @default(false)
+  pinned    Boolean       @default(false)
+  closed    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  replies TopicReply[]
+
+  @@index([category, createdAt])
+  @@index([pinned, createdAt])
+}
+
+model TopicReply {
+  id        String   @id @default(cuid())
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([topicId, createdAt])
+}
+
+// ------------------------------------------------------------ notificacoes
+
+enum NotificationAudience {
+  TODOS
+  POR_PLANO
+  VIP
+}
+
+model Notification {
+  id           String               @id @default(cuid())
+  title        String
+  body         String
+  url          String?
+  audience     NotificationAudience @default(TODOS)
+  planFilter   Plan?
+  createdById  String?
+  createdBy    User?                @relation("NotificationAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  createdAt    DateTime             @default(now())
+
+  recipients NotificationRecipient[]
+
+  @@index([sentAt])
+}
+
+model NotificationRecipient {
+  id             String       @id @default(cuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+  @@index([userId, readAt])
+}
+
+// ------------------------------------------------------------ operacao/admin
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorName String
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+}
+
+enum DeliveryStatus {
+  ENVIADO
+  FALHOU
+}
+
+model EmailLog {
+  id       String         @id @default(cuid())
+  userId   String?
+  user     User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  to       String
+  template String
+  subject  String
+  status   DeliveryStatus
+  error    String?
+  batchId  String?
+  sentAt   DateTime       @default(now())
+
+  @@index([userId, sentAt])
+  @@index([batchId])
+}
+
+model WhatsappLog {
+  id      String         @id @default(cuid())
+  userId  String?
+  user    User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  phone   String
+  kind    String
+  message String
+  status  DeliveryStatus
+  error   String?
+  sentAt  DateTime       @default(now())
+
+  @@index([sentAt])
+}
+
+enum TemplateChannel {
+  EMAIL
+  WHATSAPP
+}
+
+model MessageTemplate {
+  id        String          @id @default(cuid())
+  channel   TemplateChannel
+  key       String
+  name      String
+  subject   String?
+  body      String
+  updatedAt DateTime        @updatedAt
+  createdAt DateTime        @default(now())
+
+  @@unique([channel, key])
+}
+
+model WahaHealthCheck {
+  id        String   @id @default(cuid())
+  connected Boolean
+  state     String
+  detail    String?
+  alertSent Boolean  @default(false)
+  checkedAt DateTime @default(now())
+
+  @@index([checkedAt])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  section   String
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([section, createdAt])
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sm_smart_money
+    ports:
+      - '5432:5432'
+    volumes:
+      - sm-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sm-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - sm-redisdata:/data
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: sm-waha
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    environment:
+      WHATSAPP_DEFAULT_ENGINE: WEBJS
+    volumes:
+      - sm-wahadata:/app/.sessions
+
+volumes:
+  sm-pgdata:
+  sm-redisdata:
+  sm-wahadata:
