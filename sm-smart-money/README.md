@@ -90,9 +90,8 @@ Prisma usa a com pool na aplicação e a direta nas migrations, que falham contr
 uma conexão com pool. Num Postgres comum, sem pool, repita a mesma string nas
 duas variáveis.
 
-**2. Projeto.** Importe o repositório na Vercel e ajuste uma coisa que costuma
-passar batido: em Settings, defina o **Root Directory** como `sm-smart-money`.
-A aplicação não fica na raiz do repositório.
+**2. Projeto.** Importe o repositório na Vercel. A aplicação fica na raiz, então
+não é preciso ajustar o Root Directory. A Vercel detecta o Next sozinha.
 
 **3. Variáveis de ambiente.** No mínimo:
 
