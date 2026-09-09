@@ -2,6 +2,9 @@
   "name": "sm-smart-money",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "description": "Plataforma digital da comunidade SM Smart Money — portal do membro, perfis publicos e painel administrativo.",
   "scripts": {
     "dev": "next dev",
