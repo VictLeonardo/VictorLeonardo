@@ -27,7 +27,19 @@ const schema = z.object({
   CRON_SECRET: z.string().optional(),
 });
 
-const parsed = schema.safeParse(process.env);
+/**
+ * Variavel definida como string vazia vale como ausente.
+ *
+ * Plataformas de deploy criam variaveis em lote a partir do .env.example e
+ * deixam o valor em branco. Sem esta normalizacao o default do schema nao entra
+ * em acao: `AUTH_ACCESS_MINUTES=""` viraria o numero 0 e seria recusado, e
+ * `NEXT_PUBLIC_APP_URL=""` falharia a validacao de URL.
+ */
+const rawEnv = Object.fromEntries(
+  Object.entries(process.env).map(([key, value]) => [key, value === '' ? undefined : value]),
+);
+
+const parsed = schema.safeParse(rawEnv);
 
 if (!parsed.success) {
   const issues = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
