@@ -119,7 +119,7 @@ export function ProfileForm({
                 <Field
                   label="Foto de perfil (URL)"
                   htmlFor="avatarUrl"
-                  hint="Cole o link da imagem hospedada. Ela e' exibida em circulo."
+                  hint="Cole o link da imagem hospedada. Ela é exibida em círculo."
                 >
                   <Input
                     id="avatarUrl"
@@ -176,7 +176,7 @@ export function ProfileForm({
           <CardContent className="space-y-4 p-5">
             <h2 className="text-sm font-semibold text-text-1">Áreas de atuação</h2>
             <p className="text-sm text-text-2">
-              Ate {MAX_SPECIALTIES} tags. Elas alimentam o filtro do diretorio de membros.
+              Até {MAX_SPECIALTIES} tags. Elas alimentam o filtro do diretório de membros.
             </p>
 
             <div className="flex gap-2">
@@ -250,7 +250,7 @@ export function ProfileForm({
               <Field
                 label="WhatsApp"
                 htmlFor="phone"
-                hint="Usado pela equipe SM. So aparece no perfil público se você autorizar abaixo."
+                hint="Usado pela equipe SM. Só aparece no perfil público se você autorizar abaixo."
                 className="sm:col-span-2"
               >
                 <Input id="phone" name="phone" defaultValue={user.phone ?? ''} placeholder="(11) 90000-0000" />

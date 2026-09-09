@@ -99,7 +99,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                 <div className="flex items-baseline justify-between gap-3">
                   <h2 className="text-sm font-semibold text-text-1">Smart Money Journey</h2>
                   <span className="text-xs text-text-3">
-                    Concluido em {formatDate(lastJourney.completedAt)}
+                    Concluído em {formatDate(lastJourney.completedAt)}
                   </span>
                 </div>
 
@@ -307,7 +307,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                       <p className="truncate text-sm text-text-1">{view.content.title}</p>
                       <p className="text-xs text-text-3">
                         {CONTENT_TYPE_LABELS[view.content.type]} · {formatDate(view.viewedAt)}
-                        {view.completed ? ' · concluido' : ''}
+                        {view.completed ? ' · concluído' : ''}
                       </p>
                     </li>
                   ))}

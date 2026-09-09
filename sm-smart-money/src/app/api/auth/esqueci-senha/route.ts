@@ -10,7 +10,7 @@ const schema = z.object({ email: z.string().email() });
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Informe um e-mail valido' }, { status: 400 });
+    return NextResponse.json({ error: 'Informe um e-mail válido' }, { status: 400 });
   }
 
   const email = parsed.data.email.toLowerCase().trim();
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       html: renderEmail({
         title: 'Redefinir sua senha',
         intro: `Ola, ${user.name.split(' ')[0]}. Recebemos um pedido para redefinir a senha da sua conta na comunidade.`,
-        body: '<p>O link abaixo vale por 1 hora e so pode ser usado uma vez.</p>',
+        body: '<p>O link abaixo vale por 1 hora e só pode ser usado uma vez.</p>',
         ctaLabel: 'Criar nova senha',
         ctaUrl: link,
         footnote: 'Se você não pediu esta alteração, ignore este e-mail — nada muda.',

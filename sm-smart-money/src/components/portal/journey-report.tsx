@@ -58,15 +58,15 @@ export function JourneyReportView({
               >
                 <TrendingUp className="size-3.5" aria-hidden="true" />
                 {delta > 0 ? '+' : ''}
-                {delta} vs. diagnostico anterior
+                {delta} vs. diagnóstico anterior
               </p>
             ) : null}
           </div>
 
           <div className="space-y-3 border-t border-line pt-5 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
             <p className="text-sm text-text-2">
-              Concluido em {formatDate(completedAt)}. O relatorio fica salvo no seu perfil e pode ser
-              refeito a cada 90 dias para medir evolucao.
+              Concluído em {formatDate(completedAt)}. O relatório fica salvo no seu perfil e pode ser
+              refeito a cada 90 dias para medir evolução.
             </p>
             {retake.allowed ? (
               <Button asChild variant="secondary" size="sm">
@@ -77,7 +77,7 @@ export function JourneyReportView({
               </Button>
             ) : (
               <p className="text-xs text-text-3">
-                Voce podera refazer em {retake.daysRemaining} dia
+                Você poderá refazer em {retake.daysRemaining} dia
                 {retake.daysRemaining === 1 ? '' : 's'}.
               </p>
             )}

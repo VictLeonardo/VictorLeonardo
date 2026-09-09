@@ -63,7 +63,7 @@ export function NewMemberButton() {
         open={open}
         onOpenChange={setOpen}
         title="Novo membro"
-        description="O membro recebe um link para definir a propria senha — nenhuma senha e' enviada por e-mail."
+        description="O membro recebe um link para definir a própria senha — nenhuma senha é enviada por e-mail."
         wide
       >
         <form onSubmit={onSubmit} className="space-y-4">

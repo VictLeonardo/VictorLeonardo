@@ -6,7 +6,7 @@ import { QrCode, Share2 } from 'lucide-react';
 import { Modal } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 
-/** Cartao digital na versao publica do perfil: QR Code + share nativo. */
+/** Cartão digital na versao publica do perfil: QR Code + share nativo. */
 export function PublicShare({ name, slug }: { name: string; slug: string }) {
   const [open, setOpen] = React.useState(false);
   const [qr, setQr] = React.useState<string | null>(null);
@@ -54,10 +54,10 @@ export function PublicShare({ name, slug }: { name: string; slug: string }) {
         className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-[var(--color-brand-contrast)] transition-colors hover:bg-brand-strong hover:text-white"
       >
         <QrCode className="size-4" aria-hidden="true" />
-        Cartao digital
+        Cartão digital
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title="Cartao digital" description={name}>
+      <Modal open={open} onOpenChange={setOpen} title="Cartão digital" description={name}>
         <div className="flex flex-col items-center gap-4">
           {qr ? (
             // eslint-disable-next-line @next/next/no-img-element -- data URL gerada no cliente

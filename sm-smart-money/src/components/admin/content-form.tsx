@@ -283,7 +283,7 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
               <Field
                 label="Agendar publicação"
                 htmlFor="scheduledFor"
-                hint="Deixe vazio para publicar agora. Com data futura, o conteúdo so aparece na hora marcada."
+                hint="Deixe vazio para publicar agora. Com data futura, o conteúdo só aparece na hora marcada."
               >
                 <Input
                   id="scheduledFor"

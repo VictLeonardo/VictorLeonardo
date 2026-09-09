@@ -39,8 +39,8 @@ export function renderInvite(member: { name: string; slug: string | null }) {
     subject: 'Ative seu perfil de Membro Estratégico',
     html: renderEmail({
       title: 'Seu perfil público está reservado',
-      intro: `Ola, ${member.name.split(' ')[0]}. Cada membro da SM Smart Money tem um endereco proprio na comunidade — o seu ja' esta reservado.`,
-      body: `<p>Ative o perfil para aparecer no diretório de membros e compartilhar seu cartao digital.</p>
+      intro: `Olá, ${member.name.split(' ')[0]}. Cada membro da SM Smart Money tem um endereço próprio na comunidade — o seu já está reservado.`,
+      body: `<p>Ative o perfil para aparecer no diretório de membros e compartilhar seu cartão digital.</p>
              <p style="margin-top:12px;font-size:13px;color:#8a8474">Seu endereço: <strong>${url}</strong></p>`,
       ctaLabel: 'Ativar meu perfil',
       ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/perfil`,

@@ -58,7 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       html: renderEmail({
         title: 'Redefinir sua senha',
         intro: `Ola, ${member.name.split(' ')[0]}. A equipe SM gerou um link para voce criar uma nova senha.`,
-        body: '<p>O link vale por 24 horas e so pode ser usado uma vez.</p>',
+        body: '<p>O link vale por 24 horas e só pode ser usado uma vez.</p>',
         ctaLabel: 'Criar nova senha',
         ctaUrl: link,
       }),

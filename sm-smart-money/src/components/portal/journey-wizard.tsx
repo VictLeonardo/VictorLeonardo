@@ -48,7 +48,7 @@ export function JourneyWizard({ questions }: { questions: QuestionRow[] }) {
       return;
     }
 
-    toast('Diagnóstico concluido. Veja seu relatório.', 'success');
+    toast('Diagnóstico concluído. Veja seu relatório.', 'success');
     router.replace('/journey');
     router.refresh();
   }

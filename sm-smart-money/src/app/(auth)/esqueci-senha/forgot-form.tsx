@@ -44,7 +44,7 @@ export function ForgotPasswordForm() {
       </Field>
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-        Enviar link de recuperacao
+        Enviar link de recuperação
       </Button>
     </form>
   );

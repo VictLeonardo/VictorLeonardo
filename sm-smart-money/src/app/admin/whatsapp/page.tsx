@@ -38,7 +38,7 @@ export default async function AdminWhatsappPage() {
       <SectionHeader
         eyebrow="Integração"
         title="WhatsApp (WAHA)"
-        description="Estado da instância, reconexao por QR Code e histórico de disparos."
+        description="Estado da instância, reconexão por QR Code e histórico de disparos."
       />
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px] lg:items-start">

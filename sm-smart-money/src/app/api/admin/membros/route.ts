@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
-    return NextResponse.json({ error: 'Ja existe um membro com este e-mail' }, { status: 409 });
+    return NextResponse.json({ error: 'Já existe um membro com este e-mail' }, { status: 409 });
   }
 
   const user = await prisma.user.create({
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       html: renderEmail({
         title: 'Seu acesso está pronto',
         intro: `Ola, ${user.name.split(' ')[0]}. Voce agora faz parte da comunidade SM Smart Money.`,
-        body: '<p>Defina sua senha pelo botao abaixo e comece pelo diagnóstico Smart Money Journey. O link vale por 7 dias.</p>',
+        body: '<p>Defina sua senha pelo botão abaixo e comece pelo diagnóstico Smart Money Journey. O link vale por 7 dias.</p>',
         ctaLabel: 'Definir minha senha',
         ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/redefinir-senha?token=${token.raw}`,
       }),

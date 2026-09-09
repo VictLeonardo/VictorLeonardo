@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const last = await latestSubmission(user.id);
   if (last?.completedAt && !canRetake(last.completedAt)) {
     return NextResponse.json(
-      { error: 'O diagnóstico so pode ser refeito 90 dias após a última conclusão.' },
+      { error: 'O diagnóstico só pode ser refeito 90 dias após a última conclusão.' },
       { status: 409 },
     );
   }

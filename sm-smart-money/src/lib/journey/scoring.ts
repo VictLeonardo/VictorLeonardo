@@ -90,7 +90,7 @@ const RECOMMENDATIONS: Record<JourneyCategory, Record<ScoreBand, string>> = {
     'em-desenvolvimento':
       'Separe patrimônio pessoal e empresarial e avalie a blindagem via holding patrimonial.',
     consistente:
-      'Revise coberturas e limites anualmente e formalize acordos societários com clausulas de saida.',
+      'Revise coberturas e limites anualmente e formalize acordos societários com cláusulas de saída.',
     avancado:
       'Considere estruturas internacionais e seguros de vida como instrumento de liquidez sucessória.',
   },

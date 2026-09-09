@@ -20,7 +20,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Notificação não encontrada' }, { status: 404 });
   }
   if (notification.sentAt) {
-    return NextResponse.json({ error: 'Esta notificação ja foi disparada' }, { status: 409 });
+    return NextResponse.json({ error: 'Esta notificação já foi disparada' }, { status: 409 });
   }
 
   const result = await dispatchNotification(id);

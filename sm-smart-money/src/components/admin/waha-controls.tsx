@@ -71,7 +71,7 @@ export function WahaControls({
         open={restartOpen}
         onOpenChange={setRestartOpen}
         title="Reiniciar a instância WAHA?"
-        description="A sessao e' reiniciada e os envios ficam indisponíveis por alguns segundos. A vinculação do número e' preservada."
+        description="A sessão é reiniciada e os envios ficam indisponíveis por alguns segundos. A vinculação do número é preservada."
         confirmLabel="Reiniciar"
         tone="primary"
         loading={pending}

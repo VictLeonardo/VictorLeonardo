@@ -8,7 +8,7 @@ import { Modal } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 
 /**
- * Cartao digital: compartilha a URL do perfil pelo share nativo do dispositivo e,
+ * Cartão digital: compartilha a URL do perfil pelo share nativo do dispositivo e,
  * onde ele nao existe (desktop), copia o link. O QR Code e' gerado no cliente —
  * o endereco do membro nao passa por servico externo.
  */
@@ -61,13 +61,13 @@ export function DigitalCard({ slug, name }: { slug: string; name: string }) {
     <>
       <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)}>
         <QrCode className="size-4" aria-hidden="true" />
-        Cartao digital
+        Cartão digital
       </Button>
 
       <Modal
         open={open}
         onOpenChange={setOpen}
-        title="Cartao digital"
+        title="Cartão digital"
         description="Aponte a camera para abrir o perfil, ou compartilhe o link direto."
       >
         <div className="flex flex-col items-center gap-4">

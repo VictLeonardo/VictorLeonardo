@@ -65,7 +65,7 @@ export default async function AdminJourneyPage() {
           hint={`${stats.completedMembers} de ${stats.activeMembers} membros ativos`}
           meter={{ value: stats.completionRate, tone: 'brand' }}
         />
-        <StatTile label="Diagnósticos concluidos" value={String(stats.totalSubmissions)} />
+        <StatTile label="Diagnósticos concluídos" value={String(stats.totalSubmissions)} />
         <StatTile
           label="Score médio"
           value={String(stats.averageScore)}
@@ -96,7 +96,7 @@ export default async function AdminJourneyPage() {
           {submissions.length === 0 ? (
             <EmptyState
               icon={Compass}
-              title="Nenhum diagnóstico concluido"
+              title="Nenhum diagnóstico concluído"
               description="Assim que os membros completarem o Smart Money Journey, os resultados aparecem aqui."
               className="mt-4"
             />

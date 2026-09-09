@@ -40,7 +40,7 @@ export default async function LecturesPage({
       <SectionHeader
         eyebrow="Agenda"
         title="Palestras"
-        description="Encontros ao vivo com especialistas e o acervo completo das sessoes ja' realizadas."
+        description="Encontros ao vivo com especialistas e o acervo completo das sessões já realizadas."
       >
         <FilterBar
           basePath="/palestras"
@@ -129,7 +129,7 @@ export default async function LecturesPage({
         <EmptyState
           icon={Video}
           title="Nenhuma palestra neste filtro"
-          description="Ajuste o filtro acima ou volte em breve — a agenda e' atualizada toda semana."
+          description="Ajuste o filtro acima ou volte em breve — a agenda é atualizada toda semana."
         />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
