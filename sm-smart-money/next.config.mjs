@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Empacota servidor e dependencias tracadas num diretorio so, para a imagem
-  // Docker nao precisar carregar o node_modules inteiro.
-  output: 'standalone',
+  // Docker nao precisar carregar o node_modules inteiro. Fora do Docker fica
+  // desligado: a Vercel monta o proprio output e nao usa este modo.
+  output: process.env.DOCKER_BUILD ? 'standalone' : undefined,
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

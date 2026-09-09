@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Liga o output standalone, usado so por esta imagem.
+ENV DOCKER_BUILD=1
 RUN npx prisma generate && npx next build
 
 # --------------------------------------------------------------- ferramentas

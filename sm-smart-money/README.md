@@ -78,6 +78,60 @@ npm run dev
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
 
+## Publicar na Vercel
+
+A Vercel compila o Next por conta própria e não usa o Docker. Ela hospeda a
+aplicação, mas não banco nem processo sempre ligado, então a configuração tem
+três partes.
+
+**1. Banco.** Crie um PostgreSQL gerenciado, por exemplo no Neon ou no Supabase,
+e guarde a string de conexão.
+
+**2. Projeto.** Importe o repositório na Vercel e ajuste uma coisa que costuma
+passar batido: em Settings, defina o **Root Directory** como `sm-smart-money`.
+A aplicação não fica na raiz do repositório.
+
+**3. Variáveis de ambiente.** No mínimo:
+
+| Variável | Valor |
+|---|---|
+| `DATABASE_URL` | a string de conexão do banco gerenciado |
+| `AUTH_SECRET` | gere com `openssl rand -base64 48` |
+| `NEXT_PUBLIC_APP_URL` | a URL do projeto, depois o domínio próprio |
+| `CRON_SECRET` | gere com `openssl rand -hex 24` |
+
+As de SMTP entram quando você quiser envio real de e-mail. Sem elas, as mensagens
+ficam registradas no log e no histórico, sem sair.
+
+O deploy roda o script `vercel-build`, que aplica as migrations antes de compilar.
+O `build` comum fica reservado ao Docker, que não tem banco no momento da imagem.
+
+### Primeiro administrador
+
+O seed não serve para produção: ele limpa as tabelas. Para criar o acesso inicial
+sem tocar em mais nada:
+
+```bash
+DATABASE_URL="<string do banco>" \
+ADMIN_NAME="Seu Nome" \
+ADMIN_EMAIL="voce@dominio.com.br" \
+ADMIN_PASSWORD="<senha forte>" \
+npm run db:create-admin
+```
+
+Rodar de novo com o mesmo e-mail promove a conta existente e troca a senha.
+
+### O que não funciona na Vercel
+
+A integração com WhatsApp. A WAHA mantém uma sessão do WhatsApp Web aberta e
+precisa de disco e processo contínuo, coisas que a Vercel não oferece. O painel
+mostra a integração como não configurada e os disparos ficam só no log. Todo o
+resto da plataforma funciona.
+
+As rotinas agendadas em `vercel.json` estão diárias, o limite dos planos
+gratuitos. Em plano pago dá para deixá-las de hora em hora, o que deixa as
+notificações agendadas mais pontuais.
+
 ### Do local para um domínio
 
 Nada no código está preso a um endereço: `NEXT_PUBLIC_APP_URL` alimenta os links
@@ -167,7 +221,8 @@ registra a tentativa, então o fluxo completo — incluindo o histórico de disp
 
 ## Rotinas agendadas
 
-Ambas exigem o header `x-cron-secret` com o valor de `CRON_SECRET`:
+Ambas aceitam o header `x-cron-secret` ou `Authorization: Bearer`, este último o
+formato que a Vercel Cron envia:
 
 ```
 GET /api/cron/waha-health    # health check da instância + alerta na queda
@@ -177,6 +232,7 @@ GET /api/cron/agendamentos   # dispara notificações agendadas que venceram
 ## Estrutura
 
 ```
+├── vercel.json             framework, região e rotinas agendadas
 ├── Dockerfile              imagem de produção (multi-stage)
 ├── docker-compose.yml      postgres + migrate + app + waha
 ├── scripts/local-up.sh     sobe a stack local com um comando
