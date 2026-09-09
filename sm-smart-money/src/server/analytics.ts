@@ -75,6 +75,47 @@ function lastMonths(count: number): string[] {
 }
 
 /**
+ * Recorte justo para o KPI de crescimento. O mes corrente esta sempre
+ * incompleto, entao comparar o total dele com o mes fechado anterior acusaria
+ * queda nos primeiros vinte e poucos dias de todo mes. Aqui os dois lados
+ * cobrem o mesmo numero de dias.
+ */
+export async function monthToDateGrowth() {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const day = now.getUTCDate();
+
+  const currentStart = new Date(Date.UTC(year, month, 1));
+  const previousStart = new Date(Date.UTC(year, month - 1, 1));
+
+  // Fevereiro nao tem dia 30: o corte para no ultimo dia do mes anterior.
+  const previousMonthDays = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const previousEnd = new Date(
+    Date.UTC(
+      year,
+      month - 1,
+      Math.min(day, previousMonthDays),
+      now.getUTCHours(),
+      now.getUTCMinutes(),
+      now.getUTCSeconds(),
+      now.getUTCMilliseconds(),
+    ),
+  );
+
+  const [current, previous] = await Promise.all([
+    prisma.user.count({
+      where: { role: 'MEMBER', joinedAt: { gte: currentStart, lte: now } },
+    }),
+    prisma.user.count({
+      where: { role: 'MEMBER', joinedAt: { gte: previousStart, lte: previousEnd } },
+    }),
+  ]);
+
+  return { current, previous };
+}
+
+/**
  * Novos membros e cancelamentos mes a mes. Agrupar em memoria (e nao com
  * `date_trunc` no SQL) mantem o codigo independente de dialeto e o volume aqui e'
  * de centenas de linhas, nao de milhoes.

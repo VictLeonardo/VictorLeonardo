@@ -6,6 +6,7 @@ import {
   growthSeries,
   journeyStats,
   memberKpis,
+  monthToDateGrowth,
   profileStats,
   resolvePeriod,
   topContent,
@@ -41,9 +42,10 @@ export default async function AdminDashboardPage({
     : '30d';
   const period = resolvePeriod(periodKey, { from: params.de, to: params.ate });
 
-  const [kpis, series, engagement, journey, profiles, waha, top] = await Promise.all([
+  const [kpis, series, mtd, engagement, journey, profiles, waha, top] = await Promise.all([
     memberKpis(),
     growthSeries(12),
+    monthToDateGrowth(),
     engagementBySection(period.from, period.to),
     journeyStats(),
     profileStats(),
@@ -51,8 +53,6 @@ export default async function AdminDashboardPage({
     topContent(period.from, period.to),
   ]);
 
-  const lastMonthGrowth = series.growth.at(-1)?.value ?? 0;
-  const previousMonthGrowth = series.growth.at(-2)?.value ?? 0;
   const totalViews = engagement.reduce((sum, e) => sum + e.value, 0);
 
   return (
@@ -71,8 +71,8 @@ export default async function AdminDashboardPage({
         <StatTile
           label="Ativos"
           value={String(kpis.ativos)}
-          delta={lastMonthGrowth - previousMonthGrowth}
-          deltaLabel="novos vs. mês anterior"
+          delta={mtd.current - mtd.previous}
+          deltaLabel="novos vs. mesmo período do mês anterior"
           goodDirection="up"
         />
         <StatTile
@@ -117,7 +117,7 @@ export default async function AdminDashboardPage({
 
         <BarList
           title="Média por dimensão do diagnóstico"
-          subtitle={`${journey.totalSubmissions} diagnósticos concluidos`}
+          subtitle={`${journey.totalSubmissions} diagnósticos concluídos`}
           data={journey.categoryAverages.map((c) => ({
             label: JOURNEY_CATEGORY_LABELS[c.category as JourneyCategory] ?? c.category,
             value: c.average,
@@ -142,7 +142,7 @@ export default async function AdminDashboardPage({
         <StatTile
           label="Score médio da comunidade"
           value={String(journey.averageScore)}
-          hint="Smart Money Score médio dos diagnósticos concluidos"
+          hint="Smart Money Score médio dos diagnósticos concluídos"
           meter={{ value: journey.averageScore, tone: 'brand' }}
         />
       </section>
