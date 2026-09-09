@@ -18,6 +18,26 @@ info() { printf '\033[0;36m>\033[0m %s\n' "$1"; }
 ok()   { printf '\033[0;32m✓\033[0m %s\n' "$1"; }
 die()  { printf '\033[0;31m✗\033[0m %s\n' "$1" >&2; exit 1; }
 
+# Segredos vem do openssl, presente no macOS e na maioria dos Linux, com
+# /dev/urandom como reserva. Nao ha' caminho que produza valor fraco: se as duas
+# fontes falharem, o script para. Um CRON_SECRET adivinhavel abriria as rotas de
+# rotina agendada.
+gerar_base64() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -base64 "$1"
+  else
+    head -c "$1" /dev/urandom | base64 | tr -d '\n'
+  fi
+}
+
+gerar_hex() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "$1"
+  else
+    od -An -tx1 -N"$1" /dev/urandom | tr -d ' \n'
+  fi
+}
+
 command -v docker >/dev/null 2>&1 || die "Docker nao encontrado. Instale o Docker Desktop ou o Docker Engine."
 docker compose version >/dev/null 2>&1 || die "Docker Compose v2 nao encontrado. Atualize o Docker."
 docker info >/dev/null 2>&1 || die "O Docker esta instalado mas nao esta rodando. Inicie o Docker e tente de novo."
@@ -44,13 +64,11 @@ done
 if [ ! -f .env ]; then
   info "criando .env"
 
-  # openssl e' o caminho normal; o node cobre quem nao tem openssl no PATH.
-  if command -v openssl >/dev/null 2>&1; then
-    SECRET="$(openssl rand -base64 48)"
-  else
-    SECRET="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64'))")"
-  fi
-  CRON="$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))" 2>/dev/null || echo "troque-este-segredo-$RANDOM")"
+  SECRET="$(gerar_base64 48)"
+  CRON="$(gerar_hex 24)"
+
+  [ "${#SECRET}" -ge 32 ] || die "nao consegui gerar AUTH_SECRET. Instale o openssl e tente de novo."
+  [ "${#CRON}" -ge 16 ] || die "nao consegui gerar CRON_SECRET. Instale o openssl e tente de novo."
 
   cat > .env <<ENVEOF
 # Gerado por scripts/local-up.sh. Ajuste a vontade.
