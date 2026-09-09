@@ -203,7 +203,32 @@ const TOPICS = [
   ['OPORTUNIDADES', 'Busco sócio para operação de real estate em SP', 'Operação de retrofit em região central, ticket de entrada a partir de R$ 2 milhoes, horizonte de 36 meses. Posso compartilhar o memorando com quem tiver interesse.'],
 ] as const;
 
+/**
+ * O seed apaga tudo antes de popular, entao rodar contra uma base em uso destroi
+ * dados reais. Os registros de exemplo sao reconheciveis pelo dominio do e-mail;
+ * qualquer conta fora desse padrao indica base real e interrompe a execucao.
+ */
+async function abortarSeBaseReal() {
+  const reais = await prisma.user.count({
+    where: {
+      email: { not: { endsWith: '@exemplo.com.br' } },
+      NOT: { email: 'admin@smboard.com.br' },
+    },
+  });
+
+  if (reais === 0 || process.env.SEED_FORCE === '1') return;
+
+  throw new Error(
+    `Esta base tem ${reais} conta(s) que nao vieram do seed.\n` +
+      '  O seed apaga TODAS as tabelas antes de popular, entao a execucao foi interrompida.\n' +
+      '  Para limpar sem repopular:   CONFIRMAR=SIM npm run db:clean\n' +
+      '  Para popular mesmo assim:    SEED_FORCE=1 npm run db:seed',
+  );
+}
+
 async function main() {
+  await abortarSeBaseReal();
+
   console.log('Limpando dados existentes...');
   await prisma.$transaction([
     prisma.journeyAnswer.deleteMany(),

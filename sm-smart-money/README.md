@@ -124,6 +124,35 @@ npm run db:create-admin
 
 Rodar de novo com o mesmo e-mail promove a conta existente e troca a senha.
 
+### Explorar com dados simulados e depois carregar os reais
+
+O seed existe para conhecer a plataforma cheia, com 36 membros, conteúdo e doze
+meses de histórico. Ele apaga todas as tabelas antes de popular, então só roda
+numa base cujas contas vieram dele próprio. Numa base com dados reais ele
+interrompe e explica o caminho, em vez de destruir.
+
+O ciclo completo:
+
+```bash
+npm run db:seed                              # carrega a simulação
+CONFIRMAR=SIM INCLUIR_ADMINS=1 npm run db:clean   # limpa tudo
+npm run db:create-admin                      # recria só o seu acesso
+```
+
+Sem `CONFIRMAR`, o `db:clean` apenas mostra o que existe e não apaga nada.
+
+Sem `INCLUIR_ADMINS`, ele preserva os administradores. Isso protege quem está
+limpando de se trancar para fora, mas na virada para produção use a variável:
+o seed cria um administrador de demonstração com senha pública, e ele
+sobreviveria à limpeza comum.
+
+| Comando | Efeito |
+|---|---|
+| `npm run db:clean` | mostra os totais, não apaga |
+| `CONFIRMAR=SIM npm run db:clean` | apaga tudo, mantém administradores |
+| `CONFIRMAR=SIM INCLUIR_ADMINS=1 npm run db:clean` | apaga tudo, inclusive administradores |
+| `SEED_FORCE=1 npm run db:seed` | popula ignorando a proteção |
+
 ### O que não funciona na Vercel
 
 A integração com WhatsApp. A WAHA mantém uma sessão do WhatsApp Web aberta e
