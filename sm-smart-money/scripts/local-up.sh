@@ -73,6 +73,7 @@ if [ ! -f .env ]; then
   cat > .env <<ENVEOF
 # Gerado por scripts/local-up.sh. Ajuste a vontade.
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sm_smart_money?schema=public"
+DIRECT_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sm_smart_money?schema=public"
 AUTH_SECRET="${SECRET}"
 AUTH_ACCESS_MINUTES="15"
 AUTH_REFRESH_DAYS="7"

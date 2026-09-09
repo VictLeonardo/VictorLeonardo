@@ -84,8 +84,11 @@ A Vercel compila o Next por conta própria e não usa o Docker. Ela hospeda a
 aplicação, mas não banco nem processo sempre ligado, então a configuração tem
 três partes.
 
-**1. Banco.** Crie um PostgreSQL gerenciado, por exemplo no Neon ou no Supabase,
-e guarde a string de conexão.
+**1. Banco.** Crie um PostgreSQL gerenciado, por exemplo no Neon ou no Supabase.
+Guarde as duas strings de conexão que eles oferecem, a com pool e a direta. O
+Prisma usa a com pool na aplicação e a direta nas migrations, que falham contra
+uma conexão com pool. Num Postgres comum, sem pool, repita a mesma string nas
+duas variáveis.
 
 **2. Projeto.** Importe o repositório na Vercel e ajuste uma coisa que costuma
 passar batido: em Settings, defina o **Root Directory** como `sm-smart-money`.
@@ -95,7 +98,8 @@ A aplicação não fica na raiz do repositório.
 
 | Variável | Valor |
 |---|---|
-| `DATABASE_URL` | a string de conexão do banco gerenciado |
+| `DATABASE_URL` | a string de conexão da aplicação, a com pool se houver |
+| `DIRECT_DATABASE_URL` | a conexão direta, usada pelas migrations |
 | `AUTH_SECRET` | gere com `openssl rand -base64 48` |
 | `NEXT_PUBLIC_APP_URL` | a URL do projeto, depois o domínio próprio |
 | `CRON_SECRET` | gere com `openssl rand -hex 24` |

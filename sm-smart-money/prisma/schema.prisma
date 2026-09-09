@@ -15,8 +15,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // A aplicacao usa a conexao com pool; as migrations usam a direta. Bancos
+  // gerenciados como Neon e Supabase entregam as duas, e `migrate deploy` falha
+  // contra a que tem pool. Em Postgres sem pool, as duas sao a mesma string.
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 enum Role {

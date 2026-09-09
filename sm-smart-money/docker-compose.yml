@@ -32,6 +32,7 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+      DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
     command: ['npx', 'prisma', 'migrate', 'deploy']
     depends_on:
       postgres:
@@ -50,6 +51,7 @@ services:
       # localhost. Esta linha vence a DATABASE_URL do .env, que aponta para a
       # maquina do desenvolvedor.
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+      DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
       WAHA_BASE_URL: http://waha:3000
     ports:
       - '${APP_PORT:-3000}:3000'
@@ -87,6 +89,7 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+      DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
     depends_on:
       postgres:
         condition: service_healthy
