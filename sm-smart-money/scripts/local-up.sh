@@ -7,7 +7,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Portas publicadas no host. Em maquina com varios projetos, 3000 e 5432 sao as
+# mais disputadas: sobrescreva na chamada, por exemplo
+#   APP_PORT=3010 POSTGRES_PORT=5433 ./scripts/local-up.sh
 APP_PORT="${APP_PORT:-3000}"
+POSTGRES_PORT="${POSTGRES_PORT:-5432}"
+WAHA_PORT="${WAHA_PORT:-3001}"
 
 info() { printf '\033[0;36m>\033[0m %s\n' "$1"; }
 ok()   { printf '\033[0;32m✓\033[0m %s\n' "$1"; }
@@ -16,6 +21,24 @@ die()  { printf '\033[0;31m✗\033[0m %s\n' "$1" >&2; exit 1; }
 command -v docker >/dev/null 2>&1 || die "Docker nao encontrado. Instale o Docker Desktop ou o Docker Engine."
 docker compose version >/dev/null 2>&1 || die "Docker Compose v2 nao encontrado. Atualize o Docker."
 docker info >/dev/null 2>&1 || die "O Docker esta instalado mas nao esta rodando. Inicie o Docker e tente de novo."
+
+# Falha cedo e com mensagem clara quando a porta ja esta tomada por outro
+# projeto, em vez de deixar o Docker devolver um erro cru la na frente.
+porta_ocupada() {
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
+for par in "APP_PORT:$APP_PORT" "POSTGRES_PORT:$POSTGRES_PORT" "WAHA_PORT:$WAHA_PORT"; do
+  nome="${par%%:*}"; valor="${par##*:}"
+  if porta_ocupada "$valor" && ! docker compose ps --status running 2>/dev/null | grep -q .; then
+    die "a porta ${valor} ja esta em uso por outro processo.
+     Rode com outra porta, por exemplo:  ${nome}=$((valor + 10)) ./scripts/local-up.sh"
+  fi
+done
 
 # ------------------------------------------------------------------ .env
 if [ ! -f .env ]; then
@@ -36,6 +59,12 @@ AUTH_SECRET="${SECRET}"
 AUTH_ACCESS_MINUTES="15"
 AUTH_REFRESH_DAYS="7"
 AUTH_REMEMBER_DAYS="30"
+
+# As portas ficam gravadas para o compose e a aplicacao concordarem tambem num
+# `docker compose up` avulso, sem depender da variavel na linha de comando.
+APP_PORT="${APP_PORT}"
+POSTGRES_PORT="${POSTGRES_PORT}"
+WAHA_PORT="${WAHA_PORT}"
 
 NEXT_PUBLIC_APP_URL="http://localhost:${APP_PORT}"
 NEXT_PUBLIC_COMMUNITY_NAME="SM Smart Money"

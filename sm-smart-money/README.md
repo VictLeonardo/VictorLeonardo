@@ -37,6 +37,16 @@ do Prisma nem as dependências de desenvolvimento.
 
 Ao terminar, a plataforma responde em `http://localhost:3000`.
 
+**Máquina com outros projetos.** As portas 3000 e 5432 costumam estar disputadas.
+O script avisa antes de subir se alguma estiver ocupada e aceita outras:
+
+```bash
+APP_PORT=3010 POSTGRES_PORT=5433 WAHA_PORT=3011 ./scripts/local-up.sh
+```
+
+A escolha fica gravada no `.env`, então os comandos seguintes de `docker compose`
+usam as mesmas portas sem precisar repetir as variáveis.
+
 | Comando | O que faz |
 |---|---|
 | `docker compose logs -f app` | acompanha os logs da aplicação |
