@@ -1,43 +1,96 @@
+# Stack local completa: aplicacao, banco e WhatsApp.
+#   ./scripts/local-up.sh          sobe tudo e aplica as migrations
+#   docker compose --profile seed run --rm seed    popula com dados de exemplo
+#
+# A WAHA precisa de um container que fica de pe, com disco proprio: ela mantem
+# uma sessao do WhatsApp Web aberta e nao funciona em ambiente serverless.
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: sm-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sm_smart_money
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-sm_smart_money}
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - sm-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-sm_smart_money}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: tools
+    container_name: sm-migrate
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+    command: ['npx', 'prisma', 'migrate', 'deploy']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  app:
+    build:
+      context: .
+      target: runner
+    container_name: sm-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Dentro da rede do compose o banco atende pelo nome do servico, nao por
+      # localhost. Esta linha vence a DATABASE_URL do .env, que aponta para a
+      # maquina do desenvolvedor.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+      WAHA_BASE_URL: http://waha:3000
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:3000/login >/dev/null || exit 1']
       interval: 10s
       timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: sm-redis
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-    volumes:
-      - sm-redisdata:/data
+      retries: 12
+      start_period: 20s
 
   waha:
     image: devlikeapro/waha:latest
     container_name: sm-waha
     restart: unless-stopped
     ports:
-      - '3001:3000'
+      - '${WAHA_PORT:-3001}:3000'
     environment:
       WHATSAPP_DEFAULT_ENGINE: WEBJS
     volumes:
       - sm-wahadata:/app/.sessions
 
+  # Perfil opcional: nao sobe com `docker compose up`.
+  # Apaga o conteudo atual e recria os dados de exemplo.
+  seed:
+    profiles: ['seed']
+    build:
+      context: .
+      target: tools
+    command: ['npx', 'tsx', 'prisma/seed.ts']
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   sm-pgdata:
-  sm-redisdata:
   sm-wahadata:

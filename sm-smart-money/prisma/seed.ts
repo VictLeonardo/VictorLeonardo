@@ -254,7 +254,7 @@ async function main() {
           bio: 'Responsável pela curadoria e pela operação da comunidade SM Smart Money.',
           city: 'São Paulo',
           state: 'SP',
-          specialties: ['Estratégia', 'Educacao financeira'],
+          specialties: ['Estratégia', 'Educação financeira'],
           activatedAt: daysAgo(390),
         },
       },

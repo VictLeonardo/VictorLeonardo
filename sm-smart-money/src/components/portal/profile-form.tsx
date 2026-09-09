@@ -32,9 +32,11 @@ const BIO_LIMIT = 280;
 const MAX_SPECIALTIES = 8;
 
 export function ProfileForm({
+  host,
   user,
   profile,
 }: {
+  host: string;
   user: {
     name: string;
     email: string;
@@ -269,7 +271,7 @@ export function ProfileForm({
             </div>
 
             <p className="break-all rounded-md bg-surface-sunken px-3 py-2 font-mono text-xs text-text-2">
-              smboard.com.br/{profile.slug}
+              {host}/{profile.slug}
             </p>
 
             <label className="flex cursor-pointer items-start gap-3 rounded-md border border-line p-3">

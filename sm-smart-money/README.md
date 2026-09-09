@@ -17,18 +17,47 @@ somente leitura.
 | WhatsApp | WAHA (WhatsApp HTTP API) |
 | Editor | Tiptap (CMS integrado ao admin) |
 
-## Como rodar
+## Subir localmente
+
+Um comando, com a aplicação em modo produção, banco e WhatsApp:
+
+```bash
+./scripts/local-up.sh
+```
+
+O script confere se o Docker está rodando, gera o `.env` com um `AUTH_SECRET`
+novo, sobe os serviços e popula com dados de exemplo se o banco estiver vazio.
+Rodar de novo apenas reconstrói: o `.env` existente nunca é sobrescrito e o seed
+não repete em banco com dados.
+
+As migrations rodam num serviço próprio, `migrate`, que aplica o que estiver
+pendente e sai. O app só sobe depois que ele termina bem, então nunca serve
+contra um schema desatualizado. A imagem que atende o tráfego não carrega a CLI
+do Prisma nem as dependências de desenvolvimento.
+
+Ao terminar, a plataforma responde em `http://localhost:3000`.
+
+| Comando | O que faz |
+|---|---|
+| `docker compose logs -f app` | acompanha os logs da aplicação |
+| `docker compose down` | para tudo, preservando o banco |
+| `docker compose down -v` | para tudo e apaga o banco |
+| `docker compose --profile seed run --rm seed` | recria os dados de exemplo, apagando os atuais |
+| `docker compose run --rm migrate` | aplica migrations pendentes sem reiniciar o app |
+
+### Sem Docker
+
+Precisa de um PostgreSQL acessível:
 
 ```bash
 cp .env.example .env          # preencha DATABASE_URL e AUTH_SECRET
-docker compose up -d postgres # ou use um Postgres já existente
 npm install
-npm run db:migrate            # cria o schema
-npm run db:seed               # 36 membros, conteúdo, palestras e 12 meses de histórico
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-Credenciais geradas pelo seed:
+### Credenciais do seed
 
 | Perfil | E-mail | Senha |
 |---|---|---|
@@ -38,6 +67,19 @@ Credenciais geradas pelo seed:
 | Cancelado | `tatiana-andrade@exemplo.com.br` | `SmartMoney2026` |
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
+
+### Do local para um domínio
+
+Nada no código está preso a um endereço: `NEXT_PUBLIC_APP_URL` alimenta os links
+dos e-mails, as meta tags de compartilhamento e o endereço de perfil mostrado ao
+membro. Apontar para um subdomínio é trocar essa variável e o DNS.
+
+Dois pontos merecem atenção na virada:
+
+- **HTTPS não é opcional.** Os cookies de sessão são marcados como `secure` fora
+  de desenvolvimento, então sem certificado o login não completa.
+- **A WAHA não roda em serverless.** Ela mantém uma sessão do WhatsApp Web aberta,
+  com disco persistente, e precisa de um container de pé.
 
 ## Como o acesso é decidido
 
@@ -125,18 +167,21 @@ GET /api/cron/agendamentos   # dispara notificações agendadas que venceram
 ## Estrutura
 
 ```
-src/
-├── proxy.ts                    roteamento por papel (edge)
-├── app/
-│   ├── (auth)/                 login, recuperação e redefinição de senha
-│   ├── (portal)/               área do membro, com sidebar e bottom nav
-│   ├── (account)/              conta cancelada ou pendente
-│   ├── admin/                  painel administrativo
-│   ├── [slug]/                 perfil público
-│   └── api/                    auth, portal, admin e cron
-├── components/{ui,portal,admin,charts}/
-├── lib/                        auth, domínio, e-mail, WAHA, auditoria, tokens
-└── server/                     consultas por área (membros, conteúdo, analytics…)
+├── Dockerfile              imagem de produção (multi-stage)
+├── docker-compose.yml      postgres + migrate + app + waha
+├── scripts/local-up.sh     sobe a stack local com um comando
+└── src/
+    ├── proxy.ts                roteamento por papel (edge)
+    ├── app/
+    │   ├── (auth)/             login, recuperação e redefinição de senha
+    │   ├── (portal)/           área do membro, com sidebar e bottom nav
+    │   ├── (account)/          conta cancelada ou pendente
+    │   ├── admin/              painel administrativo
+    │   ├── [slug]/             perfil público
+    │   └── api/                auth, portal, admin e cron
+    ├── components/{ui,portal,admin,charts}/
+    ├── lib/                    auth, domínio, e-mail, WAHA, auditoria, tokens
+    └── server/                 consultas por área (membros, conteúdo, analytics…)
 ```
 
 ## Fases

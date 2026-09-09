@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Empacota servidor e dependencias tracadas num diretorio so, para a imagem
+  // Docker nao precisar carregar o node_modules inteiro.
+  output: 'standalone',
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

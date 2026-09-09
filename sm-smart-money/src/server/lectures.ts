@@ -3,6 +3,8 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { SessionUser } from '@/lib/auth/session';
 import { canSeeVip } from '@/lib/auth/guards';
+import { env } from '@/lib/env';
+import { appHost } from '@/lib/utils';
 
 export function lectureFilter(user: SessionUser | null): Prisma.LectureWhereInput {
   return {
@@ -80,7 +82,7 @@ export function buildIcs(lecture: {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:${lecture.slug}@smboard.com.br`,
+    `UID:${lecture.slug}@${appHost(env.NEXT_PUBLIC_APP_URL)}`,
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(lecture.startsAt)}`,
     `DTEND:${stamp(end)}`,

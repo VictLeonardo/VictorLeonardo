@@ -27,6 +27,19 @@ export function profileSlugFromName(name: string): string {
   return slugify(`${parts[0]} ${parts[parts.length - 1]}`);
 }
 
+/**
+ * Host do ambiente, sem protocolo, para exibir ao usuario ("smboard.com.br/ana").
+ * Sai da configuracao e nao do codigo: a mesma imagem serve localhost, staging e
+ * producao sem rebuild.
+ */
+export function appHost(appUrl: string): string {
+  try {
+    return new URL(appUrl).host;
+  } catch {
+    return appUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  }
+}
+
 export function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] ?? name;
 }

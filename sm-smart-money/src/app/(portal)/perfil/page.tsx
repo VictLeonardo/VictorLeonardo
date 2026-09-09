@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { ensureProfile } from '@/server/profile';
 import { SectionHeader } from '@/components/ui/section-header';
 import { ProfileForm } from '@/components/portal/profile-form';
+import { env } from '@/lib/env';
+import { appHost } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'Meu Perfil' };
 export const dynamic = 'force-dynamic';
@@ -33,7 +35,10 @@ export default async function ProfilePage() {
         title="Meu Perfil"
         description="Estes dados alimentam o diretório da comunidade e o seu perfil público."
       />
+      {/* O host vem do servidor: em client component, NEXT_PUBLIC_ seria
+          congelado no build e a mesma imagem deixaria de servir varios ambientes. */}
       <ProfileForm
+        host={appHost(env.NEXT_PUBLIC_APP_URL)}
         user={{
           name: user.name,
           email: user.email,
