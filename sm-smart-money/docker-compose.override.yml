@@ -1,0 +1,20 @@
+# Override de desenvolvimento. O `docker compose` carrega este arquivo sozinho
+# quando nenhum -f e' passado, entao ele vale para a maquina do desenvolvedor e
+# nao vale para a VPS, onde o deploy usa -f explicito.
+#
+# A unica coisa que ele faz e' publicar portas no host. Elas ficam so' aqui
+# porque numa maquina com IP publico o mesmo mapeamento abriria o banco e a WAHA
+# para a internet.
+
+services:
+  postgres:
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+
+  app:
+    ports:
+      - '${APP_PORT:-3000}:3000'
+
+  waha:
+    ports:
+      - '${WAHA_PORT:-3001}:3000'

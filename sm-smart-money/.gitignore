@@ -10,3 +10,6 @@ next-env.d.ts
 .DS_Store
 npm-debug.log*
 coverage/
+
+# Dumps do banco gerados pelo agendador na VPS.
+backups/

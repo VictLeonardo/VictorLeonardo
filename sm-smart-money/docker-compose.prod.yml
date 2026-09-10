@@ -1,0 +1,75 @@
+# Camada de producao. Usar sempre com -f explicito:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# O -f explicito e' parte da protecao: ele impede que o docker-compose.override.yml
+# (que publica banco e WAHA no host, para desenvolvimento) entre junto.
+#
+# As variaveis com `:?` fazem o compose recusar a subir quando faltam. Um deploy
+# que para com uma mensagem clara e' melhor do que um que sobe com a WAHA aberta
+# ou com o dominio errado no certificado.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: sm-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      APP_DOMAIN: '${APP_DOMAIN:?defina APP_DOMAIN no .env}'
+      ACME_EMAIL: '${ACME_EMAIL:?defina ACME_EMAIL no .env}'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Os certificados vivem aqui. Sem este volume, cada recriacao do container
+      # pediria certificado de novo e esbarraria no limite da Let's Encrypt.
+      - sm-caddy-data:/data
+      - sm-caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+
+  app:
+    # Fora da rede do compose ninguem alcanca a aplicacao direto: quem publica e'
+    # o Caddy, e so' em 443.
+    environment:
+      NEXT_PUBLIC_APP_URL: 'https://${APP_DOMAIN:?defina APP_DOMAIN no .env}'
+      WAHA_BASE_URL: 'http://waha:3000'
+      WAHA_API_KEY: '${WAHA_API_KEY:?defina WAHA_API_KEY no .env}'
+
+  waha:
+    environment:
+      WHATSAPP_DEFAULT_ENGINE: 'WEBJS'
+      # Sem esta chave a WAHA aceita qualquer chamada. Como ela controla a sessao
+      # de WhatsApp da comunidade, subir aberta significaria entregar o numero a
+      # quem descobrisse o endereco.
+      WHATSAPP_API_KEY: '${WAHA_API_KEY:?defina WAHA_API_KEY no .env}'
+      WHATSAPP_RESTART_ALL_SESSIONS: 'True'
+
+  scheduler:
+    build:
+      context: ./deploy
+      dockerfile: scheduler.Dockerfile
+    container_name: sm-scheduler
+    restart: unless-stopped
+    environment:
+      TZ: '${TZ:-America/Sao_Paulo}'
+      CRON_SECRET: '${CRON_SECRET:?defina CRON_SECRET no .env}'
+      APP_INTERNAL_URL: 'http://app:3000'
+      POSTGRES_USER: '${POSTGRES_USER:-postgres}'
+      POSTGRES_DB: '${POSTGRES_DB:-sm_smart_money}'
+      PGPASSWORD: '${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}'
+      BACKUP_RETENTION_DAYS: '${BACKUP_RETENTION_DAYS:-14}'
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      app:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+volumes:
+  sm-caddy-data:
+  sm-caddy-config:

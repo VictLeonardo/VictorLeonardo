@@ -23,14 +23,18 @@ RUN npx prisma generate && npx next build
 
 # --------------------------------------------------------------- ferramentas
 # Estagio com o node_modules completo, usado pelos servicos `migrate` e `seed`
-# do compose. Fica fora da imagem que serve o trafego.
+# do compose e pelos comandos de manutencao. Fica fora da imagem que serve o
+# trafego.
 FROM node:22-slim AS tools
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY package.json ./
+COPY package.json tsconfig.json ./
 COPY prisma ./prisma
+# O src entra porque o create-admin.ts reaproveita a validacao de senha e a
+# geracao de slug da propria aplicacao, em vez de duplicar as regras aqui.
+COPY src ./src
 RUN npx prisma generate
 CMD ["npx", "prisma", "migrate", "deploy"]
 

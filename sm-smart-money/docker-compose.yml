@@ -1,6 +1,17 @@
-# Stack local completa: aplicacao, banco e WhatsApp.
-#   ./scripts/local-up.sh          sobe tudo e aplica as migrations
-#   docker compose --profile seed run --rm seed    popula com dados de exemplo
+# Definicao base da stack: aplicacao, banco e WhatsApp.
+#
+#   local   ./scripts/local-up.sh
+#           `docker compose` sozinho carrega o docker-compose.override.yml
+#           automaticamente, e e' ele que publica as portas no host.
+#
+#   VPS     ./scripts/vps-up.sh
+#           usa `-f docker-compose.yml -f docker-compose.prod.yml`. Passar -f
+#           explicito desliga o override, entao nenhuma porta de banco ou de
+#           WAHA vaza para a internet.
+#
+# Nenhum servico daqui publica porta. Isso e' proposital: a exposicao e' uma
+# decisao de cada ambiente, e o padrao seguro e' nao expor. Numa VPS com IP
+# publico, publicar o Postgres significa deixa-lo aberto para a internet.
 #
 # A WAHA precisa de um container que fica de pe, com disco proprio: ela mantem
 # uma sessao do WhatsApp Web aberta e nao funciona em ambiente serverless.
@@ -17,8 +28,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-sm_smart_money}
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - sm-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -56,8 +65,6 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
       DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-sm_smart_money}?schema=public
       WAHA_BASE_URL: http://waha:3000
-    ports:
-      - '${APP_PORT:-3000}:3000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,8 +81,6 @@ services:
     image: devlikeapro/waha:latest
     container_name: sm-waha
     restart: unless-stopped
-    ports:
-      - '${WAHA_PORT:-3001}:3000'
     environment:
       WHATSAPP_DEFAULT_ENGINE: WEBJS
     volumes:

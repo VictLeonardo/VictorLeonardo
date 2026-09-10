@@ -82,6 +82,83 @@ Todas as contas de demonstração usam a senha `SmartMoney2026`. O próprio
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
 
+## Publicar numa VPS
+
+Um comando, depois de preencher o `.env`:
+
+```bash
+./scripts/vps-up.sh
+```
+
+Antes de rodar, três coisas precisam estar prontas:
+
+1. Docker com Compose v2 instalado e ativo na VPS.
+2. O domínio de `APP_DOMAIN` apontando para o IP da máquina. O certificado é
+   validado pela porta 80, então sem DNS não há HTTPS.
+3. As portas 80 e 443 liberadas no firewall, e **só** elas.
+
+O script confere as variáveis obrigatórias, recusa segredos curtos demais,
+constrói as imagens, aplica as migrations, sobe a stack e no fim verifica duas
+coisas que valem mais do que a configuração no papel: se algum serviço além do
+proxy ficou publicando porta, e se a WAHA de fato recusa uma chamada sem chave.
+
+### Os três arquivos do Compose
+
+| Arquivo | Quando entra | O que faz |
+|---|---|---|
+| `docker-compose.yml` | sempre | define os serviços, sem publicar nenhuma porta |
+| `docker-compose.override.yml` | `docker compose` sem `-f` | publica app, banco e WAHA no host, para desenvolvimento |
+| `docker-compose.prod.yml` | `-f` explícito | acrescenta proxy com HTTPS, agendador e a chave da WAHA |
+
+A base não publica porta nenhuma de propósito. Numa máquina com IP público,
+publicar o Postgres é deixá-lo aberto para a internet, e passar `-f` explícito
+no deploy é o que impede o override de desenvolvimento de entrar junto.
+
+Em produção só o proxy aparece de fora, em 80 e 443. Banco, WAHA, aplicação e
+agendador existem apenas dentro da rede do Compose.
+
+### O agendador
+
+Na Vercel as rotinas vinham do `vercel.json` e rodavam uma vez por dia, limite do
+plano gratuito. Na VPS um container próprio cuida disso, e a frequência passa a
+ser a que faz sentido:
+
+| Rotina | Frequência | Por quê |
+|---|---|---|
+| notificações agendadas | de hora em hora | o agendamento fica pontual |
+| saúde da WAHA | a cada 15 minutos | o alerta só sai na queda, então não repete |
+| backup do banco | 3h15 da manhã | fora do horário de uso |
+
+Os dumps ficam em `backups/`, comprimidos, e o expurgo respeita
+`BACKUP_RETENTION_DAYS`. O dump e a compressão são passos separados de propósito:
+num pipe, o status que sobra é o do `gzip`, e um `pg_dump` interrompido no meio
+deixaria um arquivo íntegro e truncado, com cara de backup bom.
+
+Para acompanhar:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f scheduler
+```
+
+### Restaurar um backup
+
+```bash
+gunzip -c backups/sm-AAAAMMDD-HHMMSS.sql.gz | \
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+  exec -T postgres psql -U postgres -d sm_smart_money
+```
+
+### O que ainda falta para a operação real
+
+O deploy sobe a plataforma, mas duas integrações continuam pendentes de dados que
+só você tem:
+
+- **SMTP da Zoho.** Sem `SMTP_PASSWORD` preenchido, convite e redefinição de
+  senha vão para o log em vez do e-mail, e nenhum membro consegue completar o
+  primeiro acesso.
+- **Número do WhatsApp.** Depois do deploy, abra `/admin/whatsapp` e leia o QR
+  Code. A sessão fica no volume da WAHA e sobrevive a reinício.
+
 ## Publicar na Vercel
 
 A Vercel compila o Next por conta própria e não usa o Docker. Ela hospeda a
@@ -269,21 +346,27 @@ registra a tentativa, então o fluxo completo — incluindo o histórico de disp
 
 ## Rotinas agendadas
 
-Ambas aceitam o header `x-cron-secret` ou `Authorization: Bearer`, este último o
-formato que a Vercel Cron envia:
-
 ```
 GET /api/cron/waha-health    # health check da instância + alerta na queda
 GET /api/cron/agendamentos   # dispara notificações agendadas que venceram
 ```
 
+As duas aceitam o header `x-cron-secret` ou `Authorization: Bearer`, este último
+o formato que a Vercel Cron envia. Quem as chama depende do ambiente: na Vercel,
+os `crons` do `vercel.json`; na VPS, o container `scheduler`. O segredo vai
+sempre em header e nunca na URL, que apareceria no log de acesso do proxy.
+
 ## Estrutura
 
 ```
-├── vercel.json             framework, região e rotinas agendadas
-├── Dockerfile              imagem de produção (multi-stage)
-├── docker-compose.yml      postgres + migrate + app + waha
-├── scripts/local-up.sh     sobe a stack local com um comando
+├── vercel.json                  framework, região e rotinas agendadas
+├── Dockerfile                   imagem de produção (multi-stage)
+├── docker-compose.yml           serviços, sem publicar porta
+├── docker-compose.override.yml  portas no host, só em desenvolvimento
+├── docker-compose.prod.yml      proxy com HTTPS, agendador e chave da WAHA
+├── deploy/                      Caddyfile, imagem e scripts do agendador
+├── scripts/local-up.sh          sobe a stack local com um comando
+├── scripts/vps-up.sh            sobe a stack na VPS e confere a exposição
 └── src/
     ├── proxy.ts                roteamento por papel (edge)
     ├── app/

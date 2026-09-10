@@ -1,0 +1,31 @@
+# Proxy reverso e HTTPS da plataforma.
+#
+# O Caddy pede e renova o certificado sozinho, entao nao ha' certbot nem cron de
+# renovacao para esquecer. Para isso funcionar, o dominio precisa ja' apontar
+# para o IP da VPS antes do primeiro `up`, e as portas 80 e 443 precisam estar
+# livres: a validacao do certificado acontece pela porta 80.
+#
+# Os valores vem do .env: APP_DOMAIN e ACME_EMAIL.
+
+{
+	# Endereco que a Let's Encrypt usa para avisar sobre expiracao.
+	email {$ACME_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		# A sessao vive em cookie marcado como secure. O HSTS impede que um
+		# primeiro acesso em http vaze o caminho antes do redirecionamento.
+		Strict-Transport-Security "max-age=15552000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# O Next ja' define o proprio X-Frame-Options por rota quando precisa.
+		-Server
+	}
+
+	# So a aplicacao e' publicada. O Postgres e a WAHA existem apenas dentro da
+	# rede do compose e nao tem rota de entrada a partir da internet.
+	reverse_proxy app:3000
+}

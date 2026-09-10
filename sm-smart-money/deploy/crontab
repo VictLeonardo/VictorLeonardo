@@ -1,0 +1,15 @@
+# Horarios em America/Sao_Paulo (o TZ vem do compose).
+#
+# A saida vai para o stdout do container, entao aparece em
+# `docker compose logs scheduler`.
+
+# Notificacoes agendadas. Na Vercel isso rodava uma vez por dia por limite de
+# plano; aqui pode ser de hora em hora, e o agendamento fica pontual.
+0 * * * * /usr/local/bin/chamar-cron agendamentos
+
+# Saude da instancia WhatsApp. O alerta por e-mail so sai na transicao de "no ar"
+# para "fora do ar", entao rodar de 15 em 15 minutos avisa rapido sem repetir.
+*/15 * * * * /usr/local/bin/chamar-cron waha-health
+
+# Backup do banco, de madrugada.
+15 3 * * * /usr/local/bin/backup-postgres
