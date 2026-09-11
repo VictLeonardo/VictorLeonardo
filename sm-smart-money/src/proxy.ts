@@ -22,14 +22,25 @@ const PORTAL_PREFIXES = [
   '/comunidade',
   '/perfil',
   '/notificacoes',
+  '/assinatura',
 ];
 
 const PUBLIC_PREFIXES = [
   '/login',
   '/esqueci-senha',
   '/redefinir-senha',
+  // Entrada de quem ainda nao e' membro, e o retorno do checkout. A conferencia
+  // publica vem antes da de portal, entao /assinatura/sucesso escapa da regra
+  // que protege /assinatura.
+  '/assinar',
+  '/assinatura/sucesso',
   '/api/auth',
   '/api/cron',
+  // O Stripe chama sem cookie nenhum; a prova e' a assinatura do corpo.
+  '/api/stripe',
+  // As rotas de assinatura conferem a sessao por conta propria e respondem 401.
+  // Deixar o proxy redirecionar devolveria HTML de login para um fetch.
+  '/api/assinatura',
   '/_next',
   '/favicon',
   '/icon',

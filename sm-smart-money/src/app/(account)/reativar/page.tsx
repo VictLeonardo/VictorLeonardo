@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LifeBuoy } from 'lucide-react';
 import { requireUser } from '@/lib/auth/guards';
+import { stripeConfigured } from '@/lib/env';
+import { AssinarButton } from '@/components/assinar-button';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/portal/logout-button';
@@ -30,12 +32,26 @@ export default async function ReactivatePage() {
           onde parou.
         </p>
       </div>
+      {/* Com cobranca no ar, reativar e' um checkout novo: o webhook devolve o
+          acesso a' conta que ja' existe, com historico e perfil preservados. */}
+      {stripeConfigured ? (
+        <AssinarButton
+          variant="solido"
+          className="w-full max-w-sm text-left"
+          eyebrow="Quer voltar?"
+          texto="Seu histórico e seu perfil continuam guardados."
+          chamada="reative sua assinatura"
+        />
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button asChild>
-          <a href="mailto:contato@smboard.com.br?subject=Reativar%20assinatura%20SM%20Smart%20Money">
-            Falar com a equipe SM
-          </a>
-        </Button>
+        {!stripeConfigured ? (
+          <Button asChild>
+            <a href="mailto:contato@smboard.com.br?subject=Reativar%20assinatura%20SM%20Smart%20Money">
+              Falar com a equipe SM
+            </a>
+          </Button>
+        ) : null}
         {user.profileSlug ? (
           <Button asChild variant="secondary">
             <Link href={`/${user.profileSlug}`}>Ver meu perfil público</Link>

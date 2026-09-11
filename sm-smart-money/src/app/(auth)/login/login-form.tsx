@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
+import { AssinarButton } from '@/components/assinar-button';
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: boolean }) {
   const router = useRouter();
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -114,10 +115,18 @@ export function LoginForm({ next }: { next?: string }) {
         </Button>
       </form>
 
-      <p className="text-xs leading-relaxed text-text-3">
-        O acesso é exclusivo para membros da comunidade. Se você ainda não faz parte, fale com a
-        equipe SM Smart Money.
-      </p>
+      {/* O convite so' aparece no mobile: no desktop ele ja' fecha o painel de
+          marca, e repetir os dois na mesma tela dilui a chamada. */}
+      {podeAssinar ? (
+        <div className="border-t border-line pt-5 lg:hidden">
+          <AssinarButton variant="solido" chamada="assine agora" />
+        </div>
+      ) : (
+        <p className="text-xs leading-relaxed text-text-3">
+          O acesso é exclusivo para membros da comunidade. Se você ainda não faz parte, fale com a
+          equipe SM Smart Money.
+        </p>
+      )}
     </div>
   );
 }

@@ -82,6 +82,68 @@ Todas as contas de demonstração usam a senha `SmartMoney2026`. O próprio
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
 
+## Assinatura e cobrança
+
+Cartão de crédito, mensal, com cancelamento pelo próprio membro. A cobrança
+inteira vive no Stripe; a plataforma guarda só o espelho do que decide acesso.
+
+### O caminho de entrada
+
+O convite fecha o painel de marca da tela de login e leva direto ao checkout do
+Stripe. Não há formulário intermediário e nenhum dado de cartão passa pela
+plataforma.
+
+A conta do membro **não** nasce no clique: ela nasce no webhook, depois do
+pagamento aprovado. Criar antes deixaria uma conta órfã a cada checkout
+abandonado, e abriria cadastro público sem cobrança. Assim que a conta nasce, o
+membro recebe o mesmo e-mail de definição de senha que o convite do admin usa.
+
+### Cancelar sem perder o que já foi pago
+
+Quem cancela **continua ativo até o fim do período pago**. O clique só agenda o
+encerramento no Stripe; quem vira o status é o webhook de fim de ciclo. Enquanto
+isso a tela mostra a data de término e um botão para retomar.
+
+| Evento | `status` do membro | `subscriptionStatus` |
+|---|---|---|
+| checkout aprovado | ATIVO | ATIVA |
+| cancelamento agendado | ATIVO | ATIVA |
+| retomada antes do fim | ATIVO | ATIVA |
+| cartão recusado, Stripe tentando | ATIVO | INADIMPLENTE |
+| tentativas esgotadas | CANCELADO | CANCELADA |
+
+Inadimplente mantém o acesso de propósito: derrubar alguém por uma falha de
+cartão que pode ser temporária custa mais do que os poucos dias de tolerância.
+Quem corta é o Stripe, quando as retentativas acabam.
+
+Trocar cartão e baixar fatura ficam no portal do Stripe. Reconstruir isso aqui
+significaria receber número de cartão na plataforma, o que muda a exigência de
+conformidade sem ganho para quem usa.
+
+### Por que existe uma tabela de eventos
+
+O Stripe reentrega tudo que não respondeu 200, e não garante ordem. Sem a trava
+de idempotência, uma reentrega atrasada de encerramento cancelaria uma assinatura
+que o membro acabou de retomar. A trava é solta quando o tratamento falha, para a
+reentrega poder tentar de novo: perder um evento é pior do que reprocessá-lo.
+
+### O que configurar no Stripe
+
+Um preço recorrente em reais, e um endpoint de webhook apontando para
+`https://SEU_DOMINIO/api/stripe/webhook` inscrito nestes eventos:
+
+```
+checkout.session.completed
+customer.subscription.created
+customer.subscription.updated
+customer.subscription.deleted
+invoice.paid
+invoice.payment_failed
+```
+
+As três variáveis correspondentes estão no `.env.example`. Sem elas a plataforma
+roda inteira, apenas sem o caminho de assinatura.
+
 ## Publicar numa VPS
 
 Um comando, depois de preencher o `.env`:

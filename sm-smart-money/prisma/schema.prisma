@@ -9,6 +9,10 @@
 //     uniforme e novas secoes nao exigem migration.
 //  3. `AuditLog` e `EmailLog`/`WhatsappLog` sao append-only: nenhuma rota da
 //     aplicacao expoe update ou delete sobre eles.
+//  4. A cobranca vive no Stripe; aqui fica so' o espelho. `status` continua sendo
+//     o que decide acesso, e `subscriptionStatus` o que o Stripe reporta. Quem
+//     cancela segue ATIVO ate o fim do periodo pago: e' o webhook de fim de
+//     ciclo que vira o status, nao o clique no botao.
 
 generator client {
   provider = "prisma-client-js"
@@ -45,6 +49,15 @@ enum Tier {
   VIP
 }
 
+/// Espelho do estado da assinatura no Stripe. Nao decide acesso sozinho: quem
+/// decide e' `User.status`, que o webhook atualiza nas transicoes que importam.
+enum SubscriptionStatus {
+  INCOMPLETA
+  ATIVA
+  INADIMPLENTE
+  CANCELADA
+}
+
 model User {
   id           String       @id @default(cuid())
   email        String       @unique
@@ -64,6 +77,17 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  // Espelho da assinatura no Stripe. Nulo em quem entrou por conta do admin
+  // (cortesia, parceiro) ou veio da plataforma antiga sem cartao cadastrado.
+  stripeCustomerId     String?             @unique
+  stripeSubscriptionId String?             @unique
+  subscriptionStatus   SubscriptionStatus?
+  // Fim do periodo ja' pago. Quem cancelou mantem acesso ate esta data.
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean             @default(false)
+
+  payments Payment[]
+
   profile              Profile?
   refreshTokens        RefreshToken[]
   passwordResets       PasswordResetToken[]
@@ -82,6 +106,7 @@ model User {
   @@index([status, plan])
   @@index([joinedAt])
   @@index([name])
+  @@index([subscriptionStatus])
 }
 
 model Profile {
@@ -464,4 +489,40 @@ model Setting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+/// Eventos do Stripe ja' processados.
+///
+/// O Stripe reentrega o mesmo evento quando nao recebe 200, e entrega fora de
+/// ordem. Sem esta tabela, uma reentrega de `subscription.deleted` cancelaria
+/// uma assinatura que o membro acabou de retomar. Append-only, como os logs.
+model StripeEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+
+  @@index([processedAt])
+}
+
+/// Historico de cobranca, alimentado pelos webhooks de fatura.
+///
+/// O Stripe e' a fonte da verdade; isto existe para o admin ver quem pagou o
+/// que sem sair da plataforma, e para o membro ver o proprio historico.
+model Payment {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeInvoice String    @unique
+  // Em centavos, como o Stripe entrega. Guardar o inteiro evita o arredondamento
+  // que apareceria convertendo para real na escrita.
+  amountCents   Int
+  currency      String    @default("brl")
+  status        String
+  description   String?
+  invoiceUrl    String?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }

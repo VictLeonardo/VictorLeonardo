@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { Bell, ExternalLink, LogOut, ShieldCheck, User } from 'lucide-react';
+import { Bell, CreditCard, ExternalLink, LogOut, ShieldCheck, User } from 'lucide-react';
 import { MemberAvatar } from '@/components/ui/avatar';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -67,6 +67,16 @@ export function PortalHeader({
                   >
                     <User className="size-4" aria-hidden="true" />
                     Meu perfil
+                  </Link>
+                </DropdownMenu.Item>
+
+                <DropdownMenu.Item asChild>
+                  <Link
+                    href="/assinatura"
+                    className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text-2 outline-none data-[highlighted]:bg-surface-sunken data-[highlighted]:text-text-1"
+                  >
+                    <CreditCard className="size-4" aria-hidden="true" />
+                    Minha assinatura
                   </Link>
                 </DropdownMenu.Item>
 

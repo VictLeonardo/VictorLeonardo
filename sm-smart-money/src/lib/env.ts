@@ -25,6 +25,11 @@ const schema = z.object({
   WAHA_API_KEY: z.string().optional(),
   WAHA_SESSION: z.string().default('default'),
   CRON_SECRET: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  // Id do preco recorrente no Stripe (price_...). O valor em reais vive la',
+  // nao aqui: mudar o preco da comunidade nao pode exigir um deploy.
+  STRIPE_PRICE_PADRAO: z.string().optional(),
 });
 
 /**
@@ -53,3 +58,15 @@ export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP
 
 /** WAHA e' opcional em desenvolvimento; a UI mostra "não configurada". */
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
+
+/**
+ * A cobranca so' entra em cena com as tres variaveis presentes.
+ *
+ * Sem elas a plataforma funciona inteira, apenas sem o caminho de assinatura:
+ * o CTA de inscricao some da tela de login e as rotas de checkout respondem que
+ * a cobranca nao esta configurada. E' o mesmo criterio do WAHA e do SMTP, para
+ * dev e staging nao precisarem de credencial de pagamento.
+ */
+export const stripeConfigured = Boolean(
+  env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET && env.STRIPE_PRICE_PADRAO,
+);

@@ -31,7 +31,12 @@ export type AuditAction =
   | 'whatsapp.desconectar'
   | 'whatsapp.mensagem'
   | 'template.atualizar'
-  | 'configuracao.atualizar';
+  | 'configuracao.atualizar'
+  // Acoes do proprio membro sobre a assinatura dele. O ator nao e' um admin, e
+  // por isso o registro importa ainda mais: e' o que explica, depois, por que um
+  // acesso caiu numa data especifica.
+  | 'assinatura.cancelar'
+  | 'assinatura.retomar';
 
 export async function recordAudit(params: {
   actor: SessionUser | { id: string; name: string };

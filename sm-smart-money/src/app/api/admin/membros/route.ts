@@ -4,9 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { ensureProfile } from '@/server/profile';
-import { renderEmail, sendMail } from '@/lib/mail';
-import { createOpaqueToken } from '@/lib/auth/tokens';
-import { env } from '@/lib/env';
+import { sendWelcomeEmail } from '@/server/welcome';
 import { normalizePhone } from '@/lib/utils';
 
 const schema = z.object({
@@ -67,30 +65,10 @@ export async function POST(request: Request) {
     metadata: { email: user.email, plan: data.plan, status: data.status },
   });
 
+  // O primeiro acesso e' um link de definicao de senha, nunca uma senha por
+  // e-mail. O mesmo caminho serve ao checkout do Stripe.
   if (data.sendWelcome) {
-    // O primeiro acesso e' um link de definicao de senha — nunca uma senha por e-mail.
-    const token = createOpaqueToken();
-    await prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: token.hash,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
-
-    await sendMail({
-      to: user.email,
-      userId: user.id,
-      template: 'boas-vindas',
-      subject: 'Bem-vindo a SM Smart Money',
-      html: renderEmail({
-        title: 'Seu acesso está pronto',
-        intro: `Ola, ${user.name.split(' ')[0]}. Voce agora faz parte da comunidade SM Smart Money.`,
-        body: '<p>Defina sua senha pelo botão abaixo e comece pelo diagnóstico Smart Money Journey. O link vale por 7 dias.</p>',
-        ctaLabel: 'Definir minha senha',
-        ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/redefinir-senha?token=${token.raw}`,
-      }),
-    });
+    await sendWelcomeEmail(user);
   }
 
   return NextResponse.json({ ok: true, id: user.id });
