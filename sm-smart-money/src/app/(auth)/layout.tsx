@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           chega pelo celular nao fica sem caminho de entrada. */}
       <aside className="relative hidden flex-col bg-brand-panel lg:flex">
         <div className="flex max-h-dvh flex-col gap-9 overflow-y-auto p-10 xl:p-12">
-          <Logo className="[&_span]:text-brand-ink" />
+          <Logo size="lg" priority className="[&_span]:text-brand-ink" />
           <VipPitch mostrarCta={stripeConfigured} />
           <p className="mt-auto pt-2 text-xs text-brand-ink-muted">
             © {new Date().getFullYear()} SM Smart Money. Todos os direitos reservados.
