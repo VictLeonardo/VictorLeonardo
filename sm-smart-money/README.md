@@ -82,6 +82,32 @@ Todas as contas de demonstração usam a senha `SmartMoney2026`. O próprio
 
 `npm run typecheck`, `npm run lint` e `npm run build` passam limpos.
 
+## Identidade visual
+
+A marca SM Partner entra pelos tokens, não pelos componentes: nenhum arquivo de
+interface usa cor literal, então trocar a identidade é trocar valores em
+`globals.css`.
+
+| Papel | Cor | Onde vive |
+|---|---|---|
+| Dominante | verde petróleo `#033334` | painel de marca, superfícies do tema escuro |
+| Base | verde profundo `#02201f` | fundo do tema escuro, tinta do tema claro |
+| Acento | dourado `#c5a670` | botões, selos, série de gráfico no escuro |
+| Apoio | areia `#ddd2ba` | texto sobre fundos escuros |
+
+Tipografia: serif clássico de alto contraste nos títulos (Cormorant Garamond) e
+sans-serif neutro no corpo e na interface (DM Sans).
+
+Toda combinação de tinta e fundo foi medida contra o piso WCAG AA de 4,5:1, e as
+marcas de gráfico contra o piso de 3:1. Três pares não passaram na primeira
+tentativa e foram corrigidos: o texto terciário nos dois temas, e o branco sobre
+o vermelho de perigo no escuro, que media 2,5:1. Por isso existem tokens de tinta
+separados (`--color-danger-ink`, `--color-brand-ink`): quando o fundo muda de
+luminosidade entre os temas, quem escreve sobre ele também precisa mudar.
+
+O painel das telas de acesso usa o verde petróleo, e não o verde profundo, porque
+no tema escuro os dois seriam a mesma cor do canvas e o split da tela sumiria.
+
 ## Assinatura e cobrança
 
 Cartão de crédito, mensal, com cancelamento pelo próprio membro. A cobrança
@@ -399,8 +425,10 @@ serve às notificações, que precisam materializar a lista.
 e trocam de tema sem re-render, e o peso de JS no dashboard conta para o LCP.
 Nenhum gráfico usa eixo duplo — contagem e taxa de churn são apresentadas
 separadamente, porque alinhar duas escalas num mesmo plano inventa correlação.
-A cor de série no tema claro é `#9a7a42`, não o dourado de marca: medido, o
-dourado puro fica em 2,24:1 sobre a superfície clara, abaixo do piso de 3:1.
+A cor de série troca de matiz entre os temas, de propósito: verde petróleo
+aprofundado no claro (9,4:1) e dourado no escuro (7,4:1). O que se preserva é a
+legibilidade sobre cada fundo, não a cor da tinta. O dourado de marca puro ficaria
+em 2,5:1 sobre a superfície clara, abaixo do piso de 3:1 das marcas.
 
 **Sem SMTP ou WAHA configurados, nada quebra.** O envio vai para o console e o log
 registra a tentativa, então o fluxo completo — incluindo o histórico de disparos —

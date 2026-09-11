@@ -110,7 +110,7 @@ export function AudioPlayer({
           type="button"
           onClick={toggle}
           aria-label={playing ? `Pausar ${title}` : `Reproduzir ${title}`}
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-[var(--color-brand-contrast)] transition hover:bg-brand-strong hover:text-white"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-[var(--color-brand-contrast)] transition hover:bg-brand-hover"
         >
           {playing ? (
             <Pause className="size-5" aria-hidden="true" />

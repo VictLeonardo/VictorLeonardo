@@ -8,10 +8,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-brand text-[var(--color-brand-contrast)] hover:bg-brand-strong hover:text-white',
+        primary: 'bg-brand text-[var(--color-brand-contrast)] hover:bg-brand-hover',
         secondary: 'border border-line-strong bg-surface text-text-1 hover:bg-surface-sunken',
         ghost: 'text-text-2 hover:bg-surface-sunken hover:text-text-1',
-        danger: 'bg-danger text-white hover:opacity-90',
+        danger: 'bg-danger text-danger-ink hover:opacity-90',
         link: 'text-brand-strong underline-offset-4 hover:underline',
       },
       size: {

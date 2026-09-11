@@ -10,27 +10,50 @@
 :root {
   color-scheme: light;
 
-  --color-brand: #c8a96e;
-  --color-brand-strong: #9a7a42;
-  --color-brand-soft: #f2e8d5;
-  --color-brand-contrast: #201a0e;
+  /* Dourado da marca. Como acento ele e' exato; para link e foco entra um degrau
+     mais escuro da mesma rampa, porque o dourado puro sobre fundo claro fica em
+     2.5:1 e nao alcanca o piso de texto. */
+  --color-brand: #c5a670;
+  --color-brand-strong: #836739;
+  /* Fundo de hover dos botoes preenchidos. Cada tema anda no sentido que
+     afasta do verde profundo da tinta, entao o contraste sobe no hover em vez
+     de cair: 6.2:1 aqui, 10.6:1 no escuro. */
+  --color-brand-hover: #b8975d;
+  --color-brand-soft: #f0e7d5;
+  --color-brand-contrast: #02201f;
 
-  --color-canvas: #faf8f4;
+  /* O off-white nao e' cinza: puxa para a areia da marca, entao o dourado pousa
+     nele sem o choque de temperatura que um branco neutro criaria. */
+  --color-canvas: #faf7f0;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-surface-sunken: #f3efe7;
+  --color-surface-sunken: #f1ebdf;
 
-  --color-line: #e6dfd2;
-  --color-line-strong: #d3c8b3;
+  --color-line: #e3dccb;
+  --color-line-strong: #cfc4ac;
 
-  --color-text-1: #16150f;
-  --color-text-2: #5b5647;
-  --color-text-3: #8a8474;
+  /* A tinta e' o proprio verde profundo da marca, nao um preto. */
+  --color-text-1: #02201f;
+  --color-text-2: #4a5b58;
+  --color-text-3: #5d6c68;
 
   --color-positive: #2f7d4f;
-  --color-warning: #b07d1a;
+  --color-warning: #9a6b14;
   --color-danger: #b3261e;
-  --color-info: #2a5f8f;
+  --color-info: #1f5d6b;
+  /* O vermelho muda de luminosidade entre os temas, entao quem escreve sobre
+     ele tambem muda: branco da' 6.5:1 aqui, e no escuro daria 2.5:1. */
+  --color-danger-ink: #ffffff;
+
+  /* Painel de marca das telas de acesso. O fundo e' o verde petroleo, que o
+     guia chama de dominante, e nao o verde profundo: assim o painel se destaca
+     do canvas tambem no tema escuro, onde os dois seriam a mesma cor.
+     Os tres valores nao mudam entre temas, porque o painel e' sempre escuro.
+     Medidas sobre #033334: areia 9.2:1, areia atenuada 6.4:1, dourado 5.9:1. */
+  --color-brand-panel: #033334;
+  --color-brand-ink: #ddd2ba;
+  --color-brand-ink-muted: #a3b5b0;
+  --color-brand-hairline: #1f5350;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -38,51 +61,56 @@
   --radius-xl: 22px;
 
 
-  /* Cores de grafico. Medidas com o validador de contraste do design system:
-     #9a7a42 sobre a superficie clara da' 4.0:1, acima do piso de 3:1 exigido
-     para marcas. O dourado de marca puro (#c8a96e) ficaria em 2.24:1 e por isso
-     nao e' usado como serie no tema claro. */
-  --color-chart-1: #9a7a42;
-  --color-chart-1-wash: rgb(154 122 66 / 0.1);
-  --color-chart-muted: #c2b9a6;
-  --color-chart-grid: #ece5d8;
+  /* Serie unica dos graficos. No tema claro ela e' o verde petroleo aprofundado,
+     medido em 9.35:1 sobre a superficie, bem acima do piso de 3:1 das marcas. O
+     dourado da marca ficaria em 2.5:1 e por isso nao serve como serie aqui. */
+  --color-chart-1: #0a4f50;
+  --color-chart-1-wash: rgb(10 79 80 / 0.1);
+  --color-chart-muted: #b9c3bf;
+  --color-chart-grid: #e7e0d1;
 
-  --shadow-card: 0 1px 2px rgb(22 21 15 / 0.05), 0 8px 24px -16px rgb(22 21 15 / 0.25);
-  --shadow-pop: 0 12px 40px -12px rgb(22 21 15 / 0.32);
+  --shadow-card: 0 1px 2px rgb(2 32 31 / 0.06), 0 8px 24px -16px rgb(2 32 31 / 0.3);
+  --shadow-pop: 0 12px 40px -12px rgb(2 32 31 / 0.38);
 }
 
+/* O tema escuro e' onde a marca mora: verde profundo na base, verde petroleo
+   nas superficies, areia no texto e dourado no acento. Nao e' uma inversao do
+   tema claro, e sim os degraus da propria paleta. */
 :root.dark {
   color-scheme: dark;
 
-  --color-brand: #d8bd85;
-  --color-brand-strong: #c8a96e;
-  --color-brand-soft: #2a2318;
-  --color-brand-contrast: #0c0c0a;
+  --color-brand: #d4bb8c;
+  --color-brand-strong: #c5a670;
+  --color-brand-hover: #e0c99e;
+  --color-brand-soft: #0a2e2b;
+  --color-brand-contrast: #02201f;
 
-  --color-canvas: #0c0c0a;
-  --color-surface: #15150f;
-  --color-surface-raised: #1c1c14;
-  --color-surface-sunken: #101009;
+  --color-canvas: #02201f;
+  --color-surface: #033334;
+  --color-surface-raised: #064442;
+  --color-surface-sunken: #011a19;
 
-  --color-line: #2b2a20;
-  --color-line-strong: #3d3b2d;
+  --color-line: #0c3a38;
+  --color-line-strong: #17514d;
 
-  --color-text-1: #f5f1e6;
-  --color-text-2: #b3ad9b;
-  --color-text-3: #837d6c;
+  --color-text-1: #ddd2ba;
+  --color-text-2: #9aada8;
+  --color-text-3: #8b9f99;
 
   --color-positive: #6bbd8a;
   --color-warning: #e0b455;
-  --color-danger: #e0685f;
-  --color-info: #79aede;
+  --color-danger: #ec8a80;
+  --color-info: #7fc3d1;
+  --color-danger-ink: #02201f;
 
 
-  /* O tema escuro nao inverte o tom claro: usa um degrau proprio da mesma rampa,
-     medido em 10.1:1 sobre a superficie escura. */
-  --color-chart-1: #d8bd85;
-  --color-chart-1-wash: rgb(216 189 133 / 0.12);
-  --color-chart-muted: #56513f;
-  --color-chart-grid: #26251c;
+  /* Aqui a serie e' o dourado, que sobre o verde petroleo mede 7.39:1. A troca
+     de matiz entre os temas e' deliberada: o que se preserva e' a legibilidade
+     da marca sobre cada fundo, nao a cor da tinta. */
+  --color-chart-1: #d4bb8c;
+  --color-chart-1-wash: rgb(212 187 140 / 0.14);
+  --color-chart-muted: #3d5b57;
+  --color-chart-grid: #0b3634;
 
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px -16px rgb(0 0 0 / 0.8);
   --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.85);

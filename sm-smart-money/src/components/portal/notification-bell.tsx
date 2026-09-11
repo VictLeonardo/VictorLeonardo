@@ -56,7 +56,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
         >
           <Bell className="size-5" aria-hidden="true" />
           {unread > 0 ? (
-            <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-4 text-white">
+            <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-4 text-danger-ink">
               {unread > 9 ? '9+' : unread}
             </span>
           ) : null}

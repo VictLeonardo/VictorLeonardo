@@ -33,7 +33,7 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
       </span>
 
       <blockquote className="flex flex-col gap-3">
-        <p className="font-display text-3xl leading-tight text-white xl:text-[2.1rem]">
+        <p className="font-display text-3xl leading-tight text-brand-ink xl:text-[2.1rem]">
           &ldquo;Entender o mundo não é ter mais informações, é fazer as perguntas certas.&rdquo;
         </p>
         <footer className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
@@ -41,19 +41,19 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
         </footer>
       </blockquote>
 
-      <p className="text-sm leading-relaxed text-white/70">
+      <p className="text-sm leading-relaxed text-brand-ink-muted">
         Por isso criamos o VIP Lounge SM Partner: um ecossistema exclusivo para empresários,
         investidores, conselheiros e executivos que buscam decisões mais inteligentes e geração
         consistente de valor.
       </p>
 
       <div className="flex flex-col gap-3.5">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-ink-muted">
           Ao participar, você terá acesso a
         </h2>
         <ul className="flex flex-col gap-2.5">
           {BENEFICIOS.map((item) => (
-            <li key={item} className="flex items-start gap-3 text-sm leading-snug text-white/75">
+            <li key={item} className="flex items-start gap-3 text-sm leading-snug text-brand-ink-muted">
               <span aria-hidden="true" className="mt-[7px] size-1.5 shrink-0 rotate-45 bg-brand" />
               {item}
             </li>
@@ -61,13 +61,13 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
         </ul>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-white/10 pt-6">
-        <p className="text-xs leading-relaxed text-white/45">
+      <div className="flex flex-col gap-2 border-t border-brand-hairline pt-6">
+        <p className="text-xs leading-relaxed text-brand-ink-muted">
           O grupo aberto permanece como espaço de conexão da comunidade. O VIP Lounge é o ambiente
           destinado aos membros que desejam aprofundar relacionamentos e conhecimento, e se
           posicionar num ecossistema de alto nível e oportunidades.
         </p>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-ink-muted">
           Vagas limitadas.
         </p>
       </div>

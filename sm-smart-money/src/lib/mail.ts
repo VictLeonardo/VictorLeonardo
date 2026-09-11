@@ -83,8 +83,12 @@ function htmlToText(html: string): string {
 }
 
 /**
- * Layout unico dos e-mails, com as cores da marca. Mantido inline porque muitos
- * clientes de e-mail descartam <style> no head.
+ * Layout unico dos e-mails, com as cores da marca SM Partner.
+ *
+ * Aqui as cores sao literais de proposito: cliente de e-mail nao resolve
+ * variavel CSS, e muitos descartam <style> no head. Os valores acompanham os
+ * tokens do tema claro do globals.css e foram medidos com o mesmo piso de
+ * contraste.
  */
 export function renderEmail(options: {
   title: string;
@@ -97,27 +101,27 @@ export function renderEmail(options: {
   const cta =
     options.ctaLabel && options.ctaUrl
       ? `<tr><td style="padding:8px 0 24px">
-           <a href="${options.ctaUrl}" style="background:#c8a96e;color:#201a0e;text-decoration:none;padding:13px 26px;border-radius:10px;font-weight:600;display:inline-block">${options.ctaLabel}</a>
+           <a href="${options.ctaUrl}" style="background:#c5a670;color:#02201f;text-decoration:none;padding:13px 26px;border-radius:10px;font-weight:600;display:inline-block">${options.ctaLabel}</a>
          </td></tr>`
       : '';
 
-  return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#faf8f4;padding:32px 12px;font-family:'Helvetica Neue',Arial,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;border:1px solid #e6dfd2">
+  return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#faf7f0;padding:32px 12px;font-family:'Helvetica Neue',Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;border:1px solid #e3dccb">
     <tr><td style="padding:28px 32px 0">
-      <p style="margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#9a7a42;font-weight:700">SM Smart Money</p>
+      <p style="margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#836739;font-weight:700">SM Smart Money</p>
     </td></tr>
     <tr><td style="padding:16px 32px 0">
-      <h1 style="margin:0;font-size:24px;line-height:1.25;color:#16150f;font-family:Georgia,serif">${options.title}</h1>
+      <h1 style="margin:0;font-size:24px;line-height:1.25;color:#02201f;font-family:Georgia,serif">${options.title}</h1>
     </td></tr>
     <tr><td style="padding:14px 32px 0">
-      <p style="margin:0;font-size:15px;line-height:1.65;color:#5b5647">${options.intro}</p>
+      <p style="margin:0;font-size:15px;line-height:1.65;color:#4a5b58">${options.intro}</p>
     </td></tr>
-    ${options.body ? `<tr><td style="padding:14px 32px 0"><div style="font-size:15px;line-height:1.65;color:#5b5647">${options.body}</div></td></tr>` : ''}
+    ${options.body ? `<tr><td style="padding:14px 32px 0"><div style="font-size:15px;line-height:1.65;color:#4a5b58">${options.body}</div></td></tr>` : ''}
     <tr><td style="padding:20px 32px 0">
       <table role="presentation" cellpadding="0" cellspacing="0">${cta}</table>
     </td></tr>
     <tr><td style="padding:8px 32px 30px">
-      <p style="margin:0;font-size:12px;line-height:1.6;color:#8a8474">${options.footnote ?? 'Você recebeu este e-mail porque faz parte da comunidade SM Smart Money.'}</p>
+      <p style="margin:0;font-size:12px;line-height:1.6;color:#5d6c68">${options.footnote ?? 'Você recebeu este e-mail porque faz parte da comunidade SM Smart Money.'}</p>
     </td></tr>
   </table>
 </body></html>`;

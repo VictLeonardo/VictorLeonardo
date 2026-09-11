@@ -18,7 +18,7 @@ export function PublicShare({ name, slug }: { name: string; slug: string }) {
     QRCode.toDataURL(`${window.location.origin}/${slug}`, {
       width: 512,
       margin: 1,
-      color: { dark: '#16150f', light: '#ffffff' },
+      color: { dark: '#02201f', light: '#ffffff' },
     })
       .then((dataUrl) => {
         if (active) setQr(dataUrl);
@@ -51,7 +51,7 @@ export function PublicShare({ name, slug }: { name: string; slug: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-[var(--color-brand-contrast)] transition-colors hover:bg-brand-strong hover:text-white"
+        className="inline-flex items-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-[var(--color-brand-contrast)] transition-colors hover:bg-brand-hover"
       >
         <QrCode className="size-4" aria-hidden="true" />
         Cartão digital

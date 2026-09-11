@@ -14,8 +14,14 @@ const config: Config = {
         brand: {
           DEFAULT: 'var(--color-brand)',
           strong: 'var(--color-brand-strong)',
+          hover: 'var(--color-brand-hover)',
           soft: 'var(--color-brand-soft)',
           contrast: 'var(--color-brand-contrast)',
+          // Tinta de quem escreve sobre o painel de marca, em qualquer tema.
+          panel: 'var(--color-brand-panel)',
+          ink: 'var(--color-brand-ink)',
+          'ink-muted': 'var(--color-brand-ink-muted)',
+          hairline: 'var(--color-brand-hairline)',
         },
         canvas: 'var(--color-canvas)',
         surface: {
@@ -35,6 +41,7 @@ const config: Config = {
         positive: 'var(--color-positive)',
         warning: 'var(--color-warning)',
         danger: 'var(--color-danger)',
+        'danger-ink': 'var(--color-danger-ink)',
         info: 'var(--color-info)',
       },
       fontFamily: {

@@ -30,7 +30,7 @@ export function DigitalCard({ slug, name }: { slug: string; name: string }) {
     QRCode.toDataURL(target, {
       width: 512,
       margin: 1,
-      color: { dark: '#16150f', light: '#ffffff' },
+      color: { dark: '#02201f', light: '#ffffff' },
     })
       .then((dataUrl) => {
         if (active) setCard({ qr: dataUrl, url: target });

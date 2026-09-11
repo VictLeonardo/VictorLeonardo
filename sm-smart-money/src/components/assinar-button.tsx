@@ -61,15 +61,15 @@ export function AssinarButton({
           'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
           'disabled:cursor-progress disabled:opacity-70',
           variant === 'painel'
-            ? 'border border-white/15 bg-white/[0.04] hover:border-brand/50 hover:bg-white/[0.07]'
-            : 'bg-brand-strong text-white hover:bg-brand-strong/90',
+            ? 'border border-brand-hairline bg-brand-hairline/40 hover:border-brand/50 hover:bg-brand-hairline/70'
+            : 'bg-brand text-brand-contrast hover:bg-brand/90',
         )}
       >
         <span className="flex flex-col gap-1">
           <span
             className={cn(
               'text-[10px] font-semibold uppercase tracking-[0.16em]',
-              variant === 'painel' ? 'text-white/45' : 'text-white/70',
+              variant === 'painel' ? 'text-brand-ink-muted' : 'text-brand-ink-muted',
             )}
           >
             {eyebrow}
@@ -77,7 +77,7 @@ export function AssinarButton({
           <span
             className={cn(
               'text-sm leading-snug',
-              variant === 'painel' ? 'text-white/80' : 'text-white',
+              variant === 'painel' ? 'text-brand-ink-muted' : 'text-brand-contrast',
             )}
           >
             {texto}{' '}
@@ -90,7 +90,7 @@ export function AssinarButton({
           <ArrowRight
             className={cn(
               'size-5 shrink-0 transition-transform group-hover:translate-x-0.5',
-              variant === 'painel' ? 'text-brand' : 'text-white',
+              variant === 'painel' ? 'text-brand' : 'text-brand-contrast',
             )}
             aria-hidden="true"
           />
