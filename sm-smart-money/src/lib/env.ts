@@ -1,6 +1,23 @@
 import { z } from 'zod';
 
 /**
+ * URL publica da plataforma, base de todo link absoluto que sai daqui:
+ * redefinicao de senha, convite, retorno do checkout, host do cartao virtual.
+ *
+ * O default de localhost serve ao desenvolvimento, mas em producao ele e'
+ * veneno silencioso: nao derruba nada, apenas manda o membro para uma maquina
+ * que nao e' a dele. O e-mail de recuperacao vira link morto e quem paga volta
+ * do Stripe para lugar nenhum -- sem erro em log nenhum.
+ *
+ * Por isso a Vercel entra como segunda fonte antes do localhost:
+ * `VERCEL_PROJECT_PRODUCTION_URL` carrega o dominio estavel do projeto, sem
+ * esquema. Um deploy que esqueceu a variavel ainda acerta o destino certo.
+ */
+const urlPublicaPadrao = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : 'http://localhost:3000';
+
+/**
  * Validacao das variaveis de ambiente no boot. Falhar aqui e' melhor do que
  * descobrir um segredo ausente no meio de um disparo de e-mail em massa.
  */
@@ -10,7 +27,7 @@ const schema = z.object({
   AUTH_ACCESS_MINUTES: z.coerce.number().int().positive().default(15),
   AUTH_REFRESH_DAYS: z.coerce.number().int().positive().default(7),
   AUTH_REMEMBER_DAYS: z.coerce.number().int().positive().default(30),
-  NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
+  NEXT_PUBLIC_APP_URL: z.string().url().default(urlPublicaPadrao),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
   SMTP_SECURE: z
@@ -52,6 +69,20 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+/**
+ * Producao apontando para localhost e' erro de configuracao, nao de codigo.
+ *
+ * O aviso vai para o log em vez de abortar o boot porque o proprio `next build`
+ * importa este modulo: derrubar o build por causa de uma variavel que so' existe
+ * em runtime trocaria um problema por outro, e a imagem Docker nem chegaria a
+ * ser gerada.
+ */
+if (process.env.NODE_ENV === 'production' && env.NEXT_PUBLIC_APP_URL.includes('localhost')) {
+  console.warn(
+    '[env] NEXT_PUBLIC_APP_URL ausente: links de e-mail e o retorno do Stripe vao apontar para localhost.',
+  );
+}
 
 /** O envio real so acontece quando o SMTP esta completamente configurado. */
 export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD);
