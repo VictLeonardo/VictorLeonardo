@@ -119,9 +119,19 @@ export function publicBadge(user: { tier: Tier; isPartner: boolean }): string {
   return 'MEMBRO ESTRATÉGICO';
 }
 
-/** Valor mensal por plano, usado para estimar o MRR no dashboard admin. */
+/**
+ * Valor mensal por plano, para o MRR estimado do dashboard admin.
+ *
+ * Isto e' fallback, nao fonte. O preco do plano padrao vive no Stripe e o
+ * dashboard le' de la' (`precoMensalPadrao`); estes numeros so' entram em cena
+ * quando a cobranca nao esta configurada, como em desenvolvimento.
+ *
+ * Cortesia e' zero por definicao. O plano com desconto e' negociado caso a caso
+ * e nao passa pelo Stripe, entao continua sendo um numero de referencia -- e
+ * ainda e' o numero herdado da plataforma antiga, nao o da cobranca atual.
+ */
 export const PLAN_MONTHLY_VALUE: Record<Plan, number> = {
-  PADRAO: 497,
+  PADRAO: 37.9,
   COM_DESCONTO: 347,
   CORTESIA: 0,
 };

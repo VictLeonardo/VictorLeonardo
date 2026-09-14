@@ -1,6 +1,8 @@
 import 'server-only';
+import type { Plan } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { PLAN_MONTHLY_VALUE } from '@/lib/domain';
+import { precoMensalPadrao } from '@/lib/stripe';
 
 /**
  * Consultas do dashboard analitico do admin (G03). Substituem os 4 numeros
@@ -32,7 +34,7 @@ export function resolvePeriod(
 }
 
 export async function memberKpis() {
-  const [total, ativos, cancelados, pendentes, planos] = await Promise.all([
+  const [total, ativos, cancelados, pendentes, planos, precoPadrao] = await Promise.all([
     prisma.user.count({ where: { role: 'MEMBER' } }),
     prisma.user.count({ where: { role: 'MEMBER', status: 'ATIVO' } }),
     prisma.user.count({ where: { role: 'MEMBER', status: 'CANCELADO' } }),
@@ -42,13 +44,16 @@ export async function memberKpis() {
       where: { role: 'MEMBER', status: 'ATIVO' },
       _count: { _all: true },
     }),
+    precoMensalPadrao(),
   ]);
 
-  // MRR estimado: soma do valor de tabela de cada plano ativo. Cortesia vale 0.
-  const mrr = planos.reduce(
-    (sum, row) => sum + PLAN_MONTHLY_VALUE[row.plan] * row._count._all,
-    0,
-  );
+  // MRR estimado. Quem paga pela plataforma cai no plano padrao, e esse vale o
+  // que o Stripe cobra hoje, nao um numero escrito no codigo. Cortesia vale 0 e
+  // o desconto e' negociado fora do Stripe, entao ambos seguem a tabela.
+  const valorDoPlano = (plan: Plan) =>
+    plan === 'PADRAO' && precoPadrao !== null ? precoPadrao : PLAN_MONTHLY_VALUE[plan];
+
+  const mrr = planos.reduce((sum, row) => sum + valorDoPlano(row.plan) * row._count._all, 0);
 
   return { total, ativos, cancelados, pendentes, mrr, planos };
 }
