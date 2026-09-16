@@ -30,7 +30,12 @@ const schema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default(urlPublicaPadrao),
   // Convite do grupo de WhatsApp. Entra no e-mail de boas-vindas e no rodape da
   // comunidade; ausente, os dois simplesmente nao mostram o convite.
-  NEXT_PUBLIC_WHATSAPP_GROUP_URL: z.string().url().optional(),
+  //
+  // Sem o prefixo NEXT_PUBLIC de proposito: o link e' o que a assinatura entrega
+  // a quem pagou, e um nome que diz "pode ir para o navegador" convida a
+  // vaza-lo na tela de login para quem nunca pagou. So' o servidor le' este
+  // valor.
+  WHATSAPP_GROUP_URL: z.string().url().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
   // Ausente precisa continuar ausente: quem decide o modo e' a porta, no mailer.

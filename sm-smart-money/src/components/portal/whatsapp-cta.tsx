@@ -6,7 +6,7 @@ import { env } from '@/lib/env';
  * rodape da comunidade — presente, mas nao como porta de entrada.
  */
 export function WhatsappCta() {
-  const url = env.NEXT_PUBLIC_WHATSAPP_GROUP_URL;
+  const url = env.WHATSAPP_GROUP_URL;
   if (!url) return null;
 
   return (

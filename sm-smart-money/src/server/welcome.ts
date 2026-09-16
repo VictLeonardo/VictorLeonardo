@@ -52,11 +52,11 @@ export async function sendWelcomeEmail(
       // O grupo e' parte do que a assinatura entrega, e ate' agora so' aparecia
       // dentro do portal -- o membro precisava ja' ter entrado para encontrar o
       // que deveria receber junto com o acesso.
-      ...(env.NEXT_PUBLIC_WHATSAPP_GROUP_URL
+      ...(env.WHATSAPP_GROUP_URL
         ? {
             aside: {
               label: 'Entrar no grupo de WhatsApp',
-              url: env.NEXT_PUBLIC_WHATSAPP_GROUP_URL,
+              url: env.WHATSAPP_GROUP_URL,
               note: 'Notícias selecionadas e análises comentadas por Júlio Damião, no canal do dia a dia da comunidade.',
             },
           }
