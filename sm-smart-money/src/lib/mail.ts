@@ -25,10 +25,15 @@ let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
 function getTransporter() {
   if (!mailConfigured) return null;
   if (!transporter) {
+    // A porta decide o modo quando ninguem disse: 465 e' TLS implicito, enquanto
+    // 587 e 25 conectam em claro e sobem para TLS com STARTTLS. Errar esse par
+    // nao da' erro de credencial -- da' timeout, que manda procurar no lugar
+    // errado.
+    const porta = env.SMTP_PORT ?? 465;
     transporter = nodemailer.createTransport({
       host: env.SMTP_HOST,
-      port: env.SMTP_PORT ?? 465,
-      secure: env.SMTP_SECURE ?? true,
+      port: porta,
+      secure: env.SMTP_SECURE ?? porta === 465,
       auth: { user: env.SMTP_USER!, pass: env.SMTP_PASSWORD! },
     });
   }

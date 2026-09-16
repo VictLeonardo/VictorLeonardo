@@ -30,10 +30,13 @@ const schema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default(urlPublicaPadrao),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
+  // Ausente precisa continuar ausente: quem decide o modo e' a porta, no mailer.
+  // Transformar direto para boolean fazia a variavel nao definida virar `false`,
+  // e um `?? true` la' na frente nunca entrava em acao.
   SMTP_SECURE: z
     .string()
     .optional()
-    .transform((v) => v === 'true'),
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().default('SM Smart Money <contato@smboard.com.br>'),
