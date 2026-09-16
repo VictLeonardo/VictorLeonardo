@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { PrismaClient, type MemberStatus, type Plan } from '@prisma/client';
-import { profileSlugFromName } from '../src/lib/utils';
+import { profileSlugFromName, telefoneBrasileiro } from '../src/lib/utils';
 
 /**
  * Importa para a plataforma os membros exportados do sistema anterior.
@@ -28,13 +28,6 @@ import { profileSlugFromName } from '../src/lib/utils';
  */
 
 const prisma = new PrismaClient();
-
-/** DDDs que existem no Brasil. Serve para separar telefone de campo preenchido errado. */
-const DDDS = new Set([
-  11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38, 41, 42,
-  43, 44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 73, 74,
-  75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
-]);
 
 const PLANOS: Record<string, Plan> = {
   'padrão': 'PADRAO',
@@ -115,32 +108,6 @@ function ajustaCaixa(nome: string): string {
     .split(/\s+/)
     .map((p, i) => (i > 0 && PARTICULAS.has(p) ? p : p.charAt(0).toUpperCase() + p.slice(1)))
     .join(' ');
-}
-
-/**
- * Telefone no formato que a WAHA usa: 55 + DDD + numero.
- *
- * Devolve nulo quando o campo nao e' um telefone brasileiro plausivel. O
- * `formatPhone` da interface remove o 55 para exibir, e a WAHA monta
- * `<numero>@c.us` -- os dois dependem desse formato.
- */
-function normalizaTelefone(bruto: string): { valor: string | null; motivo?: string } {
-  const d = bruto.replace(/\D/g, '');
-  if (!d) return { valor: null };
-
-  const local = d.startsWith('55') && d.length > 11 ? d.slice(2) : d;
-
-  if (local.length !== 10 && local.length !== 11) {
-    return { valor: null, motivo: `${local.length} dígitos (esperado 10 ou 11)` };
-  }
-  if (!DDDS.has(Number(local.slice(0, 2)))) {
-    return { valor: null, motivo: `DDD ${local.slice(0, 2)} não existe` };
-  }
-  if (local.length === 11 && local[2] !== '9') {
-    return { valor: null, motivo: 'celular de 11 dígitos deveria ter 9 após o DDD' };
-  }
-
-  return { valor: `55${local}` };
 }
 
 /** Data no formato brasileiro. Meio-dia UTC para nenhum fuso puxar para o dia anterior. */
@@ -241,7 +208,7 @@ async function main() {
       avisos.push(`e-mail em minúscula: "${(l[iEmail] ?? '').trim()}" -> "${email}"`);
     }
 
-    const tel = normalizaTelefone(l[iTel] ?? '');
+    const tel = telefoneBrasileiro(l[iTel]);
     if (tel.motivo) {
       avisos.push(`telefone descartado (${nome}): "${(l[iTel] ?? '').trim()}" — ${tel.motivo}`);
     }

@@ -122,6 +122,47 @@ export function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, '');
 }
 
+/** DDDs que existem no Brasil. Separa telefone de campo preenchido errado. */
+const DDDS = new Set([
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38, 41, 42,
+  43, 44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 73, 74,
+  75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+]);
+
+/**
+ * Telefone brasileiro no formato que a WAHA usa: 55 + DDD + numero.
+ *
+ * Devolve nulo, com motivo, quando o valor nao e' um telefone plausivel. Isso e'
+ * deliberado: guardar um numero "quase certo" faz a comunidade mandar mensagem
+ * para o celular de um estranho, e e' pior do que nao ter numero nenhum.
+ *
+ * Vive aqui, e nao no importador onde nasceu, porque o telefone passou a entrar
+ * por dois caminhos -- a planilha da migracao e o checkout do Stripe -- e duas
+ * nocoes diferentes de "valido" divergiriam na primeira correcao.
+ */
+export function telefoneBrasileiro(bruto: string | null | undefined): {
+  valor: string | null;
+  motivo?: string;
+} {
+  const digitos = normalizePhone(bruto ?? '');
+  if (!digitos) return { valor: null };
+
+  // O 55 inicial so' e' codigo de pais quando sobra numero demais para ser DDD.
+  const local = digitos.startsWith('55') && digitos.length > 11 ? digitos.slice(2) : digitos;
+
+  if (local.length !== 10 && local.length !== 11) {
+    return { valor: null, motivo: `${local.length} dígitos (esperado 10 ou 11)` };
+  }
+  if (!DDDS.has(Number(local.slice(0, 2)))) {
+    return { valor: null, motivo: `DDD ${local.slice(0, 2)} não existe` };
+  }
+  if (local.length === 11 && local[2] !== '9') {
+    return { valor: null, motivo: 'celular de 11 dígitos deveria ter 9 após o DDD' };
+  }
+
+  return { valor: `55${local}` };
+}
+
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return '—';
   const digits = normalizePhone(phone);

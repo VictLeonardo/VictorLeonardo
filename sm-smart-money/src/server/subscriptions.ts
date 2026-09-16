@@ -3,6 +3,7 @@ import type Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { stripe, traduzStatus, fimDoPeriodo, idDe } from '@/lib/stripe';
+import { telefoneBrasileiro } from '@/lib/utils';
 import { ensureProfile } from '@/server/profile';
 import { sendWelcomeEmail } from '@/server/welcome';
 
@@ -82,6 +83,11 @@ export async function criarCheckoutDeAssinatura(params: {
     // O que for conhecido viaja como metadado e o webhook recupera na criacao da
     // conta. O que nao for, o Stripe coleta e devolve em `customer_details`.
     metadata: { ...(nome ? { nome } : {}), ...(email ? { email } : {}) },
+    // O WhatsApp e' parte do que a comunidade entrega, e o numero e' a unica
+    // chave que liga um pedido de entrada no grupo a alguem que pagou. Sem
+    // coletar aqui, o membro novo nasce sem telefone e nenhuma automacao de
+    // grupo tem contra o que casar.
+    phone_number_collection: { enabled: true },
     allow_promotion_codes: true,
     success_url: `${env.NEXT_PUBLIC_APP_URL}/assinatura/sucesso`,
     cancel_url: `${env.NEXT_PUBLIC_APP_URL}/assinar`,
@@ -218,6 +224,10 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
   const nome = (sessao.metadata?.nome || sessao.customer_details?.name || email.split('@')[0]).trim();
   const customerId = idDe(sessao.customer);
   const assinaturaId = idDe(sessao.subscription);
+  // O Stripe devolve em E.164 (+5511...). Validar aqui, e nao so' limpar, evita
+  // guardar um numero implausivel que depois mandaria mensagem da comunidade
+  // para o celular de um estranho.
+  const telefone = telefoneBrasileiro(sessao.customer_details?.phone).valor;
 
   const existente = await prisma.user.findUnique({
     where: { email },
@@ -236,6 +246,10 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
         stripeSubscriptionId: assinaturaId,
         subscriptionStatus: 'ATIVA',
         cancelAtPeriodEnd: false,
+        // So' sobrescreve com numero valido: o que a pessoa acabou de digitar e'
+        // a declaracao mais recente, mas um valor recusado nao pode apagar o
+        // telefone que ja' estava certo.
+        ...(telefone ? { phone: telefone } : {}),
       },
     });
 
@@ -250,6 +264,7 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
     data: {
       name: nome,
       email,
+      phone: telefone,
       role: 'MEMBER',
       status: 'ATIVO',
       plan: 'PADRAO',
