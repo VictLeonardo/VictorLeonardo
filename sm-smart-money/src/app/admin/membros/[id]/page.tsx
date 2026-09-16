@@ -13,6 +13,7 @@ import { BarList } from '@/components/charts/bar-list';
 import { MemberActions } from '@/components/admin/member-actions';
 import { MemberEditForm } from '@/components/admin/member-edit-form';
 import { CONTENT_TYPE_LABELS, JOURNEY_CATEGORY_LABELS, publicBadge } from '@/lib/domain';
+import { toLocalInput } from '@/lib/datetime';
 import { formatDate, formatPhone } from '@/lib/utils';
 import type { JourneyCategory } from '@prisma/client';
 
@@ -83,6 +84,9 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
             member={{
               id: member.id,
               name: member.name,
+              email: member.email,
+              // O campo `date` espera a data como o admin a le', em Brasilia.
+              joinedAt: toLocalInput(member.joinedAt).slice(0, 10),
               phone: member.phone,
               jobTitle: member.jobTitle,
               company: member.company,

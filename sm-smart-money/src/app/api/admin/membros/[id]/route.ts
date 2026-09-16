@@ -4,9 +4,17 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser, revokeAllSessions } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { normalizePhone } from '@/lib/utils';
+import { fromLocalInput } from '@/lib/datetime';
+import { stripe } from '@/lib/stripe';
+import { stripeConfigured } from '@/lib/env';
 
 const schema = z.object({
   name: z.string().trim().min(3).max(120).optional(),
+  // O e-mail e' identidade de login, chave unica e canal de contato. Editavel
+  // porque membro troca de e-mail, e ate' agora isso so' se resolvia no banco.
+  email: z.string().trim().toLowerCase().email('E-mail inválido').max(160).optional(),
+  // Veio da planilha da migracao e pode estar errado. Chega como "2026-09-16".
+  joinedAt: z.string().trim().optional().or(z.literal('')),
   phone: z.string().trim().max(30).optional().or(z.literal('')),
   jobTitle: z.string().trim().max(120).optional().or(z.literal('')),
   company: z.string().trim().max(120).optional().or(z.literal('')),
@@ -30,11 +38,37 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const current = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, name: true, status: true, plan: true },
+    select: { id: true, name: true, email: true, status: true, plan: true, stripeCustomerId: true },
   });
   if (!current) return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
 
   const data = parsed.data;
+  const novoEmail = data.email && data.email !== current.email ? data.email : null;
+
+  if (novoEmail) {
+    const ocupado = await prisma.user.findUnique({ where: { email: novoEmail }, select: { id: true } });
+    if (ocupado) {
+      return NextResponse.json({ error: 'Já existe um membro com esse e-mail.' }, { status: 409 });
+    }
+
+    // O Stripe precisa mudar junto, e antes. O webhook de checkout encontra a
+    // conta pelo e-mail que o Stripe informa: deixar os dois divergentes faria a
+    // proxima cobranca criar uma conta duplicada em vez de reconhecer esta.
+    //
+    // Falhar aqui aborta a edicao inteira de proposito. Melhor o admin tentar de
+    // novo do que os dois lados ficarem fora de sincronia sem ninguem perceber.
+    if (current.stripeCustomerId && stripeConfigured) {
+      try {
+        await stripe().customers.update(current.stripeCustomerId, { email: novoEmail });
+      } catch (error) {
+        console.error('[membro] falha ao atualizar e-mail no Stripe', error);
+        return NextResponse.json(
+          { error: 'Não foi possível atualizar o e-mail no Stripe. Nada foi alterado.' },
+          { status: 502 },
+        );
+      }
+    }
+  }
   const becomingCanceled = data.status === 'CANCELADO' && current.status !== 'CANCELADO';
   const beingReactivated = data.status === 'ATIVO' && current.status === 'CANCELADO';
 
@@ -42,6 +76,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     where: { id },
     data: {
       ...(data.name ? { name: data.name } : {}),
+      ...(novoEmail ? { email: novoEmail } : {}),
+      ...(data.joinedAt ? { joinedAt: fromLocalInput(data.joinedAt) } : {}),
       ...(data.phone !== undefined ? { phone: data.phone ? normalizePhone(data.phone) : null } : {}),
       ...(data.jobTitle !== undefined ? { jobTitle: data.jobTitle || null } : {}),
       ...(data.company !== undefined ? { company: data.company || null } : {}),
@@ -68,8 +104,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     entity: 'user',
     entityId: id,
     metadata: {
-      antes: { status: current.status, plan: current.plan },
-      depois: { status: updated.status, plan: updated.plan },
+      antes: { status: current.status, plan: current.plan, ...(novoEmail ? { email: current.email } : {}) },
+      depois: { status: updated.status, plan: updated.plan, ...(novoEmail ? { email: novoEmail } : {}) },
     },
   });
 

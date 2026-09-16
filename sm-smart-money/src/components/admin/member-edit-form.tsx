@@ -17,6 +17,9 @@ export function MemberEditForm({
   member: {
     id: string;
     name: string;
+    email: string;
+    /** Hora de parede de Brasilia, no formato do campo `date`. */
+    joinedAt: string;
     phone: string | null;
     jobTitle: string | null;
     company: string | null;
@@ -44,6 +47,8 @@ export function MemberEditForm({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: data.get('name'),
+        email: data.get('email'),
+        joinedAt: data.get('joinedAt'),
         phone: data.get('phone'),
         jobTitle: data.get('jobTitle'),
         company: data.get('company'),
@@ -86,6 +91,12 @@ export function MemberEditForm({
             <Field label="Nome completo" htmlFor="edit-name" required className="sm:col-span-2">
               <Input id="edit-name" name="name" defaultValue={member.name} required />
             </Field>
+            <Field label="E-mail" htmlFor="edit-email" required className="sm:col-span-2">
+              <Input id="edit-email" name="email" type="email" defaultValue={member.email} required />
+              <p className="mt-1 text-xs text-text-3">
+                É o login do membro. Ao mudar, o cadastro no Stripe muda junto.
+              </p>
+            </Field>
             <Field label="Cargo" htmlFor="edit-job">
               <Input id="edit-job" name="jobTitle" defaultValue={member.jobTitle ?? ''} />
             </Field>
@@ -94,6 +105,9 @@ export function MemberEditForm({
             </Field>
             <Field label="WhatsApp" htmlFor="edit-phone">
               <Input id="edit-phone" name="phone" defaultValue={member.phone ?? ''} />
+            </Field>
+            <Field label="Data de entrada" htmlFor="edit-joined">
+              <Input id="edit-joined" name="joinedAt" type="date" defaultValue={member.joinedAt} />
             </Field>
             <Field label="Plano" htmlFor="edit-plan">
               <Select id="edit-plan" name="plan" defaultValue={member.plan}>
