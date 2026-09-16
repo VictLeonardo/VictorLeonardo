@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
 import { pendingProfileMembers, inviteHistory } from '@/server/invites';
+import { pendingFirstAccessMembers, firstAccessHistory } from '@/server/first-access';
+import { DIAS_DE_VALIDADE } from '@/server/welcome';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NotificationComposer } from '@/components/admin/notification-composer';
-import { InvitePanel } from '@/components/admin/invite-panel';
+import { DispatchPanel } from '@/components/admin/dispatch-panel';
+import { KeyRound, MailPlus } from 'lucide-react';
 import { PLAN_LABELS } from '@/lib/domain';
 import { formatDate } from '@/lib/utils';
 
@@ -22,7 +25,7 @@ const AUDIENCE_LABEL = {
 export default async function AdminNotificationsPage() {
   await requireAdmin('/admin/notificacoes');
 
-  const [notifications, pending, history] = await Promise.all([
+  const [notifications, semPerfil, historicoPerfil, semAcesso, historicoAcesso] = await Promise.all([
     prisma.notification.findMany({
       orderBy: { createdAt: 'desc' },
       take: 25,
@@ -40,41 +43,73 @@ export default async function AdminNotificationsPage() {
     }),
     pendingProfileMembers(),
     inviteHistory(),
+    pendingFirstAccessMembers(),
+    firstAccessHistory(),
   ]);
+
+  // O historico chega igual dos dois lados; so' a serializacao das datas muda.
+  const emLote = (lotes: Awaited<ReturnType<typeof inviteHistory>>) =>
+    lotes.map((lote) => ({ ...lote, sentAt: lote.sentAt.toISOString() }));
 
   return (
     <div className="space-y-6">
       <SectionHeader
         eyebrow="Comunicação"
         title="Notificações e convites"
-        description="Avisos in-app para os membros e convites de ativação de perfil público."
+        description="Avisos in-app, primeiro acesso de quem ainda não tem senha e convites de perfil público."
       />
 
       <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
         <NotificationComposer />
 
-        <InvitePanel
-          members={pending.map((m) => ({
-            id: m.id,
-            name: m.name,
-            email: m.email,
-            jobTitle: m.jobTitle,
-            slug: m.profile?.slug ?? null,
-            inviteSentAt: m.profile?.inviteSentAt?.toISOString() ?? null,
-          }))}
-          history={history.map((batch) => ({
-            batchId: batch.batchId,
-            sentAt: batch.sentAt.toISOString(),
-            total: batch.total,
-            ok: batch.ok,
-            failed: batch.failed,
-            recipients: batch.recipients.map((r) => ({
-              to: r.to,
-              status: r.status,
-              error: r.error,
-            })),
-          }))}
-        />
+        <div className="space-y-5">
+          <DispatchPanel
+            titulo="Primeiro acesso"
+            Icone={KeyRound}
+            endpoint="/api/admin/primeiro-acesso"
+            acao="Enviar primeiro acesso"
+            substantivo={{ singular: 'e-mail', plural: 'e-mails' }}
+            vazio="Todos os membros ativos já definiram senha."
+            confirmacao={`Cada membro selecionado recebe um link de definição de senha válido por ${DIAS_DE_VALIDADE} dias. O resultado por destinatário fica registrado no histórico.`}
+            previa={{
+              assunto: 'Bem-vindo à SM Smart Money',
+              corpo: `Olá, [primeiro nome]. Você agora faz parte da comunidade SM Smart Money. Defina sua senha pelo botão abaixo e comece pelo diagnóstico Smart Money Journey. O link vale por ${DIAS_DE_VALIDADE} dias.`,
+              cta: 'Definir minha senha',
+            }}
+            destinatarios={semAcesso.map((m) => ({
+              id: m.id,
+              name: m.name,
+              email: m.email,
+              nota: m.ultimoEnvio ? `Último envio: ${formatDate(m.ultimoEnvio, true)}` : null,
+            }))}
+            historico={emLote(historicoAcesso)}
+          />
+
+          <DispatchPanel
+            titulo="Convites de perfil público"
+            Icone={MailPlus}
+            endpoint="/api/admin/convites"
+            acao="Disparar convites"
+            substantivo={{ singular: 'convite', plural: 'convites' }}
+            vazio="Todos os membros ativos já tem perfil público ativado."
+            confirmacao="Cada membro selecionado recebe o e-mail abaixo. O resultado por destinatário fica registrado no histórico."
+            previa={{
+              assunto: 'Ative seu perfil de Membro Estratégico',
+              corpo:
+                'Olá, [primeiro nome]. Cada membro da SM Smart Money tem um endereço próprio na comunidade — o seu já está reservado. Ative o perfil para aparecer no diretório de membros e compartilhar seu cartão digital.',
+              cta: 'Ativar meu perfil',
+            }}
+            destinatarios={semPerfil.map((m) => ({
+              id: m.id,
+              name: m.name,
+              email: m.email,
+              nota: m.profile?.inviteSentAt
+                ? `Último convite: ${formatDate(m.profile.inviteSentAt)}`
+                : null,
+            }))}
+            historico={emLote(historicoPerfil)}
+          />
+        </div>
       </div>
 
       <Card>

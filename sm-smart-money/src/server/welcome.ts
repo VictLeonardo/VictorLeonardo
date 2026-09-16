@@ -1,7 +1,7 @@
 import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
-import { renderEmail, sendMail } from '@/lib/mail';
+import { renderEmail, sendMail, type MailResult } from '@/lib/mail';
 import { createOpaqueToken } from '@/lib/auth/tokens';
 
 /**
@@ -16,12 +16,17 @@ import { createOpaqueToken } from '@/lib/auth/tokens';
  * unico, com validade de sete dias.
  */
 export const DIAS_DE_VALIDADE = 7;
+export const WELCOME_TEMPLATE = 'boas-vindas';
 
-export async function sendWelcomeEmail(member: {
-  id: string;
-  name: string;
-  email: string;
-}): Promise<void> {
+/**
+ * `batchId` agrupa o envio no historico quando ele faz parte de um disparo em
+ * massa. O retorno deixou de ser vazio para o lote saber contar acerto e falha
+ * sem reconsultar o EmailLog.
+ */
+export async function sendWelcomeEmail(
+  member: { id: string; name: string; email: string },
+  opts?: { batchId?: string },
+): Promise<MailResult> {
   const token = createOpaqueToken();
 
   await prisma.passwordResetToken.create({
@@ -32,10 +37,11 @@ export async function sendWelcomeEmail(member: {
     },
   });
 
-  await sendMail({
+  return sendMail({
     to: member.email,
     userId: member.id,
-    template: 'boas-vindas',
+    template: WELCOME_TEMPLATE,
+    batchId: opts?.batchId,
     subject: 'Bem-vindo à SM Smart Money',
     html: renderEmail({
       title: 'Seu acesso está pronto',

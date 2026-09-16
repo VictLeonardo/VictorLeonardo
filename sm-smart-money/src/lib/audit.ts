@@ -17,6 +17,8 @@ export type AuditAction =
   | 'membro.email_manual'
   | 'perfil.convite_enviar'
   | 'perfil.convite_lote'
+  | 'membro.primeiro_acesso'
+  | 'membro.primeiro_acesso_lote'
   | 'conteudo.criar'
   | 'conteudo.atualizar'
   | 'conteudo.publicar'

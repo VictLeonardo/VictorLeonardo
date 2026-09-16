@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { renderEmail, sendMail } from '@/lib/mail';
+import { batchHistory } from '@/server/dispatch';
 
 /**
  * Convites de ativacao de perfil publico (G06). O disparo em massa da plataforma
@@ -85,37 +86,7 @@ export async function sendInvites(userIds: string[]) {
   return { batchId, sent, failed, total: members.length };
 }
 
-/** Historico de disparos, agrupado por lote. */
+/** Historico dos convites de perfil, agrupado por lote. */
 export async function inviteHistory(take = 10) {
-  const logs = await prisma.emailLog.findMany({
-    where: { template: INVITE_TEMPLATE, batchId: { not: null } },
-    orderBy: { sentAt: 'desc' },
-    take: 500,
-    select: { batchId: true, to: true, status: true, sentAt: true, error: true },
-  });
-
-  const batches = new Map<
-    string,
-    { batchId: string; sentAt: Date; total: number; ok: number; failed: number; recipients: typeof logs }
-  >();
-
-  for (const log of logs) {
-    const key = log.batchId!;
-    const existing = batches.get(key) ?? {
-      batchId: key,
-      sentAt: log.sentAt,
-      total: 0,
-      ok: 0,
-      failed: 0,
-      recipients: [] as typeof logs,
-    };
-    existing.total += 1;
-    if (log.status === 'ENVIADO') existing.ok += 1;
-    else existing.failed += 1;
-    if (log.sentAt > existing.sentAt) existing.sentAt = log.sentAt;
-    existing.recipients.push(log);
-    batches.set(key, existing);
-  }
-
-  return [...batches.values()].sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime()).slice(0, take);
+  return batchHistory(INVITE_TEMPLATE, take);
 }
