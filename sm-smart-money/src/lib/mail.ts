@@ -4,9 +4,19 @@ import { env, mailConfigured } from '@/lib/env';
 import { prisma } from '@/lib/prisma';
 
 /**
- * Envio transacional via Zoho. Sem SMTP configurado o envio nao falha: a mensagem
- * vai para o console e o EmailLog registra a tentativa. Assim dev e staging
- * exercitam o fluxo completo (incluindo o historico de disparos) sem enviar nada.
+ * Envio transacional via Zoho.
+ *
+ * Sem SMTP configurado a mensagem vai para o console e o EmailLog registra
+ * FALHOU, com o motivo. Nao e' pessimismo: e' o fato. Nada saiu do servidor, e
+ * o historico de disparos existe para responder "o membro recebeu?" -- marcar
+ * ENVIADO ali um e-mail que ninguem recebeu transforma auditoria em ficcao,
+ * justo na tela onde alguem vai investigar por que o acesso nao chegou.
+ *
+ * E' a mesma postura do envio por WhatsApp em lib/waha.ts, que ja' registra
+ * FALHOU com "WAHA nao configurada".
+ *
+ * O fluxo completo continua exercitavel em desenvolvimento: o disparo roda, o
+ * registro nasce, a tela lista. So' que dizendo a verdade sobre a entrega.
  */
 
 // O tipo vem do proprio createTransport: @types/nodemailer nao acompanha a v10.
@@ -49,10 +59,11 @@ export async function sendMail(payload: MailPayload): Promise<MailResult> {
         html: payload.html,
         text: payload.text ?? htmlToText(payload.html),
       });
+      result = { ok: true };
     } else {
       console.info(`[mail:dry-run] ${payload.template} -> ${payload.to} :: ${payload.subject}`);
+      result = { ok: false, error: 'SMTP não configurado' };
     }
-    result = { ok: true };
   } catch (error) {
     result = { ok: false, error: error instanceof Error ? error.message : 'Falha desconhecida' };
   }
