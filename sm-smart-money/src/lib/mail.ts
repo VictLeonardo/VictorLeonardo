@@ -112,6 +112,14 @@ export function renderEmail(options: {
   body?: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  /**
+   * Convite secundario, abaixo da acao principal.
+   *
+   * Existe porque um e-mail as vezes entrega duas coisas em que uma depende da
+   * outra -- definir a senha e' o que abre a plataforma, e o grupo vem logo
+   * atras. Num botao so' os dois competiriam; no rodape, o segundo sumiria.
+   */
+  aside?: { label: string; url: string; note?: string };
   footnote?: string;
 }): string {
   const cta =
@@ -120,6 +128,19 @@ export function renderEmail(options: {
            <a href="${options.ctaUrl}" style="background:#c5a670;color:#02201f;text-decoration:none;padding:13px 26px;border-radius:10px;font-weight:600;display:inline-block">${options.ctaLabel}</a>
          </td></tr>`
       : '';
+
+  // Cores literais pelo mesmo motivo do resto do arquivo: cliente de e-mail nao
+  // resolve variavel CSS.
+  const aside = options.aside
+    ? `<tr><td style="padding:4px 32px 0">
+         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf7f0;border:1px solid #e3dccb;border-radius:12px">
+           <tr><td style="padding:16px 18px">
+             <a href="${options.aside.url}" style="color:#836739;font-size:15px;font-weight:600;text-decoration:none">${options.aside.label} &rarr;</a>
+             ${options.aside.note ? `<p style="margin:6px 0 0;font-size:13px;line-height:1.6;color:#5d6c68">${options.aside.note}</p>` : ''}
+           </td></tr>
+         </table>
+       </td></tr>`
+    : '';
 
   return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#faf7f0;padding:32px 12px;font-family:'Helvetica Neue',Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;border:1px solid #e3dccb">
@@ -136,6 +157,7 @@ export function renderEmail(options: {
     <tr><td style="padding:20px 32px 0">
       <table role="presentation" cellpadding="0" cellspacing="0">${cta}</table>
     </td></tr>
+    ${aside}
     <tr><td style="padding:8px 32px 30px">
       <p style="margin:0;font-size:12px;line-height:1.6;color:#5d6c68">${options.footnote ?? 'Você recebeu este e-mail porque faz parte da comunidade SM Smart Money.'}</p>
     </td></tr>

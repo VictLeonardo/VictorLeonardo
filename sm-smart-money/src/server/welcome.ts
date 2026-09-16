@@ -49,6 +49,18 @@ export async function sendWelcomeEmail(
       body: `<p>Defina sua senha pelo botão abaixo e comece pelo diagnóstico Smart Money Journey. O link vale por ${DIAS_DE_VALIDADE} dias.</p>`,
       ctaLabel: 'Definir minha senha',
       ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/redefinir-senha?token=${token.raw}`,
+      // O grupo e' parte do que a assinatura entrega, e ate' agora so' aparecia
+      // dentro do portal -- o membro precisava ja' ter entrado para encontrar o
+      // que deveria receber junto com o acesso.
+      ...(env.NEXT_PUBLIC_WHATSAPP_GROUP_URL
+        ? {
+            aside: {
+              label: 'Entrar no grupo de WhatsApp',
+              url: env.NEXT_PUBLIC_WHATSAPP_GROUP_URL,
+              note: 'Notícias selecionadas e análises comentadas por Júlio Damião, no canal do dia a dia da comunidade.',
+            },
+          }
+        : {}),
     }),
   });
 }

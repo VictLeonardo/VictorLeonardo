@@ -28,6 +28,9 @@ const schema = z.object({
   AUTH_REFRESH_DAYS: z.coerce.number().int().positive().default(7),
   AUTH_REMEMBER_DAYS: z.coerce.number().int().positive().default(30),
   NEXT_PUBLIC_APP_URL: z.string().url().default(urlPublicaPadrao),
+  // Convite do grupo de WhatsApp. Entra no e-mail de boas-vindas e no rodape da
+  // comunidade; ausente, os dois simplesmente nao mostram o convite.
+  NEXT_PUBLIC_WHATSAPP_GROUP_URL: z.string().url().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
   // Ausente precisa continuar ausente: quem decide o modo e' a porta, no mailer.

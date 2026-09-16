@@ -1,11 +1,12 @@
 import { MessageCircle } from 'lucide-react';
+import { env } from '@/lib/env';
 
 /**
  * O grupo de WhatsApp continua existindo como canal complementar. O CTA fica no
  * rodape da comunidade — presente, mas nao como porta de entrada.
  */
 export function WhatsappCta() {
-  const url = process.env.NEXT_PUBLIC_WHATSAPP_GROUP_URL;
+  const url = env.NEXT_PUBLIC_WHATSAPP_GROUP_URL;
   if (!url) return null;
 
   return (
