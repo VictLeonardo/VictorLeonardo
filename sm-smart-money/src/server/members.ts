@@ -26,6 +26,27 @@ export type MemberFilters = {
 const SORTABLE = ['name', 'email', 'plan', 'status', 'joinedAt', 'lastLoginAt'] as const;
 type SortField = (typeof SORTABLE)[number];
 
+/**
+ * Diz se o e-mail ja' pertence a alguem, e a quem.
+ *
+ * "Ja' existe um membro com esse e-mail" mandava procurar numa lista onde a
+ * linha podia nao estar: a listagem filtra `role: 'MEMBER'`, e uma conta de
+ * administrador ocupa o mesmo espaco de e-mails sem aparecer em tela nenhuma.
+ * Quem recebia o erro ia conferir, nao encontrava nada, e concluia que a
+ * plataforma estava errada.
+ */
+export async function emailEmUso(email: string, ignorarId?: string): Promise<string | null> {
+  const dono = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, name: true, role: true },
+  });
+  if (!dono || dono.id === ignorarId) return null;
+
+  return dono.role === 'ADMIN'
+    ? `Esse e-mail é da conta de administrador de ${dono.name}, que não aparece na lista de membros.`
+    : `Já existe um membro com esse e-mail: ${dono.name}.`;
+}
+
 export function buildMemberWhere(filters: MemberFilters): Prisma.UserWhereInput {
   const joinedAt: Prisma.DateTimeFilter = {};
   if (filters.from) joinedAt.gte = fromLocalInput(filters.from);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { emailEmUso } from '@/server/members';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { ensureProfile } from '@/server/profile';
@@ -34,10 +35,8 @@ export async function POST(request: Request) {
   const data = parsed.data;
   const email = data.email.toLowerCase();
 
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) {
-    return NextResponse.json({ error: 'Já existe um membro com este e-mail' }, { status: 409 });
-  }
+  const conflito = await emailEmUso(email);
+  if (conflito) return NextResponse.json({ error: conflito }, { status: 409 });
 
   const user = await prisma.user.create({
     data: {

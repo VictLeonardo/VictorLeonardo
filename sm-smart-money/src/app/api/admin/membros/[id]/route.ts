@@ -5,6 +5,7 @@ import { getSessionUser, revokeAllSessions } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { normalizePhone } from '@/lib/utils';
 import { fromLocalInput } from '@/lib/datetime';
+import { emailEmUso } from '@/server/members';
 import { stripe } from '@/lib/stripe';
 import { stripeConfigured } from '@/lib/env';
 
@@ -46,10 +47,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const novoEmail = data.email && data.email !== current.email ? data.email : null;
 
   if (novoEmail) {
-    const ocupado = await prisma.user.findUnique({ where: { email: novoEmail }, select: { id: true } });
-    if (ocupado) {
-      return NextResponse.json({ error: 'Já existe um membro com esse e-mail.' }, { status: 409 });
-    }
+    const conflito = await emailEmUso(novoEmail, id);
+    if (conflito) return NextResponse.json({ error: conflito }, { status: 409 });
 
     // O Stripe precisa mudar junto, e antes. O webhook de checkout encontra a
     // conta pelo e-mail que o Stripe informa: deixar os dois divergentes faria a
