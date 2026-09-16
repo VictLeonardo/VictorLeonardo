@@ -13,6 +13,7 @@ import {
   MessageCircle,
   ScrollText,
   Settings,
+  ShieldCheck,
   Users,
   Video,
   X,
@@ -32,6 +33,7 @@ const ADMIN_NAV = [
   { href: '/admin/diagnosticos', label: 'Diagnósticos', icon: BarChart3 },
   { href: '/admin/notificacoes', label: 'Notificações', icon: Bell },
   { href: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
+  { href: '/admin/administradores', label: 'Administradores', icon: ShieldCheck },
   { href: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ];

@@ -19,6 +19,10 @@ export type AuditAction =
   | 'perfil.convite_lote'
   | 'membro.primeiro_acesso'
   | 'membro.primeiro_acesso_lote'
+  // Promover e rebaixar mexem no papel de maior privilegio da plataforma; o
+  // registro aqui e' o que explica depois quem deu acesso a quem, e quando.
+  | 'admin.promover'
+  | 'admin.rebaixar'
   | 'conteudo.criar'
   | 'conteudo.atualizar'
   | 'conteudo.publicar'
