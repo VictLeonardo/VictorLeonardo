@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { fromLocalInput } from '@/lib/datetime';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { slugify } from '@/lib/utils';
@@ -84,7 +85,7 @@ export function lectureDataFrom(data: z.infer<typeof lectureSchema>, slug: strin
     description: nn(data.description),
     coverUrl: nn(data.coverUrl),
     theme: data.theme,
-    startsAt: new Date(data.startsAt),
+    startsAt: fromLocalInput(data.startsAt),
     durationMin: data.durationMin,
     liveUrl: nn(data.liveUrl),
     recordingUrl: nn(data.recordingUrl),

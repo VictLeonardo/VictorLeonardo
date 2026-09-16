@@ -1,6 +1,7 @@
 import 'server-only';
 import type { Plan } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { fromLocalInput } from '@/lib/datetime';
 import { PLAN_MONTHLY_VALUE } from '@/lib/domain';
 import { precoMensalPadrao } from '@/lib/stripe';
 
@@ -15,9 +16,9 @@ export function resolvePeriod(
   key: PeriodKey,
   custom?: { from?: string; to?: string },
 ): { from: Date; to: Date; label: string } {
-  const to = custom?.to ? new Date(custom.to) : new Date();
+  const to = custom?.to ? fromLocalInput(custom.to) : new Date();
   if (key === 'custom' && custom?.from) {
-    return { from: new Date(custom.from), to, label: 'Período personalizado' };
+    return { from: fromLocalInput(custom.from), to, label: 'Período personalizado' };
   }
 
   const days = key === '7d' ? 7 : key === '30d' ? 30 : key === '90d' ? 90 : 365;

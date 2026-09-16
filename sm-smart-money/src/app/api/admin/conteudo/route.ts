@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { readingMinutes, slugify } from '@/lib/utils';
+import { fromLocalInput } from '@/lib/datetime';
 
 export const contentSchema = z.object({
   type: z.enum(['ARTIGO', 'VIDEO', 'PODCAST', 'ANALISE', 'EBOOK']),
@@ -54,9 +55,9 @@ export function contentDataFrom(data: z.infer<typeof contentSchema>, slug: strin
   const publishedAt =
     data.status === 'PUBLICADO'
       ? scheduled
-        ? new Date(scheduled)
+        ? fromLocalInput(scheduled)
         : data.publishedAt
-          ? new Date(data.publishedAt)
+          ? fromLocalInput(data.publishedAt)
           : new Date()
       : null;
 
@@ -71,7 +72,7 @@ export function contentDataFrom(data: z.infer<typeof contentSchema>, slug: strin
     status: data.status,
     visibility: data.visibility,
     publishedAt,
-    scheduledFor: scheduled ? new Date(scheduled) : null,
+    scheduledFor: scheduled ? fromLocalInput(scheduled) : null,
     authorName: nn(data.authorName),
     authorId,
     readingMinutes: data.type === 'ARTIGO' && data.body ? readingMinutes(data.body) : null,

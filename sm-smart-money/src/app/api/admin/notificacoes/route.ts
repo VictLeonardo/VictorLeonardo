@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { fromLocalInput } from '@/lib/datetime';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { dispatchNotification } from '@/server/notifications';
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       url: data.url || null,
       audience: data.audience,
       planFilter: data.audience === 'POR_PLANO' ? data.planFilter : null,
-      scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : null,
+      scheduledFor: data.scheduledFor ? fromLocalInput(data.scheduledFor) : null,
       createdById: admin.id,
     },
     select: { id: true },

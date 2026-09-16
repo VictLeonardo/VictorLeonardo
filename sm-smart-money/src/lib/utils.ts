@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { FUSO_DA_PLATAFORMA } from '@/lib/datetime';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -69,7 +70,11 @@ export function formatDate(value: Date | string | null | undefined, withTime = f
   if (!value) return '—';
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '—';
+  // Sem `timeZone` o Intl adota o fuso de quem formata -- UTC no servidor,
+  // o do visitante no navegador --, e o mesmo registro aparecia com horas
+  // diferentes conforme onde foi renderizado.
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_DA_PLATAFORMA,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -80,6 +85,7 @@ export function formatDate(value: Date | string | null | undefined, withTime = f
 export function formatDateLong(value: Date | string): string {
   const date = typeof value === 'string' ? new Date(value) : value;
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_DA_PLATAFORMA,
     weekday: 'long',
     day: '2-digit',
     month: 'long',

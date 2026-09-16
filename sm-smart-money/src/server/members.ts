@@ -1,6 +1,7 @@
 import 'server-only';
 import type { MemberStatus, Plan, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { fromLocalInput } from '@/lib/datetime';
 
 /**
  * Listagem de membros do admin com filtros completos e paginacao no servidor (G05).
@@ -27,12 +28,12 @@ type SortField = (typeof SORTABLE)[number];
 
 export function buildMemberWhere(filters: MemberFilters): Prisma.UserWhereInput {
   const joinedAt: Prisma.DateTimeFilter = {};
-  if (filters.from) joinedAt.gte = new Date(filters.from);
+  if (filters.from) joinedAt.gte = fromLocalInput(filters.from);
   if (filters.to) {
-    // O filtro "ate" e' inclusivo: soma um dia para pegar o dia inteiro.
-    const to = new Date(filters.to);
-    to.setDate(to.getDate() + 1);
-    joinedAt.lt = to;
+    // O filtro "ate" e' inclusivo: soma um dia para pegar o dia inteiro. A soma
+    // e' em milissegundos, e nao em `setDate`, que operaria no fuso de quem
+    // executa -- o mesmo descompasso que esta correcao existe para tirar.
+    joinedAt.lt = new Date(fromLocalInput(filters.to).getTime() + 24 * 60 * 60 * 1000);
   }
 
   // A busca por telefone so entra quando o termo tem digitos: `contains: ''`
