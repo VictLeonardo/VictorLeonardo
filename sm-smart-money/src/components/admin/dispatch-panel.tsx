@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import type { LucideIcon } from 'lucide-react';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +39,7 @@ export type LoteEnviado = {
  */
 export function DispatchPanel({
   titulo,
-  Icone,
+  icone,
   endpoint,
   destinatarios,
   historico,
@@ -51,7 +50,14 @@ export function DispatchPanel({
   confirmacao,
 }: {
   titulo: string;
-  Icone: LucideIcon;
+  /**
+   * O icone chega renderizado, nao como componente.
+   *
+   * A pagina que usa este painel roda no servidor, e funcao nao atravessa a
+   * fronteira para um Client Component -- o Next recusa em tempo de execucao,
+   * depois de o build ter passado. Elemento pronto e' serializavel.
+   */
+  icone: React.ReactNode;
   endpoint: string;
   destinatarios: Destinatario[];
   historico: LoteEnviado[];
@@ -112,7 +118,7 @@ export function DispatchPanel({
       <CardContent className="space-y-4 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-text-1">
-            <Icone className="size-4 text-brand-strong" aria-hidden="true" />
+            {icone}
             {titulo}
           </h2>
           <Badge tone={destinatarios.length > 0 ? 'warning' : 'positive'}>

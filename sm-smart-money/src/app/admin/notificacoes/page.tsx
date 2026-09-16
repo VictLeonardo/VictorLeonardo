@@ -65,7 +65,7 @@ export default async function AdminNotificationsPage() {
         <div className="space-y-5">
           <DispatchPanel
             titulo="Primeiro acesso"
-            Icone={KeyRound}
+            icone={<KeyRound className="size-4 text-brand-strong" aria-hidden="true" />}
             endpoint="/api/admin/primeiro-acesso"
             acao="Enviar primeiro acesso"
             substantivo={{ singular: 'e-mail', plural: 'e-mails' }}
@@ -87,7 +87,7 @@ export default async function AdminNotificationsPage() {
 
           <DispatchPanel
             titulo="Convites de perfil público"
-            Icone={MailPlus}
+            icone={<MailPlus className="size-4 text-brand-strong" aria-hidden="true" />}
             endpoint="/api/admin/convites"
             acao="Disparar convites"
             substantivo={{ singular: 'convite', plural: 'convites' }}
