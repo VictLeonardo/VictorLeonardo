@@ -13,7 +13,7 @@ somente leitura.
 | Estilo | Tailwind CSS sobre tokens CSS próprios, com dark mode |
 | Banco | PostgreSQL 18 + Prisma |
 | Auth | JWT de acesso (`jose`) + refresh token opaco rotacionado, em cookies httpOnly |
-| E-mail | Nodemailer / Zoho SMTP |
+| E-mail | Nodemailer sobre SMTP (Resend, Zoho, ou qualquer servidor) |
 | WhatsApp | WAHA (WhatsApp HTTP API) |
 | Editor | Tiptap (CMS integrado ao admin) |
 
@@ -241,9 +241,11 @@ gunzip -c backups/sm-AAAAMMDD-HHMMSS.sql.gz | \
 O deploy sobe a plataforma, mas duas integrações continuam pendentes de dados que
 só você tem:
 
-- **SMTP da Zoho.** Sem `SMTP_PASSWORD` preenchido, convite e redefinição de
-  senha vão para o log em vez do e-mail, e nenhum membro consegue completar o
-  primeiro acesso.
+- **Credenciais de SMTP.** Sem `SMTP_HOST`, `SMTP_USER` e `SMTP_PASSWORD`, o
+  convite e a redefinição de senha vão para o log em vez do e-mail — registrados
+  como `FALHOU · SMTP não configurado` — e nenhum membro completa o primeiro
+  acesso. No Resend, o usuário é a palavra `resend` e a senha é a API key; o
+  remetente precisa estar num domínio verificado lá.
 - **Número do WhatsApp.** Depois do deploy, abra `/admin/whatsapp` e leia o QR
   Code. A sessão fica no volume da WAHA e sobrevive a reinício.
 

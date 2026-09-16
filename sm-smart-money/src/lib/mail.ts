@@ -4,7 +4,7 @@ import { env, mailConfigured } from '@/lib/env';
 import { prisma } from '@/lib/prisma';
 
 /**
- * Envio transacional via Zoho.
+ * Envio transacional por SMTP, com o fornecedor decidido por configuracao.
  *
  * Sem SMTP configurado a mensagem vai para o console e o EmailLog registra
  * FALHOU, com o motivo. Nao e' pessimismo: e' o fato. Nada saiu do servidor, e

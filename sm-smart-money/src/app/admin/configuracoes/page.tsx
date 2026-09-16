@@ -56,7 +56,7 @@ export default async function AdminSettingsPage() {
           <dl className="mt-4 space-y-3">
             <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
               <div>
-                <dt className="text-sm font-medium text-text-1">E-mail transacional (Zoho)</dt>
+                <dt className="text-sm font-medium text-text-1">E-mail transacional (SMTP)</dt>
                 <dd className="text-xs text-text-3">
                   SMTP_HOST · SMTP_USER · SMTP_PASSWORD
                 </dd>
