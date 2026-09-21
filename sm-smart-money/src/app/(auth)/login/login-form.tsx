@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
-import { AssinarButton } from '@/components/assinar-button';
 
 export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: boolean }) {
   const router = useRouter();
@@ -89,7 +88,7 @@ export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: b
           </div>
         </Field>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <label className="inline-flex items-center gap-2 text-sm text-text-2">
             <input
               type="checkbox"
@@ -115,13 +114,10 @@ export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: b
         </Button>
       </form>
 
-      {/* O convite so' aparece no mobile: no desktop ele ja' fecha o painel de
-          marca, e repetir os dois na mesma tela dilui a chamada. */}
-      {podeAssinar ? (
-        <div className="border-t border-line pt-5 lg:hidden">
-          <AssinarButton variant="solido" chamada="assine agora" />
-        </div>
-      ) : (
+      {/* Sem convite aqui. Ele fecha o painel de marca -- ao lado no desktop,
+          abaixo no celular --, e em ambos vem depois da proposta. Um botao de
+          assinar antes de dizer o que se assina pedia decisao sem informacao. */}
+      {podeAssinar ? null : (
         <p className="text-xs leading-relaxed text-text-3">
           O acesso é exclusivo para membros da comunidade. Se você ainda não faz parte, fale com a
           equipe SM Smart Money.

@@ -69,7 +69,7 @@ export function AssinarButton({
           <span
             className={cn(
               'text-[10px] font-semibold uppercase tracking-[0.16em]',
-              variant === 'painel' ? 'text-brand-ink-muted' : 'text-brand-ink-muted',
+              variant === 'painel' ? 'text-brand-ink-muted' : 'text-brand-contrast',
             )}
           >
             {eyebrow}

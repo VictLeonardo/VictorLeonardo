@@ -33,7 +33,7 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
       </span>
 
       <blockquote className="flex flex-col gap-3">
-        <p className="font-display text-3xl leading-tight text-brand-ink xl:text-[2.1rem]">
+        <p className="font-display text-2xl leading-tight text-brand-ink sm:text-3xl xl:text-[2.1rem]">
           &ldquo;Entender o mundo não é ter mais informações, é fazer as perguntas certas.&rdquo;
         </p>
         <footer className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
