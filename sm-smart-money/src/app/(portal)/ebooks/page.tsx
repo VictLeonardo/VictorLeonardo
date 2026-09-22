@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { categoriesInUse, listContent, viewedIdsFor } from '@/server/content';
 import { FilterBar } from '@/components/portal/filter-bar';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -16,7 +16,7 @@ export default async function EbooksPage({
 }: {
   searchParams: Promise<{ categoria?: string; q?: string }>;
 }) {
-  const user = await requireActiveMember('/ebooks');
+  const user = await requireTela('/ebooks');
   const params = await searchParams;
 
   const [{ items }, categories] = await Promise.all([

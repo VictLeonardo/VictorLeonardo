@@ -8,8 +8,15 @@ import { Logo } from '@/components/logo';
 import { cn } from '@/lib/utils';
 import type { SessionUser } from '@/lib/auth/session';
 
-export function PortalSidebar({ user }: { user: SessionUser }) {
+/**
+ * As telas que este membro abre, decididas no servidor pela matriz de acesso.
+ * Chegam prontas em vez de serem calculadas aqui: a matriz vive no banco, e um
+ * componente de cliente nao a alcanca -- e nao deveria mesmo, porque quem
+ * decide acesso e' o servidor.
+ */
+export function PortalSidebar({ user, telas }: { user: SessionUser; telas: string[] }) {
   const pathname = usePathname();
+  const itens = PORTAL_NAV.filter((i) => telas.includes(i.href));
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex">
@@ -36,7 +43,7 @@ export function PortalSidebar({ user }: { user: SessionUser }) {
 
       <nav aria-label="Navegação principal" className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-0.5">
-          {PORTAL_NAV.map((item) => {
+          {itens.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
               <li key={item.href}>
@@ -74,9 +81,9 @@ export function PortalSidebar({ user }: { user: SessionUser }) {
 }
 
 /** Bottom navigation do mobile: apenas as 5 secoes principais. */
-export function PortalBottomNav() {
+export function PortalBottomNav({ telas }: { telas: string[] }) {
   const pathname = usePathname();
-  const items = PORTAL_NAV.filter((i) => i.primary);
+  const items = PORTAL_NAV.filter((i) => i.primary && telas.includes(i.href));
 
   return (
     <nav

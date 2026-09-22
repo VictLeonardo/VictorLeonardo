@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireActiveMember, requireTela } from '@/lib/auth/guards';
 import { getContentBySlug, recordView } from '@/server/content';
 import { prisma } from '@/lib/prisma';
 import { AudioPlayer, VideoPlayer } from '@/components/portal/media-player';
@@ -26,7 +26,7 @@ export async function generateMetadata({
 
 export default async function MediaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const user = await requireActiveMember(`/midia/${slug}`);
+  const user = await requireTela(`/midia/${slug}`);
   const content = await getContentBySlug(slug, user);
   if (!content || (content.type !== 'VIDEO' && content.type !== 'PODCAST')) notFound();
 

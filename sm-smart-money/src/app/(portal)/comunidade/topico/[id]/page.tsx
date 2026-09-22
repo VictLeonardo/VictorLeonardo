@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireActiveMember, requireTela } from '@/lib/auth/guards';
 import { getTopic } from '@/server/community';
 import { Badge } from '@/components/ui/badge';
 import { MemberAvatar } from '@/components/ui/avatar';
@@ -25,7 +25,7 @@ export async function generateMetadata({
 
 export default async function TopicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await requireActiveMember(`/comunidade/topico/${id}`);
+  const user = await requireTela(`/comunidade/topico/${id}`);
   const topic = await getTopic(id, user);
   if (!topic) notFound();
 

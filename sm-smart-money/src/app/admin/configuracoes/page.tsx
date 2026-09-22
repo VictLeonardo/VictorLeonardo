@@ -6,6 +6,9 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TemplateEditor } from '@/components/admin/template-editor';
+import { AcessoTelas } from '@/components/admin/acesso-telas';
+import { lerMatriz, TELAS } from '@/server/acesso';
+import { TIERS } from '@/lib/domain';
 
 export const metadata: Metadata = { title: 'Configurações' };
 export const dynamic = 'force-dynamic';
@@ -21,6 +24,8 @@ const EXPECTED_TEMPLATES = [
 
 export default async function AdminSettingsPage() {
   await requireAdmin('/admin/configuracoes');
+
+  const matriz = await lerMatriz();
 
   const saved = await prisma.messageTemplate.findMany();
   const byKey = new Map(saved.map((t) => [`${t.channel}:${t.key}`, t]));
@@ -42,7 +47,7 @@ export default async function AdminSettingsPage() {
       <SectionHeader
         eyebrow="Sistema"
         title="Configurações"
-        description="Estado das integrações e templates das mensagens automáticas."
+        description="Acesso por nível, estado das integrações e templates das mensagens automáticas."
       />
 
       <Card>
@@ -90,6 +95,8 @@ export default async function AdminSettingsPage() {
           </dl>
         </CardContent>
       </Card>
+
+      <AcessoTelas telas={TELAS} tiers={TIERS} inicial={matriz} />
 
       <TemplateEditor templates={templates} />
     </div>

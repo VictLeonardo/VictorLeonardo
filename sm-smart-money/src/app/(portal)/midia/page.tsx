@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Library } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { categoriesInUse, listContent, viewedIdsFor } from '@/server/content';
 import { ContentCard } from '@/components/portal/content-card';
 import { FilterBar } from '@/components/portal/filter-bar';
@@ -17,7 +17,7 @@ export default async function MediaPage({
 }: {
   searchParams: Promise<{ tipo?: string; categoria?: string; q?: string }>;
 }) {
-  const user = await requireActiveMember('/midia');
+  const user = await requireTela('/midia');
   const params = await searchParams;
   const type = params.tipo === 'podcasts' ? 'PODCAST' : 'VIDEO';
 

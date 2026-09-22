@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarPlus, Clock, Video } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { listLectures, lectureThemes } from '@/server/lectures';
 import { SectionHeader } from '@/components/ui/section-header';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -22,7 +22,7 @@ export default async function LecturesPage({
 }: {
   searchParams: Promise<{ escopo?: string; tema?: string }>;
 }) {
-  const user = await requireActiveMember('/palestras');
+  const user = await requireTela('/palestras');
   const params = await searchParams;
   const scope: Scope =
     params.escopo === 'realizadas' ? 'realizadas' : params.escopo === 'todas' ? 'todas' : 'proximas';

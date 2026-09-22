@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { TopicCategory } from '@prisma/client';
 import { MessageSquare, Users } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { listDirectory, listTopics, specialtiesInUse } from '@/server/community';
 import { SectionHeader } from '@/components/ui/section-header';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -31,7 +31,7 @@ export default async function CommunityPage({
 }: {
   searchParams: Promise<{ aba?: string; categoria?: string; q?: string; especialidade?: string }>;
 }) {
-  const user = await requireActiveMember('/comunidade');
+  const user = await requireTela('/comunidade');
   const params = await searchParams;
   const tab = params.aba === 'diretorio' ? 'diretorio' : 'forum';
 

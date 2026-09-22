@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { loadQuestions, latestSubmission, reportFor, submissionHistory } from '@/server/journey';
 import { canRetake, daysUntilRetake } from '@/lib/journey/scoring';
 import { JourneyWizard } from '@/components/portal/journey-wizard';
@@ -16,7 +16,7 @@ export default async function JourneyPage({
 }: {
   searchParams: Promise<{ refazer?: string }>;
 }) {
-  const user = await requireActiveMember('/journey');
+  const user = await requireTela('/journey');
   const params = await searchParams;
 
   const [questions, last, history] = await Promise.all([

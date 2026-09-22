@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, CalendarPlus, Clock, Radio } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireActiveMember, requireTela } from '@/lib/auth/guards';
 import { getLectureBySlug } from '@/server/lectures';
 import { VideoPlayer } from '@/components/portal/media-player';
 import { LectureCountdown } from '@/components/portal/lecture-countdown';
@@ -26,7 +26,7 @@ export async function generateMetadata({
 
 export default async function LecturePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const user = await requireActiveMember(`/palestras/${slug}`);
+  const user = await requireTela(`/palestras/${slug}`);
   const lecture = await getLectureBySlug(slug, user);
   if (!lecture) notFound();
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { FileText } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { categoriesInUse, listContent, viewedIdsFor } from '@/server/content';
 import { ContentCard } from '@/components/portal/content-card';
 import { FilterBar } from '@/components/portal/filter-bar';
@@ -18,7 +18,7 @@ export default async function ContentPage({
 }: {
   searchParams: Promise<{ categoria?: string; q?: string; pagina?: string }>;
 }) {
-  const user = await requireActiveMember('/conteudo');
+  const user = await requireTela('/conteudo');
   const params = await searchParams;
   const page = Math.max(1, Number(params.pagina ?? '1') || 1);
 

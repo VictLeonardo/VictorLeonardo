@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, CalendarPlus, Compass, Sparkles } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireTela } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
 import { listContent, viewedIdsFor } from '@/server/content';
 import { getNextLecture } from '@/server/lectures';
@@ -27,7 +27,7 @@ function daysSince(date: Date): number {
 }
 
 export default async function DashboardPage() {
-  const user = await requireActiveMember('/dashboard');
+  const user = await requireTela('/dashboard');
 
   const [nextLecture, recent, journey, member] = await Promise.all([
     getNextLecture(user),

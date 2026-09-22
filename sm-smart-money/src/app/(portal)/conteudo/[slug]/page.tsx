@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
-import { requireActiveMember } from '@/lib/auth/guards';
+import { requireActiveMember, requireTela } from '@/lib/auth/guards';
 import { getContentBySlug, recordView } from '@/server/content';
 import { Badge } from '@/components/ui/badge';
 import { ShareButton } from '@/components/portal/share-button';
@@ -23,7 +23,7 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const user = await requireActiveMember(`/conteudo/${slug}`);
+  const user = await requireTela(`/conteudo/${slug}`);
   const content = await getContentBySlug(slug, user);
   if (!content || content.type !== 'ARTIGO') notFound();
 

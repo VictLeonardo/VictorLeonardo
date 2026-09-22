@@ -1,6 +1,7 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { getSessionUser, type SessionUser } from './session';
+import { lerMatriz, podeAbrir, telasLiberadas } from '@/server/acesso';
 
 /** Exige sessao valida. Sem sessao, volta ao login preservando o destino. */
 export async function requireUser(returnTo?: string): Promise<SessionUser> {
@@ -21,6 +22,28 @@ export async function requireActiveMember(returnTo?: string): Promise<SessionUse
   if (user.status === 'CANCELADO') redirect('/reativar');
   if (user.status === 'PENDENTE') redirect('/primeiro-acesso');
   return user;
+}
+
+/**
+ * Exige membro ativo com tier que abre esta tela.
+ *
+ * Substitui `requireActiveMember` nas telas do portal. Recebe o mesmo caminho
+ * que aquele ja' recebia, entao a troca e' de uma palavra por pagina.
+ *
+ * Quem nao pode cai na primeira tela que o tier dele abre, e nao num 403: o
+ * membro nao fez nada de errado, so' pediu algo que o plano dele nao inclui.
+ * Se nao abrir nenhuma, vai para o perfil, que a matriz nao governa -- assim
+ * ninguem fica preso num redirecionamento que volta para si mesmo.
+ */
+export async function requireTela(href: string): Promise<SessionUser> {
+  const user = await requireActiveMember(href);
+  if (user.role === 'ADMIN') return user;
+
+  const matriz = await lerMatriz();
+  if (podeAbrir(matriz, href, user.tier)) return user;
+
+  const [primeira] = telasLiberadas(matriz, user.tier);
+  redirect(primeira ?? '/perfil');
 }
 
 export async function requireAdmin(returnTo?: string): Promise<SessionUser> {

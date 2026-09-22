@@ -104,7 +104,7 @@ export function NewMemberButton() {
             <Field
               label="Tier de acesso"
               htmlFor="new-tier"
-              hint="VIP libera conteúdos e espaços restritos."
+              hint="Define quais telas do portal o membro abre, em Configurações › Acesso por tela."
             >
               <Select id="new-tier" name="tier" defaultValue="PADRAO">
                 {Object.entries(TIER_LABELS).map(([valor, rotulo]) => (
