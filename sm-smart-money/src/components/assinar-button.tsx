@@ -18,12 +18,15 @@ export function AssinarButton({
   eyebrow = 'Ainda não é membro?',
   texto = 'Se você ainda não é membro do VIP Lounge,',
   chamada = 'clique aqui e assine agora',
+  preco = null,
   variant = 'painel',
 }: {
   className?: string;
   eyebrow?: string;
   texto?: string;
   chamada?: string;
+  /** Valor ja' formatado, vindo do Stripe. Nulo esconde a linha. */
+  preco?: string | null;
   variant?: 'painel' | 'solido';
 }) {
   const [pending, setPending] = React.useState(false);
@@ -74,13 +77,23 @@ export function AssinarButton({
           >
             {eyebrow}
           </span>
+          {preco ? (
+            <span
+              className={cn(
+                'text-lg font-semibold leading-tight',
+                variant === 'painel' ? 'text-brand-ink' : 'text-brand-contrast',
+              )}
+            >
+              {preco}
+            </span>
+          ) : null}
           <span
             className={cn(
               'text-sm leading-snug',
               variant === 'painel' ? 'text-brand-ink-muted' : 'text-brand-contrast',
             )}
           >
-            {texto}{' '}
+            {texto ? `${texto} ` : null}
             <span className="font-semibold underline underline-offset-4">{chamada}</span>.
           </span>
         </span>

@@ -20,7 +20,13 @@ const BENEFICIOS = [
   'Grupo exclusivo de WhatsApp com notícias selecionadas e análises comentadas por Júlio Damião',
 ];
 
-export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
+export function VipPitch({
+  mostrarCta,
+  preco,
+}: {
+  mostrarCta: boolean;
+  preco: string | null;
+}) {
   const pathname = usePathname();
   // Na propria tela de assinatura o convite seria redundante.
   const cta = mostrarCta && pathname !== '/assinar';
@@ -40,6 +46,24 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
           Follow the Money. Júlio Damião.
         </footer>
       </blockquote>
+
+      {/* O convite vem logo depois da frase de abertura, e nao no fim do
+          painel. No celular essa e' a diferenca entre caber na primeira tela e
+          exigir rolagem: no fim ele ficava a 88% da pagina, e quem abriu o link
+          para assinar tinha que percorrer tudo para achar como fazer isso.
+
+          Fica antes do paragrafo que explica o VIP Lounge de proposito: quem ja'
+          decidiu clica, e quem quer entender continua lendo logo abaixo -- o
+          botao nao interrompe nada, so' deixa de se esconder. */}
+      {cta ? (
+        <AssinarButton
+          variant="solido"
+          eyebrow="Ainda não é membro?"
+          preco={preco}
+          texto=""
+          chamada="Clique aqui e assine agora"
+        />
+      ) : null}
 
       <p className="text-sm leading-relaxed text-brand-ink-muted">
         Por isso criamos o VIP Lounge SM Partner: um ecossistema exclusivo para empresários,
@@ -72,7 +96,6 @@ export function VipPitch({ mostrarCta }: { mostrarCta: boolean }) {
         </p>
       </div>
 
-      {cta ? <AssinarButton /> : null}
     </div>
   );
 }
