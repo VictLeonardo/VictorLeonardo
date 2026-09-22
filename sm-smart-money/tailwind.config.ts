@@ -5,6 +5,35 @@ import type { Config } from 'tailwindcss';
  * em src/app/globals.css. Assim light e dark mode compartilham o mesmo utilitario
  * (`bg-surface`, `text-text-1`, ...) e trocam apenas o valor do token.
  */
+
+/**
+ * Um token de cor que aceita transparencia.
+ *
+ * Um `var(--x)` cru nao aceita: o Tailwind precisa saber os canais da cor para
+ * calcular o alfa, e com uma variavel ele nao sabe -- entao simplesmente nao
+ * gera a classe. `bg-danger/10` e os outros 48 usos de `/NN` no projeto nao
+ * existiam no CSS, e o elemento ficava sem fundo nenhum em vez de com o fundo
+ * suave que o desenho pedia.
+ *
+ * O `color-mix` resolve porque mistura no navegador, onde a variavel ja' tem
+ * valor. So' que ele entra apenas quando alguem pede alfa: sem modificador, o
+ * Tailwind manda a variavel legada de opacidade do utilitario e aqui devolvemos
+ * o `var()` limpo de sempre. Assim o color-mix fica restrito a quem precisa
+ * dele, e nao vira dependencia de todas as cores da plataforma.
+ */
+function cor(token: string) {
+  const resolver = ({ opacityValue }: { opacityValue?: string | number }) => {
+    const alfa = opacityValue === undefined ? '' : String(opacityValue);
+    if (!alfa || alfa === '1' || alfa.startsWith('var(--tw-')) return `var(${token})`;
+    return `color-mix(in srgb, var(${token}) calc(${alfa} * 100%), transparent)`;
+  };
+  // O Tailwind aceita funcao como valor de cor -- e' assim que os helpers dele
+  // proprio funcionam (`rgb`/`hsl` em types/config.d.ts). O tipo do config so'
+  // nao diz isso para cores aninhadas, entao o cast fica aqui, uma vez, em vez
+  // de em cada um dos vinte tokens abaixo.
+  return resolver as unknown as string;
+}
+
 const config: Config = {
   darkMode: 'class',
   content: ['./src/**/*.{ts,tsx}'],
@@ -12,37 +41,37 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: 'var(--color-brand)',
-          strong: 'var(--color-brand-strong)',
-          hover: 'var(--color-brand-hover)',
-          soft: 'var(--color-brand-soft)',
-          contrast: 'var(--color-brand-contrast)',
+          DEFAULT: cor('--color-brand'),
+          strong: cor('--color-brand-strong'),
+          hover: cor('--color-brand-hover'),
+          soft: cor('--color-brand-soft'),
+          contrast: cor('--color-brand-contrast'),
           // Tinta de quem escreve sobre o painel de marca, em qualquer tema.
-          panel: 'var(--color-brand-panel)',
-          ink: 'var(--color-brand-ink)',
-          'ink-muted': 'var(--color-brand-ink-muted)',
-          hairline: 'var(--color-brand-hairline)',
+          panel: cor('--color-brand-panel'),
+          ink: cor('--color-brand-ink'),
+          'ink-muted': cor('--color-brand-ink-muted'),
+          hairline: cor('--color-brand-hairline'),
         },
-        canvas: 'var(--color-canvas)',
+        canvas: cor('--color-canvas'),
         surface: {
-          DEFAULT: 'var(--color-surface)',
-          raised: 'var(--color-surface-raised)',
-          sunken: 'var(--color-surface-sunken)',
+          DEFAULT: cor('--color-surface'),
+          raised: cor('--color-surface-raised'),
+          sunken: cor('--color-surface-sunken'),
         },
         line: {
-          DEFAULT: 'var(--color-line)',
-          strong: 'var(--color-line-strong)',
+          DEFAULT: cor('--color-line'),
+          strong: cor('--color-line-strong'),
         },
         text: {
-          1: 'var(--color-text-1)',
-          2: 'var(--color-text-2)',
-          3: 'var(--color-text-3)',
+          1: cor('--color-text-1'),
+          2: cor('--color-text-2'),
+          3: cor('--color-text-3'),
         },
-        positive: 'var(--color-positive)',
-        warning: 'var(--color-warning)',
-        danger: 'var(--color-danger)',
-        'danger-ink': 'var(--color-danger-ink)',
-        info: 'var(--color-info)',
+        positive: cor('--color-positive'),
+        warning: cor('--color-warning'),
+        danger: cor('--color-danger'),
+        'danger-ink': cor('--color-danger-ink'),
+        info: cor('--color-info'),
       },
       fontFamily: {
         display: ['var(--font-display)', 'Georgia', 'serif'],
