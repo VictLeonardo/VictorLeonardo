@@ -19,8 +19,23 @@ export const STATUS_LABELS: Record<MemberStatus, string> = {
 
 export const TIER_LABELS: Record<Tier, string> = {
   PADRAO: 'Padrão',
+  ACADEMY: 'Academy',
   VIP: 'VIP',
 };
+
+/**
+ * Os tiers existentes, na ordem do enum.
+ *
+ * Vale como fonte porque `TIER_LABELS` e' `Record<Tier, string>`: acrescentar
+ * um tier ao schema quebra a compilacao aqui ate' alguem dar um rotulo a ele.
+ * Quem precisa validar ou listar tiers le' daqui em vez de repetir a lista --
+ * foi uma lista repetida que fez o Academy nascer invisivel para a sessao.
+ */
+export const TIERS = Object.keys(TIER_LABELS) as Tier[];
+
+export function isTier(valor: unknown): valor is Tier {
+  return typeof valor === 'string' && valor in TIER_LABELS;
+}
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   ARTIGO: 'Artigo',
@@ -116,6 +131,7 @@ export const JOURNEY_CATEGORY_ORDER: JourneyCategory[] = [
 export function publicBadge(user: { tier: Tier; isPartner: boolean }): string {
   if (user.isPartner) return 'SM PARTNER';
   if (user.tier === 'VIP') return 'MEMBRO VIP';
+  if (user.tier === 'ACADEMY') return 'MEMBRO ACADEMY';
   return 'MEMBRO ESTRATÉGICO';
 }
 

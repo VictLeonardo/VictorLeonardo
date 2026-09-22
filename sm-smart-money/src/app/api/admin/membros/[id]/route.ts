@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { Tier } from '@prisma/client';
+import { isTier } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser, revokeAllSessions } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
@@ -21,7 +23,7 @@ const schema = z.object({
   company: z.string().trim().max(120).optional().or(z.literal('')),
   plan: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']).optional(),
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).optional(),
-  tier: z.enum(['PADRAO', 'VIP']).optional(),
+  tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).optional(),
   isPartner: z.boolean().optional(),
 });
 

@@ -1,3 +1,4 @@
+import type { Tier } from '@prisma/client';
 import 'server-only';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
@@ -22,7 +23,7 @@ export type SessionUser = {
   role: 'MEMBER' | 'ADMIN';
   status: 'ATIVO' | 'CANCELADO' | 'PENDENTE';
   plan: 'PADRAO' | 'COM_DESCONTO' | 'CORTESIA';
-  tier: 'PADRAO' | 'VIP';
+  tier: Tier;
   isPartner: boolean;
   jobTitle: string | null;
   avatarUrl: string | null;
@@ -92,7 +93,7 @@ export function claimsFromUser(user: {
   name: string;
   role: 'MEMBER' | 'ADMIN';
   status: 'ATIVO' | 'CANCELADO' | 'PENDENTE';
-  tier: 'PADRAO' | 'VIP';
+  tier: Tier;
 }): AccessClaims {
   return {
     sub: user.id,

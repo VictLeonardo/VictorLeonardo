@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { PLAN_LABELS, STATUS_LABELS } from '@/lib/domain';
+import { PLAN_LABELS, STATUS_LABELS, TIER_LABELS } from '@/lib/domain';
 
 export function NewMemberButton() {
   const router = useRouter();
@@ -107,8 +107,11 @@ export function NewMemberButton() {
               hint="VIP libera conteúdos e espaços restritos."
             >
               <Select id="new-tier" name="tier" defaultValue="PADRAO">
-                <option value="PADRAO">Padrão</option>
-                <option value="VIP">VIP</option>
+                {Object.entries(TIER_LABELS).map(([valor, rotulo]) => (
+                  <option key={valor} value={valor}>
+                    {rotulo}
+                  </option>
+                ))}
               </Select>
             </Field>
           </div>

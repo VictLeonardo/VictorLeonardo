@@ -44,8 +44,11 @@ enum MemberStatus {
   PENDENTE
 }
 
+/// Nivel de acesso do membro. A ordem e' a de menor para maior alcance, e e'
+/// ela que a matriz de acesso por tela usa para se explicar na interface.
 enum Tier {
   PADRAO
+  ACADEMY
   VIP
 }
 

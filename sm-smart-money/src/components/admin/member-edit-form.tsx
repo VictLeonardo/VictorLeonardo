@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { PLAN_LABELS, STATUS_LABELS } from '@/lib/domain';
+import { PLAN_LABELS, STATUS_LABELS, TIER_LABELS } from '@/lib/domain';
 
 export function MemberEditForm({
   member,
@@ -133,8 +133,11 @@ export function MemberEditForm({
             </Field>
             <Field label="Tier de acesso" htmlFor="edit-tier">
               <Select id="edit-tier" name="tier" defaultValue={member.tier}>
-                <option value="PADRAO">Padrão</option>
-                <option value="VIP">VIP</option>
+                {Object.entries(TIER_LABELS).map(([valor, rotulo]) => (
+                  <option key={valor} value={valor}>
+                    {rotulo}
+                  </option>
+                ))}
               </Select>
             </Field>
           </div>

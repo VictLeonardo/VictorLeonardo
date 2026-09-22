@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { SignJWT, jwtVerify } from 'jose';
+import type { Tier } from '@prisma/client';
 import { env } from '@/lib/env';
+import { isTier } from '@/lib/domain';
 
 export const ACCESS_COOKIE = 'sm_access';
 export const REFRESH_COOKIE = 'sm_refresh';
@@ -12,7 +14,7 @@ export type AccessClaims = {
   name: string;
   role: 'MEMBER' | 'ADMIN';
   status: 'ATIVO' | 'CANCELADO' | 'PENDENTE';
-  tier: 'PADRAO' | 'VIP';
+  tier: Tier;
 };
 
 const secret = new TextEncoder().encode(env.AUTH_SECRET);
@@ -38,7 +40,10 @@ export async function verifyAccessToken(token: string): Promise<AccessClaims | n
       name: String(payload.name ?? ''),
       role: payload.role === 'ADMIN' ? 'ADMIN' : 'MEMBER',
       status: (payload.status as AccessClaims['status']) ?? 'PENDENTE',
-      tier: payload.tier === 'VIP' ? 'VIP' : 'PADRAO',
+      // Validado contra os tiers que existem, nao contra um deles. A forma
+      // antiga (`=== 'VIP' ? 'VIP' : 'PADRAO'`) rebaixava para PADRAO qualquer
+      // tier novo, sem erro nenhum: um membro Academy entraria como Padrao.
+      tier: isTier(payload.tier) ? payload.tier : 'PADRAO',
     };
   } catch {
     return null;
