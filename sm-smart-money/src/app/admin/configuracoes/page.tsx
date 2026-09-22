@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
-import { mailConfigured, wahaConfigured } from '@/lib/env';
+import { mailConfigured, provedorWhatsapp, whatsappConfigured } from '@/lib/env';
+import { NOME_DO_PROVEDOR } from '@/lib/whatsapp';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,11 +74,19 @@ export default async function AdminSettingsPage() {
 
             <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
               <div>
-                <dt className="text-sm font-medium text-text-1">WhatsApp (WAHA)</dt>
-                <dd className="text-xs text-text-3">WAHA_BASE_URL · WAHA_API_KEY · WAHA_SESSION</dd>
+                <dt className="text-sm font-medium text-text-1">
+                  {whatsappConfigured
+                    ? `WhatsApp (${NOME_DO_PROVEDOR[provedorWhatsapp]})`
+                    : 'WhatsApp'}
+                </dt>
+                <dd className="text-xs text-text-3">
+                  {whatsappConfigured && provedorWhatsapp === 'waha'
+                    ? 'WAHA_BASE_URL · WAHA_API_KEY · WAHA_SESSION'
+                    : 'ZAPI_INSTANCE_ID · ZAPI_TOKEN · ZAPI_CLIENT_TOKEN'}
+                </dd>
               </div>
-              <Badge tone={wahaConfigured ? 'positive' : 'warning'}>
-                {wahaConfigured ? 'Configurado' : 'Não configurado'}
+              <Badge tone={whatsappConfigured ? 'positive' : 'warning'}>
+                {whatsappConfigured ? 'Configurado' : 'Não configurado'}
               </Badge>
             </div>
 
@@ -85,7 +94,7 @@ export default async function AdminSettingsPage() {
               <div>
                 <dt className="text-sm font-medium text-text-1">Rotinas agendadas</dt>
                 <dd className="text-xs text-text-3">
-                  CRON_SECRET protege /api/cron/waha-health e /api/cron/agendamentos
+                  CRON_SECRET protege /api/cron/whatsapp-health e /api/cron/agendamentos
                 </dd>
               </div>
               <Badge tone={process.env.CRON_SECRET ? 'positive' : 'warning'}>

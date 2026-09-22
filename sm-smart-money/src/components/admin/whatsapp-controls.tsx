@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog, Modal } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 
-export function WahaControls({
+export function WhatsappControls({
   connected,
   configured,
 }: {
@@ -70,7 +70,7 @@ export function WahaControls({
       <ConfirmDialog
         open={restartOpen}
         onOpenChange={setRestartOpen}
-        title="Reiniciar a instância WAHA?"
+        title="Reiniciar a instância de WhatsApp?"
         description="A sessão é reiniciada e os envios ficam indisponíveis por alguns segundos. A vinculação do número é preservada."
         confirmLabel="Reiniciar"
         tone="primary"
@@ -106,7 +106,7 @@ export function WahaControls({
       >
         <div className="flex flex-col items-center gap-4">
           {qr ? (
-            // eslint-disable-next-line @next/next/no-img-element -- data URL vinda da WAHA
+            // eslint-disable-next-line @next/next/no-img-element -- data URL vinda do provedor
             <img
               src={qr}
               alt="QR Code de pareamento do WhatsApp"

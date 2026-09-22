@@ -135,7 +135,7 @@ export function MemberActions({ member }: { member: Member }) {
         open={whatsappOpen}
         onOpenChange={setWhatsappOpen}
         title="Enviar mensagem no WhatsApp"
-        description={`Via WAHA para ${member.phone ?? '—'}`}
+        description={`Via WhatsApp para ${member.phone ?? '—'}`}
       >
         <form
           onSubmit={async (event) => {

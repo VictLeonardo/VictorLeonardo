@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/lib/env';
 import { isAuthorizedCron } from '@/lib/cron';
-import { getWahaStatus, WAHA_STATE_LABELS } from '@/lib/waha';
+import { getWhatsappStatus, WHATSAPP_STATE_LABELS } from '@/lib/whatsapp';
 import { renderEmail, sendMail } from '@/lib/mail';
 
 export const dynamic = 'force-dynamic';
@@ -20,13 +20,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
   }
 
-  const status = await getWahaStatus();
+  const status = await getWhatsappStatus();
 
   if (!status.configured) {
     return NextResponse.json({ ok: true, skipped: 'WAHA não configurada' });
   }
 
-  const previous = await prisma.wahaHealthCheck.findFirst({ orderBy: { checkedAt: 'desc' } });
+  const previous = await prisma.whatsappHealthCheck.findFirst({ orderBy: { checkedAt: 'desc' } });
   const justWentDown = !status.connected && (previous?.connected ?? true);
 
   let alertSent = false;
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       html: renderEmail({
         title: 'A instância WAHA caiu',
         intro: `O health check detectou a instancia fora do ar. Estado atual: ${
-          WAHA_STATE_LABELS[status.state] ?? status.state
+          WHATSAPP_STATE_LABELS[status.state] ?? status.state
         }.`,
         body: status.detail ? `<p>Detalhe técnico: ${status.detail}</p>` : undefined,
         ctaLabel: 'Abrir painel do WhatsApp',
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     alertSent = result.ok;
   }
 
-  await prisma.wahaHealthCheck.create({
+  await prisma.whatsappHealthCheck.create({
     data: {
       connected: status.connected,
       state: status.state,

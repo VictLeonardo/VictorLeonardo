@@ -101,7 +101,7 @@ async function main() {
     prisma.emailLog.deleteMany(),
     prisma.whatsappLog.deleteMany(),
     prisma.auditLog.deleteMany(),
-    prisma.wahaHealthCheck.deleteMany(),
+    prisma.whatsappHealthCheck.deleteMany(),
     ...(incluirConfig
       ? [prisma.journeyQuestion.deleteMany(), prisma.messageTemplate.deleteMany()]
       : []),

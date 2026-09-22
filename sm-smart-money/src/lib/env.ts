@@ -49,9 +49,18 @@ const schema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().default('SM Smart Money <contato@smboard.com.br>'),
   ADMIN_ALERT_EMAIL: z.string().optional(),
+  // WAHA, auto-hospedada. Continua suportada: quando houver VPS ela volta sem
+  // custo de licenca, e a troca e' so' de variavel.
   WAHA_BASE_URL: z.string().optional(),
   WAHA_API_KEY: z.string().optional(),
   WAHA_SESSION: z.string().default('default'),
+  // Z-API, servico hospedado. Os tres primeiros sao credenciais.
+  ZAPI_INSTANCE_ID: z.string().optional(),
+  ZAPI_TOKEN: z.string().optional(),
+  ZAPI_CLIENT_TOKEN: z.string().optional(),
+  // Explicito so' quando os dois estiverem configurados ao mesmo tempo, o que
+  // acontece durante uma troca. Fora disso, quem decide e' a presenca.
+  WHATSAPP_PROVIDER: z.enum(['waha', 'zapi']).optional(),
   CRON_SECRET: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
@@ -98,8 +107,25 @@ if (process.env.NODE_ENV === 'production' && env.NEXT_PUBLIC_APP_URL.includes('l
 /** O envio real so acontece quando o SMTP esta completamente configurado. */
 export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD);
 
-/** WAHA e' opcional em desenvolvimento; a UI mostra "não configurada". */
+/**
+ * O WhatsApp e' opcional em desenvolvimento; a UI mostra "não configurada".
+ *
+ * Nenhum provedor de WhatsApp e' oficial -- todos dirigem uma conta real e todos
+ * podem ser banidos --, entao a plataforma suporta dois e escolhe por variavel.
+ * O Z-API tem precedencia quando ambos estao presentes, porque estar presente
+ * e' mais provavel ser o novo do que sobra do antigo; `WHATSAPP_PROVIDER`
+ * desempata quando isso nao for verdade.
+ */
+export const zapiConfigured = Boolean(
+  env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN && env.ZAPI_CLIENT_TOKEN,
+);
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
+
+export const provedorWhatsapp: 'waha' | 'zapi' =
+  env.WHATSAPP_PROVIDER ?? (zapiConfigured ? 'zapi' : 'waha');
+
+export const whatsappConfigured =
+  provedorWhatsapp === 'zapi' ? zapiConfigured : wahaConfigured;
 
 /**
  * A cobranca so' entra em cena com as tres variaveis presentes.

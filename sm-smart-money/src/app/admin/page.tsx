@@ -12,13 +12,13 @@ import {
   topContent,
   type PeriodKey,
 } from '@/server/analytics';
-import { getWahaStatus } from '@/lib/waha';
+import { getWhatsappStatus } from '@/lib/whatsapp';
 import { StatTile } from '@/components/charts/stat-tile';
 import { AreaChart } from '@/components/charts/area-chart';
 import { ColumnChart } from '@/components/charts/column-chart';
 import { BarList } from '@/components/charts/bar-list';
 import { PeriodFilter } from '@/components/admin/period-filter';
-import { WahaStatusChip } from '@/components/admin/waha-status-chip';
+import { WhatsappStatusChip } from '@/components/admin/whatsapp-status-chip';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { CONTENT_TYPE_LABELS, JOURNEY_CATEGORY_LABELS } from '@/lib/domain';
@@ -42,14 +42,14 @@ export default async function AdminDashboardPage({
     : '30d';
   const period = resolvePeriod(periodKey, { from: params.de, to: params.ate });
 
-  const [kpis, series, mtd, engagement, journey, profiles, waha, top] = await Promise.all([
+  const [kpis, series, mtd, engagement, journey, profiles, whatsapp, top] = await Promise.all([
     memberKpis(),
     growthSeries(12),
     monthToDateGrowth(),
     engagementBySection(period.from, period.to),
     journeyStats(),
     profileStats(),
-    getWahaStatus(),
+    getWhatsappStatus(),
     topContent(period.from, period.to),
   ]);
 
@@ -61,7 +61,7 @@ export default async function AdminDashboardPage({
         eyebrow="Visão geral"
         title="Dashboard"
         description={`Métricas da comunidade. Engajamento e conteúdo referentes a: ${period.label.toLowerCase()}.`}
-        actions={<WahaStatusChip status={waha} />}
+        actions={<WhatsappStatusChip status={whatsapp} />}
       >
         <PeriodFilter value={periodKey} />
       </SectionHeader>

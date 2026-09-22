@@ -74,7 +74,7 @@ export function NewMemberButton() {
             <Field label="E-mail" htmlFor="new-email" required>
               <Input id="new-email" name="email" type="email" required />
             </Field>
-            <Field label="WhatsApp" htmlFor="new-phone" hint="Com DDD. Usado nos disparos WAHA.">
+            <Field label="WhatsApp" htmlFor="new-phone" hint="Com DDD. Usado nos disparos de WhatsApp.">
               <Input id="new-phone" name="phone" placeholder="(11) 90000-0000" />
             </Field>
             <Field label="Cargo" htmlFor="new-job">

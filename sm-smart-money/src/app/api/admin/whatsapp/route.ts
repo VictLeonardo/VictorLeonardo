@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
-import { getWahaQrCode, restartWahaSession, stopWahaSession } from '@/lib/waha';
+import { getWhatsappQrCode, restartWhatsappSession, disconnectWhatsappSession } from '@/lib/whatsapp';
 
 const schema = z.object({ action: z.enum(['reiniciar', 'desconectar', 'qrcode']) });
 
@@ -18,14 +18,14 @@ export async function POST(request: Request) {
   }
 
   if (parsed.data.action === 'qrcode') {
-    const qr = await getWahaQrCode();
+    const qr = await getWhatsappQrCode();
     return qr
       ? NextResponse.json({ ok: true, qr })
       : NextResponse.json({ error: 'QR Code indisponível no momento' }, { status: 502 });
   }
 
   const result =
-    parsed.data.action === 'reiniciar' ? await restartWahaSession() : await stopWahaSession();
+    parsed.data.action === 'reiniciar' ? await restartWhatsappSession() : await disconnectWhatsappSession();
 
   await recordAudit({
     actor: admin,

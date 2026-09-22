@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
 import { renderEmail, sendMail } from '@/lib/mail';
-import { sendWhatsappMessage } from '@/lib/waha';
+import { sendWhatsappMessage } from '@/lib/whatsapp';
 import { createOpaqueToken } from '@/lib/auth/tokens';
 import { env } from '@/lib/env';
 

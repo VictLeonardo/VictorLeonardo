@@ -4,6 +4,6 @@
   "regions": ["gru1"],
   "crons": [
     { "path": "/api/cron/agendamentos", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/waha-health", "schedule": "30 9 * * *" }
+    { "path": "/api/cron/whatsapp-health", "schedule": "30 9 * * *" }
   ]
 }

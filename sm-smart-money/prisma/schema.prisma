@@ -465,7 +465,10 @@ model MessageTemplate {
   @@unique([channel, key])
 }
 
-model WahaHealthCheck {
+/// Sonda diaria da conexao de WhatsApp. O nome da tabela continua o antigo por
+/// `@@map`: renomear o modelo deixa o codigo honesto -- a plataforma nao depende
+/// mais da WAHA -- sem custar uma migration que so' mudaria uma palavra.
+model WhatsappHealthCheck {
   id        String   @id @default(cuid())
   connected Boolean
   state     String
@@ -474,6 +477,7 @@ model WahaHealthCheck {
   checkedAt DateTime @default(now())
 
   @@index([checkedAt])
+  @@map("WahaHealthCheck")
 }
 
 model ActivityLog {

@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import { CheckCircle2, XCircle } from 'lucide-react';
-import type { WahaStatus } from '@/lib/waha';
-import { WAHA_STATE_LABELS } from '@/lib/waha';
+import type { StatusWhatsapp } from '@/lib/whatsapp';
+import { WHATSAPP_STATE_LABELS } from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
 
 /**
- * Estado da instancia WAHA em tempo real. Icone + texto: o estado nunca depende
+ * Estado da instancia de WhatsApp em tempo real. Icone + texto: o estado nunca depende
  * apenas da cor.
  */
-export function WahaStatusChip({ status }: { status: WahaStatus }) {
-  const label = WAHA_STATE_LABELS[status.state] ?? status.state;
+export function WhatsappStatusChip({ status }: { status: StatusWhatsapp }) {
+  const label = WHATSAPP_STATE_LABELS[status.state] ?? status.state;
 
   return (
     <Link

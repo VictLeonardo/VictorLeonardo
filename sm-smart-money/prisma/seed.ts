@@ -328,7 +328,7 @@ async function main() {
     prisma.emailLog.deleteMany(),
     prisma.whatsappLog.deleteMany(),
     prisma.auditLog.deleteMany(),
-    prisma.wahaHealthCheck.deleteMany(),
+    prisma.whatsappHealthCheck.deleteMany(),
     prisma.messageTemplate.deleteMany(),
     prisma.refreshToken.deleteMany(),
     prisma.passwordResetToken.deleteMany(),
@@ -1059,7 +1059,7 @@ async function main() {
     })),
   });
 
-  await prisma.wahaHealthCheck.createMany({
+  await prisma.whatsappHealthCheck.createMany({
     data: [
       { connected: true, state: 'WORKING', checkedAt: daysAgo(1) },
       { connected: false, state: 'FAILED', detail: 'Timeout na API', alertSent: true, checkedAt: daysAgo(4) },

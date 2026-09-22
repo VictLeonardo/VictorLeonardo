@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
-import { getWahaStatus, WAHA_STATE_LABELS } from '@/lib/waha';
+import { provedorWhatsapp as provedorEmUso } from '@/lib/env';
+import { getWhatsappStatus, nomeDoProvedorAtual, WHATSAPP_STATE_LABELS } from '@/lib/whatsapp';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { WahaControls } from '@/components/admin/waha-controls';
+import { WhatsappControls } from '@/components/admin/whatsapp-controls';
 import { formatDate, formatPhone } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'WhatsApp' };
@@ -14,8 +15,16 @@ export const dynamic = 'force-dynamic';
 export default async function AdminWhatsappPage() {
   await requireAdmin('/admin/whatsapp');
 
+  const provedor = nomeDoProvedorAtual();
+  // O id da instancia identifica a conta no Z-API e viaja na URL de toda
+  // chamada: mostrar inteiro na tela seria expor metade da credencial.
+  const identificador =
+    provedorEmUso === 'zapi'
+      ? (process.env.ZAPI_INSTANCE_ID ?? '—').slice(0, 6) + '…'
+      : (process.env.WAHA_SESSION ?? 'default');
+
   const [status, logs, lastChecks] = await Promise.all([
-    getWahaStatus(),
+    getWhatsappStatus(),
     prisma.whatsappLog.findMany({
       orderBy: { sentAt: 'desc' },
       take: 40,
@@ -30,14 +39,14 @@ export default async function AdminWhatsappPage() {
         user: { select: { name: true } },
       },
     }),
-    prisma.wahaHealthCheck.findMany({ orderBy: { checkedAt: 'desc' }, take: 10 }),
+    prisma.whatsappHealthCheck.findMany({ orderBy: { checkedAt: 'desc' }, take: 10 }),
   ]);
 
   return (
     <div className="space-y-6">
       <SectionHeader
         eyebrow="Integração"
-        title="WhatsApp (WAHA)"
+        title={provedor ? `WhatsApp (${provedor})` : 'WhatsApp'}
         description="Estado da instância, reconexão por QR Code e histórico de disparos."
       />
 
@@ -48,16 +57,16 @@ export default async function AdminWhatsappPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold text-text-1">Instância</h2>
                 <Badge tone={status.connected ? 'positive' : 'danger'}>
-                  {WAHA_STATE_LABELS[status.state] ?? status.state}
+                  {WHATSAPP_STATE_LABELS[status.state] ?? status.state}
                 </Badge>
               </div>
 
               <dl className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <dt className="text-xs text-text-3">Sessão</dt>
-                  <dd className="font-mono text-sm text-text-1">
-                    {process.env.WAHA_SESSION ?? 'default'}
-                  </dd>
+                  <dt className="text-xs text-text-3">
+                    {provedorEmUso === 'zapi' ? 'Instância' : 'Sessão'}
+                  </dt>
+                  <dd className="font-mono text-sm text-text-1">{identificador}</dd>
                 </div>
                 <div>
                   <dt className="text-xs text-text-3">Número vinculado</dt>
@@ -84,7 +93,7 @@ export default async function AdminWhatsappPage() {
                 </p>
               ) : null}
 
-              <WahaControls connected={status.connected} configured={status.configured} />
+              <WhatsappControls connected={status.connected} configured={status.configured} />
             </CardContent>
           </Card>
 
