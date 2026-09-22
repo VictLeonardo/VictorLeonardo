@@ -6,6 +6,11 @@ import { AssinarButton } from '@/components/assinar-button';
 /**
  * A proposta do VIP Lounge, no painel de marca das telas de acesso.
  *
+ * Vem partida em duas porque no celular ela nao fica inteira num lugar so': a
+ * abertura abre a pagina, o formulario de login entra no meio, e os beneficios
+ * fecham embaixo. No desktop as duas metades voltam a ser uma coisa so', na
+ * coluna lateral -- por isso `VipPitch` existe, para o lado que nao parte.
+ *
  * E' cliente por um motivo so': o convite para assinar sai de cena quando o
  * visitante ja' esta no caminho da assinatura, e quem sabe disso e' a rota.
  */
@@ -20,13 +25,8 @@ const BENEFICIOS = [
   'Grupo exclusivo de WhatsApp com notícias selecionadas e análises comentadas por Júlio Damião',
 ];
 
-export function VipPitch({
-  mostrarCta,
-  preco,
-}: {
-  mostrarCta: boolean;
-  preco: string | null;
-}) {
+/** O que o VIP Lounge e', e como entrar. */
+export function VipAbertura({ mostrarCta, preco }: { mostrarCta: boolean; preco: string | null }) {
   const pathname = usePathname();
   // Na propria tela de assinatura o convite seria redundante.
   const cta = mostrarCta && pathname !== '/assinar';
@@ -47,14 +47,16 @@ export function VipPitch({
         </footer>
       </blockquote>
 
-      {/* O convite vem logo depois da frase de abertura, e nao no fim do
-          painel. No celular essa e' a diferenca entre caber na primeira tela e
-          exigir rolagem: no fim ele ficava a 88% da pagina, e quem abriu o link
-          para assinar tinha que percorrer tudo para achar como fazer isso.
+      <p className="text-sm leading-relaxed text-brand-ink-muted">
+        Por isso criamos o VIP Lounge SM Partner: um ecossistema exclusivo para empresários,
+        investidores, conselheiros e executivos que buscam decisões mais inteligentes e geração
+        consistente de valor.
+      </p>
 
-          Fica antes do paragrafo que explica o VIP Lounge de proposito: quem ja'
-          decidiu clica, e quem quer entender continua lendo logo abaixo -- o
-          botao nao interrompe nada, so' deixa de se esconder. */}
+      {/* O convite fecha a abertura: vem depois da frase e do paragrafo que
+          dizem o que se esta' assinando, e antes de qualquer outra coisa. No
+          celular a abertura abre a pagina, entao ele cabe na primeira tela sem
+          precisar disputar espaco com o resto do painel. */}
       {cta ? (
         <AssinarButton
           variant="solido"
@@ -64,13 +66,14 @@ export function VipPitch({
           chamada="Clique aqui e assine agora"
         />
       ) : null}
+    </div>
+  );
+}
 
-      <p className="text-sm leading-relaxed text-brand-ink-muted">
-        Por isso criamos o VIP Lounge SM Partner: um ecossistema exclusivo para empresários,
-        investidores, conselheiros e executivos que buscam decisões mais inteligentes e geração
-        consistente de valor.
-      </p>
-
+/** O que se leva ao entrar, e para quem o ambiente e'. */
+export function VipBeneficios() {
+  return (
+    <div className="flex max-w-xl flex-col gap-7">
       <div className="flex flex-col gap-3.5">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-ink-muted">
           Ao participar, você terá acesso a
@@ -95,7 +98,16 @@ export function VipPitch({
           Vagas limitadas.
         </p>
       </div>
+    </div>
+  );
+}
 
+/** As duas metades juntas, para a coluna lateral do desktop. */
+export function VipPitch({ mostrarCta, preco }: { mostrarCta: boolean; preco: string | null }) {
+  return (
+    <div className="flex flex-col gap-7">
+      <VipAbertura mostrarCta={mostrarCta} preco={preco} />
+      <VipBeneficios />
     </div>
   );
 }
