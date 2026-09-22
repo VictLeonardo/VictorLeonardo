@@ -1,5 +1,6 @@
 'use client';
 
+import { VISIBILITY_LABELS } from '@/lib/domain';
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import type { ContentStatus, Visibility } from '@prisma/client';
@@ -181,8 +182,11 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
             </Field>
             <Field label="Visibilidade" htmlFor="visibility" required>
               <Select id="visibility" name="visibility" defaultValue={initial.visibility}>
-                <option value="TODOS">Todos os membros</option>
-                <option value="VIP">Apenas VIP</option>
+                {Object.entries(VISIBILITY_LABELS).map(([valor, rotulo]) => (
+                  <option key={valor} value={valor}>
+                    {rotulo}
+                  </option>
+                ))}
               </Select>
             </Field>
             <Field label="Capa (URL)" htmlFor="coverUrl">

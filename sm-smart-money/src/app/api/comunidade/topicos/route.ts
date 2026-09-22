@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
-import { canSeeVip } from '@/lib/auth/guards';
+import { podeVerRestrito } from '@/lib/auth/guards';
 
 const schema = z.object({
   title: z.string().trim().min(6, 'Título muito curto').max(160),
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       body: parsed.data.body,
       category: parsed.data.category,
       // Marcar como VIP so' faz sentido para quem enxerga o espaco VIP.
-      isVip: parsed.data.isVip && canSeeVip(user),
+      isVip: parsed.data.isVip && podeVerRestrito(user),
     },
     select: { id: true },
   });

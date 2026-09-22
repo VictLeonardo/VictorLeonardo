@@ -106,7 +106,7 @@ export function NewMemberButton() {
               htmlFor="new-tier"
               hint="Define quais telas do portal o membro abre, em Configurações › Acesso por tela."
             >
-              <Select id="new-tier" name="tier" defaultValue="PADRAO">
+              <Select id="new-tier" name="tier" defaultValue="VIP">
                 {Object.entries(TIER_LABELS).map(([valor, rotulo]) => (
                   <option key={valor} value={valor}>
                     {rotulo}

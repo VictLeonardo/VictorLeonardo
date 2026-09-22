@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { TopicCategory } from '@prisma/client';
 import { MessageSquare, Users } from 'lucide-react';
-import { requireTela } from '@/lib/auth/guards';
+import { podeVerRestrito, requireTela } from '@/lib/auth/guards';
 import { listDirectory, listTopics, specialtiesInUse } from '@/server/community';
 import { SectionHeader } from '@/components/ui/section-header';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -53,7 +53,7 @@ export default async function CommunityPage({
         eyebrow="Rede"
         title="Comunidade VIP"
         description="Discussões, oportunidades e o diretório completo de membros da SM Smart Money."
-        actions={tab === 'forum' ? <NewTopicButton canPostVip={user.tier === 'VIP' || user.role === 'ADMIN'} /> : undefined}
+        actions={tab === 'forum' ? <NewTopicButton canPostVip={podeVerRestrito(user)} /> : undefined}
       >
         <div className="flex flex-col gap-4">
           <CommunityTabs active={tab} />
@@ -178,7 +178,7 @@ export default async function CommunityPage({
                     </div>
                   </div>
 
-                  <Badge tone={member.isPartner || member.tier === 'VIP' ? 'brand' : 'neutral'}>
+                  <Badge tone={member.isPartner || member.tier === 'ACADEMY' ? 'brand' : 'neutral'}>
                     {publicBadge(member)}
                   </Badge>
 

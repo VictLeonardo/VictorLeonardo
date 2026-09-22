@@ -266,7 +266,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                     <Badge tone={member.profile.isPublic ? 'positive' : 'neutral'}>
                       {member.profile.isPublic ? 'Ativo' : 'Privado'}
                     </Badge>
-                    <Badge tone={member.isPartner || member.tier === 'VIP' ? 'brand' : 'neutral'}>
+                    <Badge tone={member.isPartner || member.tier === 'ACADEMY' ? 'brand' : 'neutral'}>
                       {publicBadge(member)}
                     </Badge>
                   </div>

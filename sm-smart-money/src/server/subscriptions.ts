@@ -268,7 +268,8 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
       role: 'MEMBER',
       status: 'ATIVO',
       plan: 'PADRAO',
-      tier: 'PADRAO',
+      // Quem paga a assinatura entra no nivel de entrada, que e' o VIP.
+      tier: 'VIP',
       stripeCustomerId: customerId,
       stripeSubscriptionId: assinaturaId,
       subscriptionStatus: 'ATIVA',

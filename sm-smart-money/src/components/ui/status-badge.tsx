@@ -20,14 +20,13 @@ export function PlanBadge({ plan }: { plan: Plan }) {
  * Padrao nao rende selo: e' o caso comum, e um selo em todo mundo nao distingue
  * ninguem. Os demais tem tom proprio para se diferenciarem de relance na lista.
  */
+// Os dois rendem selo: com apenas dois niveis, nenhum e' "o caso comum" que
+// dispensaria a marcacao, e distinguir de relance na lista e' o que se quer.
 const TIER_TONE = {
-  PADRAO: null,
-  ACADEMY: 'info',
   VIP: 'brand',
+  ACADEMY: 'info',
 } as const;
 
 export function TierBadge({ tier }: { tier: Tier }) {
-  const tone = TIER_TONE[tier];
-  if (!tone) return null;
-  return <Badge tone={tone}>{TIER_LABELS[tier]}</Badge>;
+  return <Badge tone={TIER_TONE[tier]}>{TIER_LABELS[tier]}</Badge>;
 }

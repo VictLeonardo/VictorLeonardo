@@ -31,9 +31,11 @@ export async function dispatchNotification(notificationId: string) {
   const notification = await prisma.notification.findUnique({ where: { id: notificationId } });
   if (!notification || notification.sentAt) return { recipients: 0 };
 
+  // Os dois niveis sao audiencias possiveis: com apenas VIP, o Academy ficaria
+  // sem como ser avisado de nada que nao fosse para todo mundo.
   const where =
-    notification.audience === 'VIP'
-      ? { role: 'MEMBER' as const, status: 'ATIVO' as const, tier: 'VIP' as const }
+    notification.audience === 'VIP' || notification.audience === 'ACADEMY'
+      ? { role: 'MEMBER' as const, status: 'ATIVO' as const, tier: notification.audience }
       : notification.audience === 'POR_PLANO' && notification.planFilter
         ? { role: 'MEMBER' as const, status: 'ATIVO' as const, plan: notification.planFilter }
         : { role: 'MEMBER' as const, status: 'ATIVO' as const };

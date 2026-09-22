@@ -2,7 +2,7 @@ import 'server-only';
 import type { Prisma, TopicCategory } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { SessionUser } from '@/lib/auth/session';
-import { canSeeVip } from '@/lib/auth/guards';
+import { podeVerRestrito } from '@/lib/auth/guards';
 
 const topicSelect = {
   id: true,
@@ -35,7 +35,7 @@ export async function listTopics(params: {
 }) {
   return prisma.topic.findMany({
     where: {
-      ...(canSeeVip(params.user) ? {} : { isVip: false }),
+      ...(podeVerRestrito(params.user) ? {} : { isVip: false }),
       ...(params.category ? { category: params.category } : {}),
       ...(params.search
         ? {
@@ -78,7 +78,7 @@ export async function getTopic(id: string, user: SessionUser) {
   });
 
   if (!topic) return null;
-  if (topic.isVip && !canSeeVip(user)) return null;
+  if (topic.isVip && !podeVerRestrito(user)) return null;
   return topic;
 }
 

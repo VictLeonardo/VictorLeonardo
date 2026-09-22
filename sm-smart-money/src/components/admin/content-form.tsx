@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { RichEditor } from '@/components/admin/rich-editor';
 import { useToast } from '@/components/ui/toast';
-import { CONTENT_TYPE_LABELS, categoriesFor } from '@/lib/domain';
+import { CONTENT_TYPE_LABELS, VISIBILITY_LABELS, categoriesFor } from '@/lib/domain';
 
 export type ContentFormValues = {
   id?: string;
@@ -274,8 +274,11 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
 
             <Field label="Visibilidade" htmlFor="visibility" required>
               <Select id="visibility" name="visibility" defaultValue={initial.visibility}>
-                <option value="TODOS">Todos os membros</option>
-                <option value="VIP">Apenas VIP</option>
+                {Object.entries(VISIBILITY_LABELS).map(([valor, rotulo]) => (
+                  <option key={valor} value={valor}>
+                    {rotulo}
+                  </option>
+                ))}
               </Select>
             </Field>
 

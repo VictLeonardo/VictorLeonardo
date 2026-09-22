@@ -40,10 +40,9 @@ export async function verifyAccessToken(token: string): Promise<AccessClaims | n
       name: String(payload.name ?? ''),
       role: payload.role === 'ADMIN' ? 'ADMIN' : 'MEMBER',
       status: (payload.status as AccessClaims['status']) ?? 'PENDENTE',
-      // Validado contra os tiers que existem, nao contra um deles. A forma
-      // antiga (`=== 'VIP' ? 'VIP' : 'PADRAO'`) rebaixava para PADRAO qualquer
-      // tier novo, sem erro nenhum: um membro Academy entraria como Padrao.
-      tier: isTier(payload.tier) ? payload.tier : 'PADRAO',
+      // Validado contra os tiers que existem, nao contra um deles. Na duvida
+      // cai no nivel de entrada, que e' o que concede menos.
+      tier: isTier(payload.tier) ? payload.tier : 'VIP',
     };
   } catch {
     return null;

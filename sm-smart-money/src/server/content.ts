@@ -2,7 +2,7 @@ import 'server-only';
 import type { ContentType, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { SessionUser } from '@/lib/auth/session';
-import { canSeeVip } from '@/lib/auth/guards';
+import { podeVer, visibilityFilter } from '@/lib/auth/guards';
 
 /**
  * Filtro base de leitura do portal. Publicado, com data de publicacao ja' passada
@@ -12,7 +12,7 @@ export function publishedFilter(user: SessionUser | null): Prisma.ContentWhereIn
   return {
     status: 'PUBLICADO',
     publishedAt: { lte: new Date() },
-    ...(canSeeVip(user) ? {} : { visibility: 'TODOS' }),
+    ...visibilityFilter(user),
   };
 }
 
@@ -77,7 +77,7 @@ export async function getContentBySlug(slug: string, user: SessionUser | null) {
   const isPublished = content.status === 'PUBLICADO' && content.publishedAt && content.publishedAt <= new Date();
   // Admin enxerga rascunho e agendado para conferir antes de publicar.
   if (!isPublished && user?.role !== 'ADMIN') return null;
-  if (content.visibility === 'VIP' && !canSeeVip(user)) return null;
+  if (!podeVer(user, content.visibility)) return null;
 
   return content;
 }

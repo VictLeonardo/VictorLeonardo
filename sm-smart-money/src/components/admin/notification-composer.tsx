@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import type { NotificationAudience } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { Bell, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,15 +9,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { PLAN_LABELS } from '@/lib/domain';
+import { AUDIENCE_LABELS, PLAN_LABELS } from '@/lib/domain';
 
-type Audience = 'TODOS' | 'POR_PLANO' | 'VIP';
-
-const AUDIENCE_LABEL: Record<Audience, string> = {
-  TODOS: 'Todos os membros ativos',
-  POR_PLANO: 'Segmento por plano',
-  VIP: 'Somente membros VIP',
-};
+type Audience = NotificationAudience;
 
 /** Notificacao in-app para os membros (G10), com preview antes do disparo. */
 export function NotificationComposer() {
@@ -119,7 +114,7 @@ export function NotificationComposer() {
               value={audience}
               onChange={(e) => setAudience(e.target.value as Audience)}
             >
-              {Object.entries(AUDIENCE_LABEL).map(([value, label]) => (
+              {Object.entries(AUDIENCE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
@@ -169,7 +164,7 @@ export function NotificationComposer() {
           description={
             scheduledFor
               ? 'A notificação será materializada na data marcada, para quem estiver ativo naquele momento.'
-              : `Sera entregue imediatamente para: ${AUDIENCE_LABEL[audience].toLowerCase()}${
+              : `Sera entregue imediatamente para: ${AUDIENCE_LABELS[audience].toLowerCase()}${
                   audience === 'POR_PLANO'
                     ? ` (${PLAN_LABELS[planFilter as keyof typeof PLAN_LABELS]})`
                     : ''

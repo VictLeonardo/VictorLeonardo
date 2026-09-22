@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { Visibility } from '@prisma/client';
+import { isVisibility } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
@@ -15,7 +17,7 @@ export const contentSchema = z.object({
   coverUrl: z.string().trim().url().optional().or(z.literal('')),
   category: z.string().trim().min(2, 'Escolha uma categoria').max(60),
   status: z.enum(['RASCUNHO', 'PUBLICADO', 'ARQUIVADO']),
-  visibility: z.enum(['TODOS', 'VIP']),
+  visibility: z.custom<Visibility>(isVisibility, { message: 'Visibilidade inválida' }),
   publishedAt: z.string().optional().or(z.literal('')),
   scheduledFor: z.string().optional().or(z.literal('')),
   authorName: z.string().trim().max(120).optional().or(z.literal('')),

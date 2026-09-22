@@ -2,14 +2,14 @@ import 'server-only';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { SessionUser } from '@/lib/auth/session';
-import { canSeeVip } from '@/lib/auth/guards';
+import { podeVer, visibilityFilter } from '@/lib/auth/guards';
 import { env } from '@/lib/env';
 import { appHost } from '@/lib/utils';
 
 export function lectureFilter(user: SessionUser | null): Prisma.LectureWhereInput {
   return {
     status: 'PUBLICADO',
-    ...(canSeeVip(user) ? {} : { visibility: 'TODOS' }),
+    ...visibilityFilter(user),
   };
 }
 
@@ -45,7 +45,7 @@ export async function getLectureBySlug(slug: string, user: SessionUser | null) {
   const lecture = await prisma.lecture.findUnique({ where: { slug }, include: lectureInclude });
   if (!lecture) return null;
   if (lecture.status !== 'PUBLICADO' && user?.role !== 'ADMIN') return null;
-  if (lecture.visibility === 'VIP' && !canSeeVip(user)) return null;
+  if (!podeVer(user, lecture.visibility)) return null;
   return lecture;
 }
 

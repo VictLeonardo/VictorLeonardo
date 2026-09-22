@@ -18,7 +18,7 @@ const schema = z.object({
   company: z.string().trim().max(120).optional().or(z.literal('')),
   plan: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']),
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).default('ATIVO'),
-  tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).default('PADRAO'),
+  tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).default('VIP'),
   isPartner: z.boolean().default(false),
   sendWelcome: z.boolean().default(true),
 });

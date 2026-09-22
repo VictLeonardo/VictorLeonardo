@@ -10,17 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { NotificationComposer } from '@/components/admin/notification-composer';
 import { DispatchPanel } from '@/components/admin/dispatch-panel';
 import { KeyRound, MailPlus } from 'lucide-react';
-import { PLAN_LABELS } from '@/lib/domain';
+import { AUDIENCE_LABELS, PLAN_LABELS } from '@/lib/domain';
 import { formatDate } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'Notificações' };
 export const dynamic = 'force-dynamic';
-
-const AUDIENCE_LABEL = {
-  TODOS: 'Todos os membros ativos',
-  POR_PLANO: 'Segmento por plano',
-  VIP: 'Somente VIP',
-};
 
 export default async function AdminNotificationsPage() {
   await requireAdmin('/admin/notificacoes');
@@ -148,7 +142,7 @@ export default async function AdminNotificationsPage() {
                         <p className="line-clamp-1 text-xs text-text-3">{item.body}</p>
                       </td>
                       <td className="py-2.5 pr-4 text-text-2">
-                        {AUDIENCE_LABEL[item.audience]}
+                        {AUDIENCE_LABELS[item.audience]}
                         {item.planFilter ? ` · ${PLAN_LABELS[item.planFilter]}` : ''}
                       </td>
                       <td className="py-2.5 pr-4">

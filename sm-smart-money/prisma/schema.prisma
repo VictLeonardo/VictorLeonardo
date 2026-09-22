@@ -44,12 +44,16 @@ enum MemberStatus {
   PENDENTE
 }
 
-/// Nivel de acesso do membro. A ordem e' a de menor para maior alcance, e e'
-/// ela que a matriz de acesso por tela usa para se explicar na interface.
+/// Nivel de acesso do membro. Sao dois, e a ordem e' a de menor para maior
+/// alcance -- e' ela que a matriz de acesso por tela usa para se explicar.
+///
+/// VIP e' o nivel de entrada, o que a assinatura do Stripe entrega. Academy e'
+/// o de cima, concedido. Os nomes enganam quem leu a versao anterior do
+/// sistema, onde VIP era o topo: a migracao `tier_vip_academy` fez a troca
+/// cruzada -- quem era PADRAO virou VIP, quem era VIP virou ACADEMY.
 enum Tier {
-  PADRAO
-  ACADEMY
   VIP
+  ACADEMY
 }
 
 /// Espelho do estado da assinatura no Stripe. Nao decide acesso sozinho: quem
@@ -72,7 +76,7 @@ model User {
   role         Role         @default(MEMBER)
   plan         Plan         @default(PADRAO)
   status       MemberStatus @default(PENDENTE)
-  tier         Tier         @default(PADRAO)
+  tier         Tier         @default(VIP)
   isPartner    Boolean      @default(false)
   joinedAt     DateTime     @default(now())
   canceledAt   DateTime?
@@ -176,9 +180,13 @@ enum ContentStatus {
   ARQUIVADO
 }
 
+/// Quem enxerga um conteudo. `TODOS` alcanca os dois niveis; os demais valem
+/// so' para o nivel homonimo, do mesmo jeito que a matriz de telas trata cada
+/// tier em separado.
 enum Visibility {
   TODOS
   VIP
+  ACADEMY
 }
 
 model Content {
@@ -361,6 +369,7 @@ enum NotificationAudience {
   TODOS
   POR_PLANO
   VIP
+  ACADEMY
 }
 
 model Notification {

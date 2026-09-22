@@ -265,7 +265,7 @@ export function ProfileForm({
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-text-1">Perfil público</h2>
-              <Badge tone={user.isPartner || user.tier === 'VIP' ? 'brand' : 'neutral'}>
+              <Badge tone={user.isPartner || user.tier === 'ACADEMY' ? 'brand' : 'neutral'}>
                 {publicBadge(user)}
               </Badge>
             </div>

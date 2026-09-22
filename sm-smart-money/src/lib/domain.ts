@@ -1,4 +1,13 @@
-import type { ContentType, JourneyCategory, Plan, MemberStatus, Tier, TopicCategory } from '@prisma/client';
+import type {
+  ContentType,
+  JourneyCategory,
+  Plan,
+  MemberStatus,
+  NotificationAudience,
+  Tier,
+  TopicCategory,
+  Visibility,
+} from '@prisma/client';
 
 /**
  * Vocabulario compartilhado entre portal e admin. Deixar os rotulos aqui evita
@@ -18,10 +27,36 @@ export const STATUS_LABELS: Record<MemberStatus, string> = {
 };
 
 export const TIER_LABELS: Record<Tier, string> = {
-  PADRAO: 'Padrão',
-  ACADEMY: 'Academy',
   VIP: 'VIP',
+  ACADEMY: 'Academy',
 };
+
+/**
+ * Quem alcanca cada conteudo. Os rotulos dizem "apenas" nos dois niveis porque
+ * nao ha' hierarquia entre eles: marcar Academy tira o conteudo dos VIPs tanto
+ * quanto marcar VIP o tira dos Academy.
+ */
+export const VISIBILITY_LABELS: Record<Visibility, string> = {
+  TODOS: 'Todos os membros',
+  VIP: 'Apenas VIP',
+  ACADEMY: 'Apenas Academy',
+};
+
+/**
+ * Para quem vai uma notificacao. Estava escrito em dois lugares -- a pagina e o
+ * compositor --, cada um com um texto ligeiramente diferente para o mesmo
+ * valor, e um deles ficou para tras quando o Academy entrou.
+ */
+export const AUDIENCE_LABELS: Record<NotificationAudience, string> = {
+  TODOS: 'Todos os membros ativos',
+  POR_PLANO: 'Segmento por plano',
+  VIP: 'Somente VIP',
+  ACADEMY: 'Somente Academy',
+};
+
+export function isVisibility(valor: unknown): valor is Visibility {
+  return typeof valor === 'string' && valor in VISIBILITY_LABELS;
+}
 
 /**
  * Os tiers existentes, na ordem do enum.
@@ -130,9 +165,7 @@ export const JOURNEY_CATEGORY_ORDER: JourneyCategory[] = [
  */
 export function publicBadge(user: { tier: Tier; isPartner: boolean }): string {
   if (user.isPartner) return 'SM PARTNER';
-  if (user.tier === 'VIP') return 'MEMBRO VIP';
-  if (user.tier === 'ACADEMY') return 'MEMBRO ACADEMY';
-  return 'MEMBRO ESTRATÉGICO';
+  return user.tier === 'ACADEMY' ? 'MEMBRO ACADEMY' : 'MEMBRO VIP';
 }
 
 /**

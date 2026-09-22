@@ -390,7 +390,7 @@ async function main() {
     const status: MemberStatus =
       i >= 34 ? 'PENDENTE' : CANCELED_AFTER_DAYS.has(i) ? 'CANCELADO' : 'ATIVO';
     const plan = pick(plans, i);
-    const tier: Tier = i % 5 === 0 ? 'VIP' : 'PADRAO';
+    const tier: Tier = i % 5 === 0 ? 'ACADEMY' : 'VIP';
 
     // Entradas ao longo de 12 meses com curva de aceleracao: o expoente faz os
     // meses recentes receberem mais gente que os antigos, entao o grafico de
@@ -571,7 +571,7 @@ async function main() {
         liveUrl: days > 0 ? 'https://meet.example.com/sm-smart-money' : null,
         recordingUrl: days < 0 ? 'https://player.vimeo.com/video/76979871' : null,
         status: 'PUBLICADO',
-        visibility: days === -20 ? 'VIP' : 'TODOS',
+        visibility: days === -20 ? 'ACADEMY' : 'TODOS',
       },
     });
   }
@@ -590,7 +590,7 @@ async function main() {
           category,
           body: `<p>${excerpt}</p><h2>Por que isso importa agora</h2><p>A combinação de mudança regulatoria e custo de capital elevado muda a ordem das prioridades para quem administra patrimônio relevante. O ponto de partida não é o produto, é a estrutura.</p><p>Ao longo deste material, tratamos do impacto prático da decisão, dos números que sustentam a análise e das perguntas que valem ser levadas ao seu assessor.</p><h3>O que revisar ainda neste exercício</h3><ul><li>Estrutura societária e o custo efetivo de manutenção;</li><li>Distribuição de resultados e o momento de faze-la;</li><li>Veículos de investimento e a eficiência tributária de cada um.</li></ul><blockquote>Estrutura sem objetivo definido é custo. Objetivo sem estrutura é risco.</blockquote><p>A recomendação geral é revisar a estrutura a cada ciclo de doze meses, ou sempre que houver evento societário relevante.</p>`,
           status: 'PUBLICADO',
-          visibility: index === 1 ? 'VIP' : 'TODOS',
+          visibility: index === 1 ? 'ACADEMY' : 'TODOS',
           publishedAt: daysAgo(index * 11 + 2),
           authorName: index % 2 === 0 ? 'Curadoria SM Smart Money' : 'Dra. Helena Vasques',
           authorId: admin.id,
@@ -672,7 +672,7 @@ async function main() {
           excerpt: 'Material completo para consulta, com checklists e modelos práticos.',
           category: category as string,
           status: 'PUBLICADO',
-          visibility: index === 3 ? 'VIP' : 'TODOS',
+          visibility: index === 3 ? 'ACADEMY' : 'TODOS',
           publishedAt: daysAgo(index * 21 + 10),
           fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
           pageCount: pages as number,
@@ -823,7 +823,7 @@ async function main() {
     title: string;
     body: string;
     url: string | null;
-    audience: 'TODOS' | 'VIP' | 'POR_PLANO';
+    audience: 'TODOS' | 'VIP' | 'ACADEMY' | 'POR_PLANO';
     planFilter: Plan | null;
     dias: number;
     enviada: boolean;
@@ -906,8 +906,8 @@ async function main() {
     if (!aviso.enviada) continue;
 
     const publico = activeMembers.filter((m) =>
-      aviso.audience === 'VIP'
-        ? m.tier === 'VIP'
+      aviso.audience === 'VIP' || aviso.audience === 'ACADEMY'
+        ? m.tier === aviso.audience
         : aviso.audience === 'POR_PLANO'
           ? m.plan === aviso.planFilter
           : true,
@@ -1070,16 +1070,16 @@ async function main() {
   // Contas de demonstracao para a apresentacao: uma de cada estado que muda a
   // tela. Todas compartilham a mesma senha, entao a base nunca deve ir para
   // producao real.
-  const padrao = members.find((m) => m.tier === 'PADRAO' && m.status === 'ATIVO');
-  const vip = members.find((m) => m.tier === 'VIP' && m.status === 'ATIVO');
+  const membroVip = members.find((m) => m.tier === 'VIP' && m.status === 'ATIVO');
+  const membroAcademy = members.find((m) => m.tier === 'ACADEMY' && m.status === 'ATIVO');
   const cancelado = members.find((m) => m.status === 'CANCELADO');
 
   console.log('');
   console.log(`Seed concluído. Senha de todas as contas: ${PASSWORD}`);
   console.log('');
   console.log('  Administrador  admin@smboard.com.br');
-  if (padrao) console.log(`  Membro padrão  ${padrao.email}`);
-  if (vip) console.log(`  Membro VIP     ${vip.email}`);
+  if (membroVip) console.log(`  Membro VIP     ${membroVip.email}`);
+  if (membroAcademy) console.log(`  Membro Academy ${membroAcademy.email}`);
   if (cancelado) console.log(`  Cancelado      ${cancelado.email}`);
 }
 

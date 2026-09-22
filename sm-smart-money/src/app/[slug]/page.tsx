@@ -104,7 +104,7 @@ export default async function PublicProfilePage({
               <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                 <MemberAvatar name={user.name} src={profile.avatarUrl} size={96} />
                 <div className="min-w-0 space-y-2">
-                  <Badge tone={user.isPartner || user.tier === 'VIP' ? 'brand' : 'neutral'}>
+                  <Badge tone={user.isPartner || user.tier === 'ACADEMY' ? 'brand' : 'neutral'}>
                     {publicBadge(user)}
                   </Badge>
                   <h1 className="font-display text-3xl leading-tight text-text-1 sm:text-4xl">

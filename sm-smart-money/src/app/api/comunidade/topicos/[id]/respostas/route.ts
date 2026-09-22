@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
-import { canSeeVip } from '@/lib/auth/guards';
+import { podeVerRestrito } from '@/lib/auth/guards';
 
 const schema = z.object({ body: z.string().trim().min(2).max(5000) });
 
@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   });
 
   if (!topic) return NextResponse.json({ error: 'Tópico não encontrado' }, { status: 404 });
-  if (topic.isVip && !canSeeVip(user)) {
+  if (topic.isVip && !podeVerRestrito(user)) {
     return NextResponse.json({ error: 'Tópico restrito' }, { status: 403 });
   }
   if (topic.closed) {

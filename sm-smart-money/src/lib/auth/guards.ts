@@ -1,5 +1,6 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
+import type { Visibility } from '@prisma/client';
 import { getSessionUser, type SessionUser } from './session';
 import { lerMatriz, podeAbrir, telasLiberadas } from '@/server/acesso';
 
@@ -52,13 +53,41 @@ export async function requireAdmin(returnTo?: string): Promise<SessionUser> {
   return user;
 }
 
-/** Conteudo marcado como VIP so abre para tier VIP (admin ve tudo). */
-export function canSeeVip(user: SessionUser | null): boolean {
-  if (!user) return false;
-  return user.role === 'ADMIN' || user.tier === 'VIP';
+/**
+ * As visibilidades que este membro alcanca.
+ *
+ * `TODOS` vale para os dois niveis; as demais valem so' para o nivel homonimo,
+ * como a matriz de telas trata cada tier em separado. Nao ha' hierarquia: um
+ * membro Academy nao ve' o que foi marcado "apenas VIP", e vice-versa. Quem
+ * quiser alcançar os dois marca `TODOS`.
+ */
+export function visibilidadesDe(user: SessionUser | null): Visibility[] {
+  if (!user) return ['TODOS'];
+  if (user.role === 'ADMIN') return ['TODOS', 'VIP', 'ACADEMY'];
+  return ['TODOS', user.tier];
+}
+
+/** Se este membro alcanca um conteudo com esta visibilidade. */
+export function podeVer(user: SessionUser | null, visibility: Visibility): boolean {
+  return visibilidadesDe(user).includes(visibility);
 }
 
 /** Filtro de visibilidade aplicado em toda consulta de conteudo do portal. */
 export function visibilityFilter(user: SessionUser | null) {
-  return canSeeVip(user) ? undefined : { visibility: 'TODOS' as const };
+  const alcance = visibilidadesDe(user);
+  // O admin alcanca tudo: filtrar seria pedir ao banco uma condicao sempre
+  // verdadeira.
+  return alcance.length === 3 ? undefined : { visibility: { in: alcance } };
+}
+
+/**
+ * Se este membro alcanca o que era restrito ao nivel de cima.
+ *
+ * O topico do forum guarda a restricao num booleano, nao numa visibilidade, e
+ * o nivel de cima e' o Academy desde a troca cruzada dos niveis -- antes se
+ * chamava VIP, e por isso a coluna no banco ainda se chama `isVip`.
+ */
+export function podeVerRestrito(user: SessionUser | null): boolean {
+  if (!user) return false;
+  return user.role === 'ADMIN' || user.tier === 'ACADEMY';
 }

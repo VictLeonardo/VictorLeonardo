@@ -24,8 +24,8 @@ export type MemberFilters = {
 };
 
 // `tier` entra aqui porque a ordem do enum no banco e' a de menor para maior
-// abrangencia (PADRAO, ACADEMY, VIP), entao ordenar por ele agrupa de um jeito
-// que significa alguma coisa.
+// abrangencia (VIP, ACADEMY), entao ordenar por ele agrupa de um jeito que
+// significa alguma coisa.
 const SORTABLE = ['name', 'email', 'plan', 'status', 'tier', 'joinedAt', 'lastLoginAt'] as const;
 type SortField = (typeof SORTABLE)[number];
 

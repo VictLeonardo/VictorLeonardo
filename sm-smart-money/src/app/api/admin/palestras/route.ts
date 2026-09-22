@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { Visibility } from '@prisma/client';
+import { isVisibility } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
 import { fromLocalInput } from '@/lib/datetime';
 import { getSessionUser } from '@/lib/auth/session';
@@ -17,7 +19,7 @@ export const lectureSchema = z.object({
   liveUrl: z.string().trim().url().optional().or(z.literal('')),
   recordingUrl: z.string().trim().url().optional().or(z.literal('')),
   status: z.enum(['RASCUNHO', 'PUBLICADO', 'ARQUIVADO']),
-  visibility: z.enum(['TODOS', 'VIP']),
+  visibility: z.custom<Visibility>(isVisibility, { message: 'Visibilidade inválida' }),
   speakerName: z.string().trim().max(120).optional().or(z.literal('')),
   speakerJobTitle: z.string().trim().max(120).optional().or(z.literal('')),
   speakerBio: z.string().trim().max(1000).optional().or(z.literal('')),

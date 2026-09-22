@@ -1,3 +1,4 @@
+import type { Visibility } from '@prisma/client';
 import Link from 'next/link';
 import type { ContentType } from '@prisma/client';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,7 @@ export type ContentCardData = {
   category: string;
   coverUrl?: string | null;
   publishedAt?: Date | null;
-  visibility: 'TODOS' | 'VIP';
+  visibility: Visibility;
   meta?: string | null;
   viewed?: boolean;
 };
