@@ -82,7 +82,7 @@ export default async function AdminSettingsPage() {
                 <dd className="text-xs text-text-3">
                   {whatsappConfigured && provedorWhatsapp === 'waha'
                     ? 'WAHA_BASE_URL · WAHA_API_KEY · WAHA_SESSION'
-                    : 'ZAPI_INSTANCE_ID · ZAPI_TOKEN · ZAPI_CLIENT_TOKEN'}
+                    : 'ZAPI_INSTANCE_ID · ZAPI_TOKEN · ZAPI_CLIENT_TOKEN (opcional)'}
                 </dd>
               </div>
               <Badge tone={whatsappConfigured ? 'positive' : 'warning'}>

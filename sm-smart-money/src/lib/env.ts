@@ -54,7 +54,10 @@ const schema = z.object({
   WAHA_BASE_URL: z.string().optional(),
   WAHA_API_KEY: z.string().optional(),
   WAHA_SESSION: z.string().default('default'),
-  // Z-API, servico hospedado. Os tres primeiros sao credenciais.
+  // Z-API, servico hospedado. Instancia e token identificam a conta e viajam na
+  // URL; o Client-Token e' a camada extra que o painel deles chama de "Token de
+  // Seguranca da Conta". Ele nasce desligado la', entao aqui e' opcional -- mas
+  // uma vez ativado no painel, toda chamada sem ele passa a ser recusada.
   ZAPI_INSTANCE_ID: z.string().optional(),
   ZAPI_TOKEN: z.string().optional(),
   ZAPI_CLIENT_TOKEN: z.string().optional(),
@@ -116,9 +119,7 @@ export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP
  * e' mais provavel ser o novo do que sobra do antigo; `WHATSAPP_PROVIDER`
  * desempata quando isso nao for verdade.
  */
-export const zapiConfigured = Boolean(
-  env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN && env.ZAPI_CLIENT_TOKEN,
-);
+export const zapiConfigured = Boolean(env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN);
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
 
 export const provedorWhatsapp: 'waha' | 'zapi' =
