@@ -65,25 +65,41 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
     setPending(true);
 
     const data = new FormData(event.currentTarget);
+
+    /**
+     * `FormData.get` devolve `null` quando o campo nao esta' na tela, e os
+     * campos deste formulario aparecem conforme o tipo: um video nao desenha os
+     * campos de arquivo, um e-book nao desenha os de midia.
+     *
+     * `null` nao e' string nem `undefined`, entao a validacao recusava o envio
+     * inteiro por causa de um campo que a pessoa nem via -- e a mensagem que
+     * voltava era "Invalid input", sem dizer qual. Ausente tem que chegar como
+     * ausente.
+     */
+    const campo = (nome: string) => {
+      const valor = data.get(nome);
+      return typeof valor === 'string' ? valor : undefined;
+    };
+
     const payload = {
       type,
-      title: data.get('title'),
-      slug: data.get('slug'),
-      excerpt: data.get('excerpt'),
+      title: campo('title'),
+      slug: campo('slug'),
+      excerpt: campo('excerpt'),
       body,
-      coverUrl: data.get('coverUrl'),
+      coverUrl: campo('coverUrl'),
       category,
       status,
-      visibility: data.get('visibility'),
-      scheduledFor: data.get('scheduledFor'),
-      authorName: data.get('authorName'),
-      mediaUrl: data.get('mediaUrl'),
-      durationSecs: data.get('durationSecs') || undefined,
-      transcript: data.get('transcript'),
-      fileUrl: data.get('fileUrl'),
-      pageCount: data.get('pageCount') || undefined,
-      seriesName: data.get('seriesName'),
-      episodeNumber: data.get('episodeNumber') || undefined,
+      visibility: campo('visibility'),
+      scheduledFor: campo('scheduledFor'),
+      authorName: campo('authorName'),
+      mediaUrl: campo('mediaUrl'),
+      durationSecs: campo('durationSecs') || undefined,
+      transcript: campo('transcript'),
+      fileUrl: campo('fileUrl'),
+      pageCount: campo('pageCount') || undefined,
+      seriesName: campo('seriesName'),
+      episodeNumber: campo('episodeNumber') || undefined,
     };
 
     const res = await fetch(
@@ -156,7 +172,7 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
                 htmlFor="mediaUrl"
                 hint={
                   type === 'VIDEO'
-                    ? 'Embed do Vimeo/Bunny ou link direto para o arquivo.'
+                    ? 'Cole o link do YouTube ou Vimeo como ele aparece no navegador, um embed do Bunny, ou o link direto do arquivo.'
                     : 'Link direto para o arquivo de áudio (mp3).'
                 }
               >

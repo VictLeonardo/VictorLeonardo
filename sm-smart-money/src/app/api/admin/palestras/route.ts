@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { mensagemDeValidacao } from '@/lib/validacao';
 import type { Visibility } from '@prisma/client';
 import { isVisibility } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -105,7 +106,7 @@ export async function POST(request: Request) {
 
   const parsed = lectureSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    return NextResponse.json({ error: mensagemDeValidacao(parsed.error) }, { status: 400 });
   }
 
   const slug = await uniqueLectureSlug(parsed.data.title, parsed.data.slug);

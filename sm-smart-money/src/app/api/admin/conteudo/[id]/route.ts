@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { mensagemDeValidacao } from '@/lib/validacao';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
@@ -12,7 +13,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   const parsed = contentSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    return NextResponse.json({ error: mensagemDeValidacao(parsed.error) }, { status: 400 });
   }
 
   const { id } = await params;

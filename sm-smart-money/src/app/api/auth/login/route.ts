@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { mensagemDeValidacao } from '@/lib/validacao';
 import { prisma } from '@/lib/prisma';
 import { verifyPasswordConstantTime } from '@/lib/auth/password';
 import { claimsFromUser, issueSession } from '@/lib/auth/session';
@@ -13,7 +14,7 @@ const schema = z.object({
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    return NextResponse.json({ error: mensagemDeValidacao(parsed.error) }, { status: 400 });
   }
 
   const { email, password, remember } = parsed.data;

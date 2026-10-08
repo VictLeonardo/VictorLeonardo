@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Pause, Play, RotateCcw, Volume2 } from 'lucide-react';
 import { cn, formatDuration } from '@/lib/utils';
+import { resolverVideo } from '@/lib/video';
 
 /**
  * Player de video. Aceita tanto um embed (Vimeo/Bunny) quanto um arquivo direto:
@@ -19,21 +20,23 @@ export function VideoPlayer({
   poster?: string | null;
   className?: string;
 }) {
-  const isEmbed = /vimeo\.com|youtube\.com|youtu\.be|b-cdn\.net\/embed|iframe\.mediadelivery\.net/.test(url);
+  // Reconhecer que e' do YouTube nao bastava: o endereco que a pessoa cola e' o
+  // de assistir, e o iframe precisa do de embutir.
+  const video = resolverVideo(url);
 
   return (
     <div className={cn('overflow-hidden rounded-lg border border-line bg-black', className)}>
       <div className="aspect-video w-full">
-        {isEmbed ? (
+        {video.modo === 'embed' ? (
           <iframe
-            src={url}
+            src={video.url}
             title={title}
             allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
             className="size-full"
           />
         ) : (
-          <video src={url} poster={poster ?? undefined} controls preload="metadata" className="size-full">
+          <video src={video.url} poster={poster ?? undefined} controls preload="metadata" className="size-full">
             <track kind="captions" />
           </video>
         )}
