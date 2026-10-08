@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { ensureProfile } from '@/server/profile';
 
 const schema = z.object({
   name: z.string().trim().min(3).max(120),
-  jobTitle: z.string().trim().max(120).optional().or(z.literal('')),
-  company: z.string().trim().max(120).optional().or(z.literal('')),
-  phone: z.string().trim().max(30).optional().or(z.literal('')),
-  bio: z.string().trim().max(280).optional().or(z.literal('')),
-  city: z.string().trim().max(80).optional().or(z.literal('')),
-  state: z.string().trim().max(40).optional().or(z.literal('')),
-  country: z.string().trim().max(60).optional().or(z.literal('')),
+  jobTitle: opcional(z.string().trim().max(120)),
+  company: opcional(z.string().trim().max(120)),
+  phone: opcional(z.string().trim().max(30)),
+  bio: opcional(z.string().trim().max(280)),
+  city: opcional(z.string().trim().max(80)),
+  state: opcional(z.string().trim().max(40)),
+  country: opcional(z.string().trim().max(60)),
   specialties: z.array(z.string().trim().min(2).max(40)).max(8).default([]),
-  linkedinUrl: z.string().trim().url('Informe uma URL valida').optional().or(z.literal('')),
-  websiteUrl: z.string().trim().url('Informe uma URL valida').optional().or(z.literal('')),
-  avatarUrl: z.string().trim().url().optional().or(z.literal('')),
+  linkedinUrl: opcional(z.string().trim().url('Informe uma URL valida')),
+  websiteUrl: opcional(z.string().trim().url('Informe uma URL valida')),
+  avatarUrl: opcional(z.string().trim().url()),
   isPublic: z.boolean(),
   showWhatsapp: z.boolean(),
 });

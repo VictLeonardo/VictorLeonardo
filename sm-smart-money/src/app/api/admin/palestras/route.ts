@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import type { Visibility } from '@prisma/client';
 import { isVisibility } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -11,20 +11,20 @@ import { slugify } from '@/lib/utils';
 
 export const lectureSchema = z.object({
   title: z.string().trim().min(4, 'Título muito curto').max(200),
-  slug: z.string().trim().max(120).optional().or(z.literal('')),
-  description: z.string().trim().max(2000).optional().or(z.literal('')),
-  coverUrl: z.string().trim().url().optional().or(z.literal('')),
+  slug: opcional(z.string().trim().max(120)),
+  description: opcional(z.string().trim().max(2000)),
+  coverUrl: opcional(z.string().trim().url()),
   theme: z.string().trim().min(2, 'Informe o tema').max(60),
   startsAt: z.string().min(4, 'Informe data e hora'),
   durationMin: z.coerce.number().int().min(5).max(600),
-  liveUrl: z.string().trim().url().optional().or(z.literal('')),
-  recordingUrl: z.string().trim().url().optional().or(z.literal('')),
+  liveUrl: opcional(z.string().trim().url()),
+  recordingUrl: opcional(z.string().trim().url()),
   status: z.enum(['RASCUNHO', 'PUBLICADO', 'ARQUIVADO']),
   visibility: z.custom<Visibility>(isVisibility, { message: 'Visibilidade inválida' }),
-  speakerName: z.string().trim().max(120).optional().or(z.literal('')),
-  speakerJobTitle: z.string().trim().max(120).optional().or(z.literal('')),
-  speakerBio: z.string().trim().max(1000).optional().or(z.literal('')),
-  speakerAvatarUrl: z.string().trim().url().optional().or(z.literal('')),
+  speakerName: opcional(z.string().trim().max(120)),
+  speakerJobTitle: opcional(z.string().trim().max(120)),
+  speakerBio: opcional(z.string().trim().max(1000)),
+  speakerAvatarUrl: opcional(z.string().trim().url()),
 });
 
 const nn = (v: string | undefined) => (v && v.length > 0 ? v : null);

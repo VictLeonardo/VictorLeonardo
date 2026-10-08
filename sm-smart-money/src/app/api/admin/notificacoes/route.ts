@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import { prisma } from '@/lib/prisma';
 import { fromLocalInput } from '@/lib/datetime';
 import { getSessionUser } from '@/lib/auth/session';
@@ -10,10 +10,10 @@ import { dispatchNotification } from '@/server/notifications';
 const schema = z.object({
   title: z.string().trim().min(4, 'Título muito curto').max(120),
   body: z.string().trim().min(10, 'Escreva a mensagem').max(1000),
-  url: z.string().trim().max(300).optional().or(z.literal('')),
+  url: opcional(z.string().trim().max(300)),
   audience: z.enum(['TODOS', 'POR_PLANO', 'VIP', 'ACADEMY']),
   planFilter: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']).optional(),
-  scheduledFor: z.string().optional().or(z.literal('')),
+  scheduledFor: opcional(z.string()),
   sendNow: z.boolean().default(false),
 });
 

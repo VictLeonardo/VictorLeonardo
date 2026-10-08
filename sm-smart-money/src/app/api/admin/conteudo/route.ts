@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import type { Visibility } from '@prisma/client';
 import { isVisibility } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -12,22 +12,22 @@ import { fromLocalInput } from '@/lib/datetime';
 export const contentSchema = z.object({
   type: z.enum(['ARTIGO', 'VIDEO', 'PODCAST', 'ANALISE', 'EBOOK']),
   title: z.string().trim().min(4, 'Título muito curto').max(200),
-  slug: z.string().trim().max(120).optional().or(z.literal('')),
-  excerpt: z.string().trim().max(400).optional().or(z.literal('')),
-  body: z.string().optional().or(z.literal('')),
-  coverUrl: z.string().trim().url().optional().or(z.literal('')),
+  slug: opcional(z.string().trim().max(120)),
+  excerpt: opcional(z.string().trim().max(400)),
+  body: opcional(z.string()),
+  coverUrl: opcional(z.string().trim().url()),
   category: z.string().trim().min(2, 'Escolha uma categoria').max(60),
   status: z.enum(['RASCUNHO', 'PUBLICADO', 'ARQUIVADO']),
   visibility: z.custom<Visibility>(isVisibility, { message: 'Visibilidade inválida' }),
-  publishedAt: z.string().optional().or(z.literal('')),
-  scheduledFor: z.string().optional().or(z.literal('')),
-  authorName: z.string().trim().max(120).optional().or(z.literal('')),
-  mediaUrl: z.string().trim().url().optional().or(z.literal('')),
+  publishedAt: opcional(z.string()),
+  scheduledFor: opcional(z.string()),
+  authorName: opcional(z.string().trim().max(120)),
+  mediaUrl: opcional(z.string().trim().url()),
   durationSecs: z.coerce.number().int().min(0).optional(),
-  transcript: z.string().optional().or(z.literal('')),
-  fileUrl: z.string().trim().url().optional().or(z.literal('')),
+  transcript: opcional(z.string()),
+  fileUrl: opcional(z.string().trim().url()),
   pageCount: z.coerce.number().int().min(0).optional(),
-  seriesName: z.string().trim().max(120).optional().or(z.literal('')),
+  seriesName: opcional(z.string().trim().max(120)),
   episodeNumber: z.coerce.number().int().min(0).optional(),
 });
 

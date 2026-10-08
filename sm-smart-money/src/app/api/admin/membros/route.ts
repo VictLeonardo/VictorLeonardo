@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import type { Tier } from '@prisma/client';
 import { isTier } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -14,9 +14,9 @@ import { normalizePhone } from '@/lib/utils';
 const schema = z.object({
   name: z.string().trim().min(3, 'Informe o nome completo').max(120),
   email: z.string().trim().email('E-mail inválido'),
-  phone: z.string().trim().max(30).optional().or(z.literal('')),
-  jobTitle: z.string().trim().max(120).optional().or(z.literal('')),
-  company: z.string().trim().max(120).optional().or(z.literal('')),
+  phone: opcional(z.string().trim().max(30)),
+  jobTitle: opcional(z.string().trim().max(120)),
+  company: opcional(z.string().trim().max(120)),
   plan: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']),
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).default('ATIVO'),
   tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).default('VIP'),

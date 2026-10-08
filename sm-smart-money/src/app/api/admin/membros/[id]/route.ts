@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import type { Tier } from '@prisma/client';
 import { isTier } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -18,10 +18,10 @@ const schema = z.object({
   // porque membro troca de e-mail, e ate' agora isso so' se resolvia no banco.
   email: z.string().trim().toLowerCase().email('E-mail inválido').max(160).optional(),
   // Veio da planilha da migracao e pode estar errado. Chega como "2026-09-16".
-  joinedAt: z.string().trim().optional().or(z.literal('')),
-  phone: z.string().trim().max(30).optional().or(z.literal('')),
-  jobTitle: z.string().trim().max(120).optional().or(z.literal('')),
-  company: z.string().trim().max(120).optional().or(z.literal('')),
+  joinedAt: opcional(z.string().trim()),
+  phone: opcional(z.string().trim().max(30)),
+  jobTitle: opcional(z.string().trim().max(120)),
+  company: opcional(z.string().trim().max(120)),
   plan: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']).optional(),
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).optional(),
   tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).optional(),

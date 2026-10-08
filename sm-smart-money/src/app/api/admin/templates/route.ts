@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { mensagemDeValidacao } from '@/lib/validacao';
+import { mensagemDeValidacao, opcional } from '@/lib/validacao';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
@@ -9,7 +9,7 @@ const schema = z.object({
   channel: z.enum(['EMAIL', 'WHATSAPP']),
   key: z.string().trim().min(2).max(60),
   name: z.string().trim().min(2).max(120),
-  subject: z.string().trim().max(160).optional().or(z.literal('')),
+  subject: opcional(z.string().trim().max(160)),
   body: z.string().trim().min(5).max(8000),
 });
 
