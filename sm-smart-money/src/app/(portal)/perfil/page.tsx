@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { ensureProfile } from '@/server/profile';
 import { SectionHeader } from '@/components/ui/section-header';
 import { ProfileForm } from '@/components/portal/profile-form';
-import { env } from '@/lib/env';
+import { armazenamentoConfigurado, env } from '@/lib/env';
 import { appHost } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'Meu Perfil' };
@@ -38,6 +38,7 @@ export default async function ProfilePage() {
       {/* O host vem do servidor: em client component, NEXT_PUBLIC_ seria
           congelado no build e a mesma imagem deixaria de servir varios ambientes. */}
       <ProfileForm
+        podeEnviarArquivo={armazenamentoConfigurado}
         host={appHost(env.NEXT_PUBLIC_APP_URL)}
         user={{
           name: user.name,

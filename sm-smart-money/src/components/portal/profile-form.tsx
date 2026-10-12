@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { CampoArquivo } from '@/components/ui/campo-arquivo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Tier } from '@prisma/client';
@@ -35,8 +36,11 @@ export function ProfileForm({
   host,
   user,
   profile,
+  podeEnviarArquivo,
 }: {
   host: string;
+  /** Sem armazenamento configurado, o campo so' aceita endereco colado. */
+  podeEnviarArquivo: boolean;
   user: {
     name: string;
     email: string;
@@ -117,16 +121,16 @@ export function ProfileForm({
               <MemberAvatar name={name} src={avatarUrl || null} size={72} />
               <div className="min-w-0 flex-1">
                 <Field
-                  label="Foto de perfil (URL)"
+                  label="Foto de perfil"
                   htmlFor="avatarUrl"
-                  hint="Cole o link da imagem hospedada. Ela é exibida em círculo."
+                  hint="Ela é exibida em círculo, então prefira uma foto enquadrada no rosto."
                 >
-                  <Input
+                  <CampoArquivo
                     id="avatarUrl"
+                    tipo="avatar"
                     value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    type="url"
-                    placeholder="https://..."
+                    onValueChange={setAvatarUrl}
+                    podeEnviar={podeEnviarArquivo}
                   />
                 </Field>
               </div>

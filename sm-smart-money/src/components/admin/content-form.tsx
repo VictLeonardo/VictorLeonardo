@@ -11,7 +11,7 @@ import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { RichEditor } from '@/components/admin/rich-editor';
 import { useToast } from '@/components/ui/toast';
 import { CONTENT_TYPE_LABELS, VISIBILITY_LABELS, categoriesFor } from '@/lib/domain';
-import { CampoArquivo } from '@/components/admin/campo-arquivo';
+import { CampoArquivo } from '@/components/ui/campo-arquivo';
 
 export type ContentFormValues = {
   id?: string;
@@ -184,7 +184,19 @@ export function ContentForm({
                     : 'Link direto para o arquivo de áudio (mp3).'
                 }
               >
-                <Input id="mediaUrl" name="mediaUrl" type="url" defaultValue={initial.mediaUrl} />
+                {/* So' o podcast ganha botao de envio. Video nao se envia: o
+                    arquivo mora no YouTube, no Vimeo ou no Bunny, e o campo
+                    recebe o endereco de la'. */}
+                <CampoArquivo
+                  id="mediaUrl"
+                  name="mediaUrl"
+                  tipo="audio"
+                  defaultValue={initial.mediaUrl}
+                  podeEnviar={podeEnviarArquivo && type === 'PODCAST'}
+                  placeholder={
+                    type === 'VIDEO' ? 'Cole o link do vídeo' : 'Envie o áudio ou cole um endereço'
+                  }
+                />
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-3">

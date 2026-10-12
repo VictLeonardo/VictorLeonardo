@@ -1,6 +1,7 @@
 'use client';
 
 import { VISIBILITY_LABELS } from '@/lib/domain';
+import { CampoArquivo } from '@/components/ui/campo-arquivo';
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import type { ContentStatus, Visibility } from '@prisma/client';
@@ -30,7 +31,14 @@ export type LectureFormValues = {
   speakerAvatarUrl: string;
 };
 
-export function LectureForm({ initial }: { initial: LectureFormValues }) {
+export function LectureForm({
+  initial,
+  podeEnviarArquivo,
+}: {
+  initial: LectureFormValues;
+  /** Sem armazenamento configurado, os campos de arquivo so' aceitam endereco colado. */
+  podeEnviarArquivo: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [pending, setPending] = React.useState(false);
@@ -150,12 +158,13 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
                   defaultValue={initial.speakerJobTitle}
                 />
               </Field>
-              <Field label="Foto (URL)" htmlFor="speakerAvatarUrl" className="sm:col-span-2">
-                <Input
+              <Field label="Foto do palestrante" htmlFor="speakerAvatarUrl" className="sm:col-span-2">
+                <CampoArquivo
                   id="speakerAvatarUrl"
                   name="speakerAvatarUrl"
-                  type="url"
+                  tipo="imagem"
                   defaultValue={initial.speakerAvatarUrl}
+                  podeEnviar={podeEnviarArquivo}
                 />
               </Field>
               <Field label="Bio curta" htmlFor="speakerBio" className="sm:col-span-2">
@@ -189,8 +198,14 @@ export function LectureForm({ initial }: { initial: LectureFormValues }) {
                 ))}
               </Select>
             </Field>
-            <Field label="Capa (URL)" htmlFor="coverUrl">
-              <Input id="coverUrl" name="coverUrl" type="url" defaultValue={initial.coverUrl} />
+            <Field label="Capa" htmlFor="coverUrl">
+              <CampoArquivo
+                id="coverUrl"
+                name="coverUrl"
+                tipo="imagem"
+                defaultValue={initial.coverUrl}
+                podeEnviar={podeEnviarArquivo}
+              />
             </Field>
             <Field label="Slug" htmlFor="slug" hint="Deixe vazio para gerar do título.">
               <Input id="slug" name="slug" defaultValue={initial.slug} />

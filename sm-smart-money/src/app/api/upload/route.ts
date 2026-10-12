@@ -16,6 +16,10 @@ import { ehTipoDeArquivo, REGRAS } from '@/lib/arquivos';
  * chamada. Uma e' do navegador pedindo permissao, com o cookie da sessao. A
  * outra e' da propria Vercel avisando que o envio terminou -- sem cookie
  * nenhum. Barrar no topo mataria a segunda.
+ *
+ * Nao vive sob `/api/admin` porque nem todo envio e' de administrador: a foto
+ * de perfil quem manda e' o proprio membro. Quem decide o que cada um pode e'
+ * a regra do tipo pedido, nao o caminho da rota.
  */
 export async function POST(request: Request) {
   const body = (await request.json()) as HandleUploadBody;
@@ -25,17 +29,25 @@ export async function POST(request: Request) {
       body,
       request,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
-        const admin = await getSessionUser();
-        if (admin?.role !== 'ADMIN') {
-          throw new Error('Acesso restrito');
-        }
-
         // O tipo vem da tela e diz o que aceitar. Desconhecido nao vira padrao:
         // viraria uma porta para subir qualquer coisa.
         if (!ehTipoDeArquivo(clientPayload)) {
           throw new Error('Tipo de arquivo não reconhecido');
         }
         const regra = REGRAS[clientPayload];
+
+        const quem = await getSessionUser();
+        if (!quem) {
+          throw new Error('Acesso restrito');
+        }
+        // A permissao e' do tipo pedido, nao da rota. Foto de perfil qualquer
+        // membro manda; o resto e' do administrador.
+        if (regra.quem === 'admin' && quem.role !== 'ADMIN') {
+          throw new Error('Acesso restrito');
+        }
+        if (regra.quem === 'membro' && quem.role !== 'ADMIN' && quem.status !== 'ATIVO') {
+          throw new Error('Acesso restrito');
+        }
 
         return {
           allowedContentTypes: regra.tipos,
@@ -45,8 +57,8 @@ export async function POST(request: Request) {
           // apagaria a de setembro.
           addRandomSuffix: true,
           tokenPayload: JSON.stringify({
-            adminId: admin.id,
-            adminNome: admin.name,
+            adminId: quem.id,
+            adminNome: quem.name,
             tipo: clientPayload,
           }),
         };

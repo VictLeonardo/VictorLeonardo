@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { armazenamentoConfigurado } from '@/lib/env';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
@@ -54,6 +55,7 @@ export default async function EditLecturePage({ params }: { params: Promise<{ id
       />
 
       <LectureForm
+        podeEnviarArquivo={armazenamentoConfigurado}
         initial={{
           id: lecture.id,
           title: lecture.title,

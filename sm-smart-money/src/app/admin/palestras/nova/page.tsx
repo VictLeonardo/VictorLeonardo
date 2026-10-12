@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { armazenamentoConfigurado } from '@/lib/env';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
@@ -24,6 +25,7 @@ export default async function NewLecturePage() {
       <SectionHeader eyebrow="Agenda" title="Nova palestra" />
 
       <LectureForm
+        podeEnviarArquivo={armazenamentoConfigurado}
         initial={{
           title: '',
           slug: '',
