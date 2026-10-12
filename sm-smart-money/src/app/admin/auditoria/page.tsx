@@ -24,6 +24,7 @@ const ENTITY_LABELS: Record<string, string> = {
   invite: 'Convite',
   waha: 'WhatsApp',
   setting: 'Configuração',
+  arquivo: 'Arquivo',
 };
 
 /** Registro imutavel de acoes administrativas (G11). Somente leitura. */

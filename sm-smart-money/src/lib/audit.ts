@@ -38,6 +38,9 @@ export type AuditAction =
   | 'whatsapp.mensagem'
   | 'template.atualizar'
   | 'configuracao.atualizar'
+  // Quem subiu arquivo para a plataforma, e quando, e' coisa que se pergunta
+  // depois -- o conteudo guarda so' o endereco final.
+  | 'arquivo.enviar'
   // Acoes do proprio membro sobre a assinatura dele. O ator nao e' um admin, e
   // por isso o registro importa ainda mais: e' o que explica, depois, por que um
   // acesso caiu numa data especifica.

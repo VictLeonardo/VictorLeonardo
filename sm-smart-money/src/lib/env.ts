@@ -122,6 +122,16 @@ export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP
 export const zapiConfigured = Boolean(env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN);
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
 
+/**
+ * O armazenamento de arquivos e' o Blob da Vercel, e o token vem dela: quem
+ * conecta o Blob ao projeto no painel ganha `BLOB_READ_WRITE_TOKEN` sozinho.
+ *
+ * Sem ele a plataforma continua inteira -- os campos de arquivo seguem
+ * aceitando um endereco colado a' mao, como sempre aceitaram. O que some e' o
+ * botao de enviar.
+ */
+export const armazenamentoConfigurado = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
 export const provedorWhatsapp: 'waha' | 'zapi' =
   env.WHATSAPP_PROVIDER ?? (zapiConfigured ? 'zapi' : 'waha');
 

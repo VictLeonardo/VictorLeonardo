@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { armazenamentoConfigurado } from '@/lib/env';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
@@ -55,6 +56,7 @@ export default async function EditContentPage({ params }: { params: Promise<{ id
       />
 
       <ContentForm
+        podeEnviarArquivo={armazenamentoConfigurado}
         initial={{
           id: content.id,
           type: content.type,

@@ -11,6 +11,7 @@ import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { RichEditor } from '@/components/admin/rich-editor';
 import { useToast } from '@/components/ui/toast';
 import { CONTENT_TYPE_LABELS, VISIBILITY_LABELS, categoriesFor } from '@/lib/domain';
+import { CampoArquivo } from '@/components/admin/campo-arquivo';
 
 export type ContentFormValues = {
   id?: string;
@@ -38,7 +39,14 @@ export type ContentFormValues = {
  * Formulario unico do CMS. Os campos especificos aparecem conforme o tipo — o
  * mesmo componente cobre artigo, video, podcast, analise e e-book.
  */
-export function ContentForm({ initial }: { initial: ContentFormValues }) {
+export function ContentForm({
+  initial,
+  podeEnviarArquivo,
+}: {
+  initial: ContentFormValues;
+  /** Sem armazenamento configurado, os campos de arquivo so' aceitam endereco colado. */
+  podeEnviarArquivo: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -219,15 +227,21 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
             <CardContent className="space-y-4 p-5">
               <h2 className="text-sm font-semibold text-text-1">Arquivo</h2>
               <Field
-                label="URL do PDF"
+                label="Arquivo PDF"
                 htmlFor="fileUrl"
                 hint={
                   type === 'ANALISE'
-                    ? 'Se preenchido, o PDF e exibido no lugar do texto.'
+                    ? 'Se preenchido, o PDF é exibido no lugar do texto que você escrever.'
                     : 'PDF completo do e-book.'
                 }
               >
-                <Input id="fileUrl" name="fileUrl" type="url" defaultValue={initial.fileUrl} />
+                <CampoArquivo
+                  id="fileUrl"
+                  name="fileUrl"
+                  tipo="pdf"
+                  defaultValue={initial.fileUrl}
+                  podeEnviar={podeEnviarArquivo}
+                />
               </Field>
               {type === 'EBOOK' ? (
                 <Field label="Número de páginas" htmlFor="pageCount">
@@ -317,8 +331,14 @@ export function ContentForm({ initial }: { initial: ContentFormValues }) {
               <Input id="authorName" name="authorName" defaultValue={initial.authorName} />
             </Field>
 
-            <Field label="Capa (URL)" htmlFor="coverUrl">
-              <Input id="coverUrl" name="coverUrl" type="url" defaultValue={initial.coverUrl} />
+            <Field label="Capa" htmlFor="coverUrl">
+              <CampoArquivo
+                  id="coverUrl"
+                  name="coverUrl"
+                  tipo="imagem"
+                  defaultValue={initial.coverUrl}
+                  podeEnviar={podeEnviarArquivo}
+                />
             </Field>
 
             <Field

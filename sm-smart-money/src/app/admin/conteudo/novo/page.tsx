@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { armazenamentoConfigurado } from '@/lib/env';
 import Link from 'next/link';
 import type { ContentType } from '@prisma/client';
 import { ArrowLeft } from 'lucide-react';
@@ -34,6 +35,7 @@ export default async function NewContentPage({
       <SectionHeader eyebrow="CMS" title="Novo conteúdo" />
 
       <ContentForm
+        podeEnviarArquivo={armazenamentoConfigurado}
         initial={{
           type,
           title: '',
