@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
-import { mailConfigured, provedorWhatsapp, whatsappConfigured } from '@/lib/env';
+import {
+  armazenamentoConectado,
+  armazenamentoConfigurado,
+  mailConfigured,
+  provedorWhatsapp,
+  variaveisDoArmazenamento,
+  whatsappConfigured,
+} from '@/lib/env';
 import { NOME_DO_PROVEDOR } from '@/lib/whatsapp';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -87,6 +94,27 @@ export default async function AdminSettingsPage() {
               </div>
               <Badge tone={whatsappConfigured ? 'positive' : 'warning'}>
                 {whatsappConfigured ? 'Configurado' : 'Não configurado'}
+              </Badge>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
+              <div>
+                <dt className="text-sm font-medium text-text-1">Armazenamento de arquivos</dt>
+                <dd className="text-xs text-text-3">
+                  {armazenamentoConfigurado
+                    ? 'BLOB_READ_WRITE_TOKEN'
+                    : armazenamentoConectado
+                      ? 'Blob conectado, mas sem BLOB_READ_WRITE_TOKEN — o envio pelo navegador precisa dele. No painel da Vercel, na aba Storage do projeto, gere o token de leitura e escrita da loja.'
+                      : 'BLOB_READ_WRITE_TOKEN ausente. Conecte um Blob ao projeto na Vercel e faça um novo deploy.'}
+                </dd>
+                <dd className="mt-1 font-mono text-[11px] text-text-3">
+                  {Object.entries(variaveisDoArmazenamento)
+                    .map(([nome, presente]) => `${presente ? '✓' : '✗'} ${nome}`)
+                    .join('   ')}
+                </dd>
+              </div>
+              <Badge tone={armazenamentoConfigurado ? 'positive' : 'warning'}>
+                {armazenamentoConfigurado ? 'Configurado' : 'Não configurado'}
               </Badge>
             </div>
 

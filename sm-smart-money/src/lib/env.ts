@@ -132,6 +132,27 @@ export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
  */
 export const armazenamentoConfigurado = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
+/**
+ * O que a Vercel deixou no ambiente ao conectar o armazenamento.
+ *
+ * Existe porque conectar o Blob adiciona tres variaveis, e a autenticacao
+ * padrao dela hoje e' OIDC -- `VERCEL_OIDC_TOKEN` e `BLOB_STORE_ID`. So' que o
+ * envio direto do navegador, que e' o nosso caso, precisa do token de leitura e
+ * escrita: e' ele que assina a permissao do cliente.
+ *
+ * Sem isto, um armazenamento conectado pelo caminho de OIDC apareceria como
+ * "nao configurado" sem nenhuma pista do porque, e a unica evidencia seria um
+ * botao que nao aparece.
+ */
+export const variaveisDoArmazenamento = {
+  BLOB_READ_WRITE_TOKEN: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+  BLOB_STORE_ID: Boolean(process.env.BLOB_STORE_ID),
+  VERCEL_OIDC_TOKEN: Boolean(process.env.VERCEL_OIDC_TOKEN),
+};
+
+/** A loja foi conectada, mesmo que falte o token que o envio exige. */
+export const armazenamentoConectado = Object.values(variaveisDoArmazenamento).some(Boolean);
+
 export const provedorWhatsapp: 'waha' | 'zapi' =
   env.WHATSAPP_PROVIDER ?? (zapiConfigured ? 'zapi' : 'waha');
 
