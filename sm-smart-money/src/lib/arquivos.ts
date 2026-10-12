@@ -71,3 +71,65 @@ export function ehTipoDeArquivo(valor: unknown): valor is TipoDeArquivo {
 export function limiteEmMb(tipo: TipoDeArquivo): number {
   return Math.round(REGRAS[tipo].limiteBytes / (1024 * 1024));
 }
+
+/**
+ * Traduz a falha de envio para algo que o administrador consiga agir.
+ *
+ * O SDK do armazenamento fala ingles e em jargao proprio ("Access denied,
+ * please provide a valid token for this resource") -- texto que nao diz a quem
+ * usa o painel o que fazer, num sistema que e' todo em portugues. As compara-
+ * coes sao por trecho da mensagem porque as classes de erro do pacote nao
+ * expoem `name` nem sao exportadas pelo modulo do cliente.
+ */
+export function mensagemDoEnvio(erro: unknown, tipo: TipoDeArquivo): string {
+  const texto = erro instanceof Error ? erro.message : String(erro);
+
+  // O pacote descarta a resposta da nossa rota e so' diz que nao conseguiu o
+  // token, entao "Acesso restrito" nunca chega aqui. Na pratica isso acontece
+  // quando a sessao vence com o formulario aberto.
+  if (texto.includes('retrieve the client token')) {
+    return 'O sistema não autorizou o envio. Entre na conta outra vez e repita.';
+  }
+  if (texto.includes('Access denied')) {
+    return 'O armazenamento recusou o envio. Confira o BLOB_READ_WRITE_TOKEN nas variáveis do projeto.';
+  }
+  if (texto.includes('Client token has expired')) {
+    return 'A autorização de envio expirou. Tente enviar outra vez.';
+  }
+  if (texto.includes('This store does not exist')) {
+    return 'O armazenamento não foi encontrado. Reconecte o Blob ao projeto na Vercel.';
+  }
+  if (texto.includes('This store has been suspended')) {
+    return 'O armazenamento está suspenso. Verifique a conta na Vercel.';
+  }
+  if (texto.includes('not available')) {
+    return 'O armazenamento está fora do ar. Tente de novo em alguns minutos.';
+  }
+  if (texto.includes('Too many requests')) {
+    return 'Muitos envios ao mesmo tempo. Espere um instante e tente de novo.';
+  }
+  if (texto.includes('File is too large')) {
+    return `O arquivo passa de ${limiteEmMb(tipo)} MB.`;
+  }
+  if (texto.includes('Content type mismatch')) {
+    return `Esse arquivo não é um ${REGRAS[tipo].rotulo} aceito aqui.`;
+  }
+  if (ehFalhaDeRede(erro)) {
+    return 'Não foi possível falar com o armazenamento. Verifique a conexão e tente de novo.';
+  }
+  return 'Falha ao enviar o arquivo. Tente de novo.';
+}
+
+/**
+ * A conexao nao chegou ao armazenamento -- diferente de o armazenamento ter
+ * recusado. O navegador lanca TypeError nesse caso, nao um erro do pacote.
+ */
+export function ehFalhaDeRede(erro: unknown): boolean {
+  const texto = erro instanceof Error ? erro.message : String(erro);
+  return (
+    texto.includes('Failed to fetch') ||
+    texto.includes('NetworkError') ||
+    texto.includes('network error') ||
+    texto.includes('Load failed')
+  );
+}
