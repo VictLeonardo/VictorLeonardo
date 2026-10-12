@@ -2,9 +2,28 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSessionUser } from '@/lib/auth/session';
 import { recordAudit } from '@/lib/audit';
-import { getWhatsappQrCode, restartWhatsappSession, disconnectWhatsappSession } from '@/lib/whatsapp';
+import {
+  getWhatsappQrCode,
+  getWhatsappStatus,
+  restartWhatsappSession,
+  disconnectWhatsappSession,
+} from '@/lib/whatsapp';
 
 const schema = z.object({ action: z.enum(['reiniciar', 'desconectar', 'qrcode']) });
+
+/**
+ * Estado da instancia, para a tela acompanhar o pareamento sem recarregar.
+ *
+ * Existe porque conectar e' uma espera: a pessoa sai da tela, pega o celular e
+ * aponta a camera. Quem percebe que deu certo tem que ser a propria tela.
+ */
+export async function GET() {
+  const admin = await getSessionUser();
+  if (admin?.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Acesso restrito' }, { status: 403 });
+  }
+  return NextResponse.json(await getWhatsappStatus());
+}
 
 export async function POST(request: Request) {
   const admin = await getSessionUser();

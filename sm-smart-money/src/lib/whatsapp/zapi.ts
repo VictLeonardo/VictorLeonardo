@@ -54,13 +54,17 @@ export const zapi: ProvedorWhatsapp = {
             ? 'SCAN_QR_CODE'
             : 'FAILED';
 
+      const conectado = Boolean(dados.connected);
+
       return {
         configured: true,
-        connected: Boolean(dados.connected),
+        connected: conectado,
         state,
-        // O /status nao devolve o numero; quem devolve e' /device, e uma
-        // consulta a mais em toda visita ao painel nao paga esse dado.
-        phone: null,
+        // O /status nao devolve o numero; quem devolve e' /device. Vale a
+        // consulta a mais: quem acabou de parear precisa confirmar que vinculou
+        // o numero dedicado, e nao o pessoal de alguem. So' quando ha' numero
+        // para perguntar -- desconectado, seria uma ida a' rede para nada.
+        phone: conectado ? await numeroVinculado() : null,
         detail: dados.error || undefined,
       };
     } catch (erro) {
@@ -103,6 +107,24 @@ export const zapi: ProvedorWhatsapp = {
   },
 
 };
+
+/**
+ * O numero vinculado a' instancia.
+ *
+ * Falha em silencio de proposito: saber o numero e' um detalhe da tela, e nao
+ * vale derrubar a leitura de estado -- que decide se os disparos funcionam --
+ * por causa de uma segunda consulta que nao respondeu.
+ */
+async function numeroVinculado(): Promise<string | null> {
+  try {
+    const res = await chamar('/device');
+    if (!res.ok) return null;
+    const dados = (await res.json()) as { phone?: string | null };
+    return dados.phone || null;
+  } catch {
+    return null;
+  }
+}
 
 /** Reiniciar e desconectar sao GET no Z-API, ao contrario do que o verbo sugere. */
 async function acao(caminho: string): Promise<Resultado> {
