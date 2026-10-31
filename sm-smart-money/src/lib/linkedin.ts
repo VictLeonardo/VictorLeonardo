@@ -39,7 +39,7 @@ export function normalizarLinkedin(valor: string): string | null {
   return `https://${host}/${secao.toLowerCase()}/${partes.slice(1).join('/')}`;
 }
 
-const MOTIVO = 'Informe o endereço do seu perfil no LinkedIn (linkedin.com/in/...)';
+const MOTIVO = 'Informe o endereço do perfil (linkedin.com/in/...)';
 
 /** Obrigatorio: perfil do membro, no proprio cadastro e na tela de pendencia. */
 export const linkedinObrigatorio = z
