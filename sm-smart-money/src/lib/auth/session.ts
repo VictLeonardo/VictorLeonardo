@@ -29,6 +29,8 @@ export type SessionUser = {
   avatarUrl: string | null;
   profileSlug: string | null;
   profilePublic: boolean;
+  /** Obrigatorio para o membro navegar; vazio manda para /completar-perfil. */
+  linkedinUrl: string | null;
 };
 
 const cookieBase = {
@@ -66,7 +68,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
       tier: true,
       isPartner: true,
       jobTitle: true,
-      profile: { select: { slug: true, isPublic: true, avatarUrl: true } },
+      profile: { select: { slug: true, isPublic: true, avatarUrl: true, linkedinUrl: true } },
     },
   });
   if (!user) return null;
@@ -84,6 +86,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     avatarUrl: user.profile?.avatarUrl ?? null,
     profileSlug: user.profile?.slug ?? null,
     profilePublic: user.profile?.isPublic ?? false,
+    linkedinUrl: user.profile?.linkedinUrl ?? null,
   };
 });
 

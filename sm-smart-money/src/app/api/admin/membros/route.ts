@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { mensagemDeValidacao, opcional } from '@/lib/validacao';
+import { linkedinOpcional } from '@/lib/linkedin';
 import type { Tier } from '@prisma/client';
 import { isTier } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -17,6 +18,9 @@ const schema = z.object({
   phone: opcional(z.string().trim().max(30)),
   jobTitle: opcional(z.string().trim().max(120)),
   company: opcional(z.string().trim().max(120)),
+  // Opcional para o admin: ele nem sempre tem o LinkedIn em maos, e o proprio
+  // membro e' cobrado na primeira entrada. Preenchido, passa pela conferencia.
+  linkedinUrl: linkedinOpcional,
   plan: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']),
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).default('ATIVO'),
   tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).default('VIP'),
@@ -57,7 +61,13 @@ export async function POST(request: Request) {
   });
 
   // O perfil (inativo) nasce junto do membro para o slug ja' existir no cadastro.
-  await ensureProfile(user.id, user.name);
+  const profile = await ensureProfile(user.id, user.name);
+  if (data.linkedinUrl) {
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: { linkedinUrl: data.linkedinUrl },
+    });
+  }
 
   await recordAudit({
     actor: admin,

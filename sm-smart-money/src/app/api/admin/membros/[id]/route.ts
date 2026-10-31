@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { mensagemDeValidacao, opcional } from '@/lib/validacao';
+import { linkedinOpcional } from '@/lib/linkedin';
 import type { Tier } from '@prisma/client';
 import { isTier } from '@/lib/domain';
 import { prisma } from '@/lib/prisma';
@@ -26,6 +27,9 @@ const schema = z.object({
   status: z.enum(['ATIVO', 'CANCELADO', 'PENDENTE']).optional(),
   tier: z.custom<Tier>(isTier, { message: 'Tier inválido' }).optional(),
   isPartner: z.boolean().optional(),
+  // Vive no perfil, nao no usuario. Vazio limpa -- e o membro volta a ser
+  // cobrado na proxima entrada, que e' o comportamento esperado de limpar.
+  linkedinUrl: linkedinOpcional.optional(),
 });
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -92,6 +96,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     },
     select: { id: true, name: true, status: true, plan: true },
   });
+
+  // O LinkedIn fica no perfil, que pode nao existir ainda num cadastro antigo.
+  if (data.linkedinUrl !== undefined) {
+    await prisma.profile.updateMany({
+      where: { userId: id },
+      data: { linkedinUrl: data.linkedinUrl },
+    });
+  }
 
   // Cancelar corta o acesso agora: sem revogar, o access token valeria ate expirar.
   if (becomingCanceled) await revokeAllSessions(id);

@@ -65,7 +65,8 @@ export default async function proxy(request: NextRequest) {
     isAdminPath ||
     isPortalPath(pathname) ||
     pathname === '/reativar' ||
-    pathname === '/primeiro-acesso';
+    pathname === '/primeiro-acesso' ||
+    pathname === '/completar-perfil';
 
   if (!isProtected) {
     // Rotas restantes sao perfis publicos /{slug} — resolvidos na propria pagina.

@@ -233,13 +233,18 @@ export function ProfileForm({
           <CardContent className="space-y-4 p-5">
             <h2 className="text-sm font-semibold text-text-1">Links profissionais</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="LinkedIn" htmlFor="linkedinUrl">
+              <Field
+                label="LinkedIn"
+                htmlFor="linkedinUrl"
+                required
+                hint="Obrigatório. Serve com ou sem https:// na frente."
+              >
                 <Input
                   id="linkedinUrl"
                   name="linkedinUrl"
-                  type="url"
                   defaultValue={profile.linkedinUrl ?? ''}
-                  placeholder="https://linkedin.com/in/..."
+                  placeholder="linkedin.com/in/seu-perfil"
+                  required
                 />
               </Field>
               <Field label="Site pessoal" htmlFor="websiteUrl">

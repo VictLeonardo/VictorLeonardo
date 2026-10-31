@@ -77,7 +77,7 @@ export function MemberFiltersBar() {
         <Select
           value={params.get('status') ?? ''}
           onChange={(e) => update({ status: e.target.value })}
-          className="w-36"
+          className="w-40"
         >
           <option value="">Todos</option>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -89,16 +89,17 @@ export function MemberFiltersBar() {
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-text-3">Perfil público</span>
+        <span className="text-xs font-medium text-text-3">Perfil</span>
         <Select
           value={params.get('perfil') ?? ''}
           onChange={(e) => update({ perfil: e.target.value })}
-          className="w-36"
+          className="w-40"
         >
           <option value="">Todos</option>
           <option value="ativo">Ativo</option>
           <option value="privado">Privado</option>
           <option value="sem">Sem perfil</option>
+          <option value="sem-linkedin">Sem LinkedIn</option>
         </Select>
       </label>
 

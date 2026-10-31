@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { mensagemDeValidacao, opcional } from '@/lib/validacao';
+import { linkedinObrigatorio } from '@/lib/linkedin';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { ensureProfile } from '@/server/profile';
@@ -15,7 +16,9 @@ const schema = z.object({
   state: opcional(z.string().trim().max(40)),
   country: opcional(z.string().trim().max(60)),
   specialties: z.array(z.string().trim().min(2).max(40)).max(8).default([]),
-  linkedinUrl: opcional(z.string().trim().url('Informe uma URL valida')),
+  // Obrigatorio em todo perfil, e conferido de verdade: um site pessoal no
+  // lugar do perfil do LinkedIn esvaziaria a exigencia.
+  linkedinUrl: linkedinObrigatorio,
   websiteUrl: opcional(z.string().trim().url('Informe uma URL valida')),
   avatarUrl: opcional(z.string().trim().url()),
   isPublic: z.boolean(),
@@ -56,7 +59,7 @@ export async function PUT(request: Request) {
         state: orNull(data.state),
         country: orNull(data.country),
         specialties: data.specialties,
-        linkedinUrl: orNull(data.linkedinUrl),
+        linkedinUrl: data.linkedinUrl,
         websiteUrl: orNull(data.websiteUrl),
         avatarUrl: orNull(data.avatarUrl),
         isPublic: data.isPublic,

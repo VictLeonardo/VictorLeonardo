@@ -15,7 +15,7 @@ export type MemberFilters = {
   search?: string;
   plan?: Plan;
   status?: MemberStatus;
-  profile?: 'ativo' | 'privado' | 'sem';
+  profile?: 'ativo' | 'privado' | 'sem' | 'sem-linkedin';
   from?: string;
   to?: string;
   sort?: string;
@@ -81,6 +81,21 @@ export function buildMemberWhere(filters: MemberFilters): Prisma.UserWhereInput 
     ...(filters.profile === 'ativo' ? { profile: { isPublic: true } } : {}),
     ...(filters.profile === 'privado' ? { profile: { isPublic: false } } : {}),
     ...(filters.profile === 'sem' ? { profile: { is: null } } : {}),
+    // Dentro de AND de proposito: a busca por nome/e-mail ja' ocupa o OR do
+    // topo, e um segundo OR no mesmo objeto apagaria o primeiro em silencio.
+    ...(filters.profile === 'sem-linkedin'
+      ? {
+          AND: [
+            {
+              OR: [
+                { profile: { is: null } },
+                { profile: { linkedinUrl: null } },
+                { profile: { linkedinUrl: '' } },
+              ],
+            },
+          ],
+        }
+      : {}),
   };
 }
 

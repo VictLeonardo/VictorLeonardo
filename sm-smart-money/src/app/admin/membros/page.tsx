@@ -27,10 +27,10 @@ export default async function AdminMembersPage({
     status: STATUSES.includes(params.status as MemberStatus)
       ? (params.status as MemberStatus)
       : undefined,
-    profile: (['ativo', 'privado', 'sem'] as const).includes(
-      params.perfil as 'ativo' | 'privado' | 'sem',
+    profile: (['ativo', 'privado', 'sem', 'sem-linkedin'] as const).includes(
+      params.perfil as 'ativo' | 'privado' | 'sem' | 'sem-linkedin',
     )
-      ? (params.perfil as 'ativo' | 'privado' | 'sem')
+      ? (params.perfil as 'ativo' | 'privado' | 'sem' | 'sem-linkedin')
       : undefined,
     from: params.de,
     to: params.ate,

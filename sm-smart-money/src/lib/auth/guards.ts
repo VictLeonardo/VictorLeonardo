@@ -16,12 +16,22 @@ export async function requireUser(returnTo?: string): Promise<SessionUser> {
 /**
  * Exige membro com assinatura ativa. Cancelados sao levados para a pagina de
  * reativacao em vez de um 403 seco — eles continuam sendo clientes.
+ *
+ * Tambem cobra o LinkedIn de quem ainda nao informou. O campo e' obrigatorio
+ * para todo perfil, e exigi-lo apenas no formulario deixaria de fora quem nunca
+ * abre o proprio perfil -- a maioria dos que vieram da migracao. A cobranca e'
+ * uma tela de um campo, antes da navegacao: nada se perde, e a assinatura
+ * continua valendo enquanto isso.
+ *
+ * O admin fica de fora de proposito: ele percorre o portal para conferir o que o
+ * membro ve', e tranca-lo aqui o tiraria do painel.
  */
 export async function requireActiveMember(returnTo?: string): Promise<SessionUser> {
   const user = await requireUser(returnTo);
   if (user.role === 'ADMIN') return user;
   if (user.status === 'CANCELADO') redirect('/reativar');
   if (user.status === 'PENDENTE') redirect('/primeiro-acesso');
+  if (!user.linkedinUrl) redirect('/completar-perfil');
   return user;
 }
 

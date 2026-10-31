@@ -94,6 +94,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
               status: member.status,
               tier: member.tier,
               isPartner: member.isPartner,
+              linkedinUrl: member.profile?.linkedinUrl ?? null,
             }}
           />
 

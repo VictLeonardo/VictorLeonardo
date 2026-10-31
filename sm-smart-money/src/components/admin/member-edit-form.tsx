@@ -27,6 +27,7 @@ export function MemberEditForm({
     status: MemberStatus;
     tier: Tier;
     isPartner: boolean;
+    linkedinUrl: string | null;
   };
 }) {
   const router = useRouter();
@@ -52,6 +53,7 @@ export function MemberEditForm({
         phone: data.get('phone'),
         jobTitle: data.get('jobTitle'),
         company: data.get('company'),
+        linkedinUrl: data.get('linkedinUrl'),
         plan: data.get('plan'),
         status,
         tier: data.get('tier'),
@@ -105,6 +107,19 @@ export function MemberEditForm({
             </Field>
             <Field label="WhatsApp" htmlFor="edit-phone">
               <Input id="edit-phone" name="phone" defaultValue={member.phone ?? ''} />
+            </Field>
+            <Field
+              label="LinkedIn"
+              htmlFor="edit-linkedin"
+              className="sm:col-span-2"
+              hint="Obrigatório para o membro navegar. Vazio, ele preenche na próxima entrada."
+            >
+              <Input
+                id="edit-linkedin"
+                name="linkedinUrl"
+                defaultValue={member.linkedinUrl ?? ''}
+                placeholder="linkedin.com/in/perfil-do-membro"
+              />
             </Field>
             <Field label="Data de entrada" htmlFor="edit-joined">
               <Input id="edit-joined" name="joinedAt" type="date" defaultValue={member.joinedAt} />

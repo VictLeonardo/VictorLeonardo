@@ -31,6 +31,7 @@ export function NewMemberButton() {
         phone: data.get('phone'),
         jobTitle: data.get('jobTitle'),
         company: data.get('company'),
+        linkedinUrl: data.get('linkedinUrl'),
         plan: data.get('plan'),
         status: data.get('status'),
         tier: data.get('tier'),
@@ -82,6 +83,18 @@ export function NewMemberButton() {
             </Field>
             <Field label="Empresa" htmlFor="new-company">
               <Input id="new-company" name="company" />
+            </Field>
+            <Field
+              label="LinkedIn"
+              htmlFor="new-linkedin"
+              className="sm:col-span-2"
+              hint="Opcional aqui. Se ficar vazio, o membro informa na primeira entrada — é obrigatório para ele navegar."
+            >
+              <Input
+                id="new-linkedin"
+                name="linkedinUrl"
+                placeholder="linkedin.com/in/perfil-do-membro"
+              />
             </Field>
             <Field label="Plano" htmlFor="new-plan" required>
               <Select id="new-plan" name="plan" defaultValue="PADRAO">
