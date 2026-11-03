@@ -112,8 +112,8 @@ export default async function AdminSettingsPage() {
                 </dd>
                 <dd className="mt-1 text-xs text-text-3">
                   {conviteDoGrupoConfigurado
-                    ? 'WHATSAPP_GRUPO_CONVITE ✓ — quem paga recebe o link no WhatsApp. Se você redefinir o link do grupo, atualize esta variável: ela não se renova sozinha.'
-                    : 'WHATSAPP_GRUPO_CONVITE ✗ — sem ela, quem paga não recebe o convite do grupo.'}
+                    ? 'WHATSAPP_GROUP_URL ✓ — quem paga recebe o link no WhatsApp, e ele também vai no e-mail de boas-vindas. Se redefinir o link do grupo, atualize esta variável: ela não se renova sozinha.'
+                    : 'WHATSAPP_GROUP_URL ✗ — sem ela, quem paga não recebe o convite do grupo.'}
                 </dd>
               </div>
               <Badge tone={agenteConfigurado ? 'positive' : 'warning'}>

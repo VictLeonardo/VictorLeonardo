@@ -15,10 +15,14 @@ export const CHAVE_DO_TEMPLATE = 'convite-grupo';
 /**
  * Manda o convite do grupo para quem acabou de pagar.
  *
- * O link vem de variavel de ambiente, e nao da Z-API: pedi-lo no momento do
- * pagamento amarraria a confirmacao da assinatura a mais um servico de pe'.
- * Em troca, trocar o link do grupo no WhatsApp exige atualizar a variavel --
- * a tela de Configuracoes avisa disso.
+ * O link e' o mesmo `WHATSAPP_GROUP_URL` que o e-mail de boas-vindas e o botao
+ * do portal ja' usam. Uma segunda variavel para o mesmo endereco divergiria na
+ * primeira vez que o grupo trocasse de link, e metade dos avisos passaria a
+ * apontar para um convite morto.
+ *
+ * Ele nao vem da Z-API: pedir o link no momento do pagamento amarraria a
+ * confirmacao da assinatura a mais um servico de pe'. Em troca, trocar o link
+ * do grupo exige atualizar a variavel -- a tela de Configuracoes avisa disso.
  *
  * Nunca lanca: isto roda dentro do webhook do Stripe, e uma excecao aqui faria
  * o Stripe repetir a confirmacao inteira e criar o membro duas vezes. Falhar o
@@ -30,7 +34,7 @@ export async function enviarConviteDoGrupo(membro: {
   phone: string | null;
 }): Promise<{ ok: boolean; motivo?: string }> {
   try {
-    if (!env.WHATSAPP_GRUPO_CONVITE) {
+    if (!env.WHATSAPP_GROUP_URL) {
       return { ok: false, motivo: 'Link do grupo não configurado' };
     }
     if (!membro.phone) {
@@ -44,7 +48,7 @@ export async function enviarConviteDoGrupo(membro: {
 
     const mensagem = preencherModelo(salvo?.body?.trim() || PADRAO, {
       nome: membro.name,
-      link: env.WHATSAPP_GRUPO_CONVITE,
+      link: env.WHATSAPP_GROUP_URL,
     });
 
     return await sendWhatsappMessage({
