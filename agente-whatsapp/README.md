@@ -6,6 +6,12 @@ A Z-API avisa, por webhook, que alguém pediu entrada. O agente pergunta à
 plataforma se aquele telefone pertence a um membro ativo e, sendo, aprova pela
 própria Z-API. Quem não casa fica esperando — o agente nunca recusa sozinho.
 
+O ciclo fecha com a outra metade, que vive na plataforma: assim que o Stripe
+confirma o pagamento, o novo membro recebe o link do convite por WhatsApp, com o
+pedido de entrar usando o mesmo número. Esse número é o que o agente confere
+aqui. A variável do link é `WHATSAPP_GRUPO_CONVITE`, nas variáveis do projeto na
+Vercel — não aqui na VPS.
+
 ## Por que ele existe fora da plataforma
 
 A decisão de quem pode entrar mora na plataforma, não aqui. Este processo só

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import {
   agenteConfigurado,
   armazenamentoConectado,
+  conviteDoGrupoConfigurado,
   armazenamentoConfigurado,
   mailConfigured,
   provedorWhatsapp,
@@ -29,6 +30,7 @@ const EXPECTED_TEMPLATES = [
   { channel: 'EMAIL' as const, key: 'nova-palestra', name: 'E-mail de nova palestra' },
   { channel: 'WHATSAPP' as const, key: 'lembrete-palestra', name: 'Lembrete de palestra' },
   { channel: 'WHATSAPP' as const, key: 'novo-conteudo', name: 'Aviso de novo conteúdo' },
+  { channel: 'WHATSAPP' as const, key: 'convite-grupo', name: 'Convite do grupo (após o pagamento)' },
 ];
 
 export default async function AdminSettingsPage() {
@@ -107,6 +109,11 @@ export default async function AdminSettingsPage() {
                   {agenteConfigurado
                     ? 'AGENTE_SECRET — o agente na VPS aceita no grupo quem já é membro ativo.'
                     : 'AGENTE_SECRET ausente. Sem ele a rota recusa o agente, e ninguém entra no grupo automaticamente.'}
+                </dd>
+                <dd className="mt-1 text-xs text-text-3">
+                  {conviteDoGrupoConfigurado
+                    ? 'WHATSAPP_GRUPO_CONVITE ✓ — quem paga recebe o link no WhatsApp. Se você redefinir o link do grupo, atualize esta variável: ela não se renova sozinha.'
+                    : 'WHATSAPP_GRUPO_CONVITE ✗ — sem ela, quem paga não recebe o convite do grupo.'}
                 </dd>
               </div>
               <Badge tone={agenteConfigurado ? 'positive' : 'warning'}>

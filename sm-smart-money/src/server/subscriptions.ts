@@ -6,6 +6,7 @@ import { stripe, traduzStatus, fimDoPeriodo, idDe } from '@/lib/stripe';
 import { telefoneBrasileiro } from '@/lib/utils';
 import { ensureProfile } from '@/server/profile';
 import { sendWelcomeEmail } from '@/server/welcome';
+import { enviarConviteDoGrupo } from '@/server/convite-grupo';
 
 /**
  * Ponte entre o que o Stripe informa e o que a plataforma faz com isso.
@@ -231,7 +232,7 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
 
   const existente = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, name: true, status: true, passwordHash: true },
+    select: { id: true, name: true, status: true, passwordHash: true, phone: true },
   });
 
   if (existente) {
@@ -257,6 +258,15 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
     if (!existente.passwordHash) {
       await sendWelcomeEmail({ id: existente.id, name: existente.name, email });
     }
+
+    // Quem volta foi tirado do grupo quando cancelou, entao recebe o convite de
+    // novo. Receber duas vezes e' so' uma mensagem a mais; nao receber deixa um
+    // cliente pagante de fora da comunidade sem saber por que.
+    await enviarConviteDoGrupo({
+      id: existente.id,
+      name: existente.name,
+      phone: telefone ?? existente.phone,
+    });
     return;
   }
 
@@ -281,6 +291,7 @@ export async function aoConcluirCheckout(sessao: Stripe.Checkout.Session): Promi
   // o endereco publico dele ja' existir desde o primeiro dia.
   await ensureProfile(criado.id, criado.name);
   await sendWelcomeEmail(criado);
+  await enviarConviteDoGrupo({ id: criado.id, name: criado.name, phone: telefone });
 }
 
 /** Estado da assinatura mudou no Stripe: espelha, e derruba o acesso no fim. */

@@ -11,7 +11,9 @@ import { comTimeout, motivo, type ProvedorWhatsapp, type Resultado } from './tip
  */
 
 function base(): string {
-  return `https://api.z-api.io/instances/${env.ZAPI_INSTANCE_ID}/token/${env.ZAPI_TOKEN}`;
+  // Trocavel para apontar a um proxy da Z-API; o padrao e' o endereco deles.
+  const servidor = (env.ZAPI_BASE_URL ?? 'https://api.z-api.io').replace(/\/+$/, '');
+  return `${servidor}/instances/${env.ZAPI_INSTANCE_ID}/token/${env.ZAPI_TOKEN}`;
 }
 
 async function chamar(caminho: string, init?: RequestInit): Promise<Response> {
