@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth/guards';
 import { prisma } from '@/lib/prisma';
 import {
+  agenteConfigurado,
   armazenamentoConectado,
   armazenamentoConfigurado,
   mailConfigured,
@@ -94,6 +95,22 @@ export default async function AdminSettingsPage() {
               </div>
               <Badge tone={whatsappConfigured ? 'positive' : 'warning'}>
                 {whatsappConfigured ? 'Configurado' : 'Não configurado'}
+              </Badge>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
+              <div>
+                <dt className="text-sm font-medium text-text-1">
+                  Agente do grupo no WhatsApp
+                </dt>
+                <dd className="text-xs text-text-3">
+                  {agenteConfigurado
+                    ? 'AGENTE_SECRET — o agente na VPS aceita no grupo quem já é membro ativo.'
+                    : 'AGENTE_SECRET ausente. Sem ele a rota recusa o agente, e ninguém entra no grupo automaticamente.'}
+                </dd>
+              </div>
+              <Badge tone={agenteConfigurado ? 'positive' : 'warning'}>
+                {agenteConfigurado ? 'Configurado' : 'Não configurado'}
               </Badge>
             </div>
 

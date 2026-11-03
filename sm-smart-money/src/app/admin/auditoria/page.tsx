@@ -25,6 +25,9 @@ const ENTITY_LABELS: Record<string, string> = {
   waha: 'WhatsApp',
   setting: 'Configuração',
   arquivo: 'Arquivo',
+  // O filtro sai daqui: sem a entrada, as decisoes do agente ficam visiveis mas
+  // so' se encontram rolando a lista inteira.
+  grupo: 'Grupo do WhatsApp',
 };
 
 /** Registro imutavel de acoes administrativas (G11). Somente leitura. */

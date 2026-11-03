@@ -45,10 +45,16 @@ export type AuditAction =
   // por isso o registro importa ainda mais: e' o que explica, depois, por que um
   // acesso caiu numa data especifica.
   | 'assinatura.cancelar'
-  | 'assinatura.retomar';
+  | 'assinatura.retomar'
+  // Entrada no grupo do WhatsApp decidida pelo agente, sem ninguem olhando. O
+  // registro e' o que explica depois por que um numero entrou e outro ficou
+  // esperando.
+  | 'grupo.entrada_aprovada'
+  | 'grupo.entrada_pendente';
 
 export async function recordAudit(params: {
-  actor: SessionUser | { id: string; name: string };
+  /** `id` nulo quando quem agiu nao e' uma conta -- o agente do WhatsApp. */
+  actor: SessionUser | { id: string | null; name: string };
   action: AuditAction;
   entity: string;
   entityId?: string | null;
@@ -101,4 +107,6 @@ export const AUDIT_LABELS: Record<string, string> = {
   'whatsapp.mensagem': 'Enviou mensagem WhatsApp',
   'template.atualizar': 'Atualizou template',
   'configuracao.atualizar': 'Atualizou configuração',
+  'grupo.entrada_aprovada': 'Aprovou entrada no grupo',
+  'grupo.entrada_pendente': 'Deixou entrada pendente',
 };

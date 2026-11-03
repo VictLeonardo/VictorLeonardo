@@ -1,0 +1,25 @@
+[Unit]
+Description=Agente do grupo no WhatsApp (SM Smart Money)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sm
+WorkingDirectory=/opt/sm/agente-whatsapp
+EnvironmentFile=/etc/sm-agente.env
+ExecStart=/usr/bin/node src/servidor.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# O processo não precisa de mais nada do sistema do que o próprio diretório.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/sm-agente
+
+[Install]
+WantedBy=multi-user.target

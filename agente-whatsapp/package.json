@@ -1,0 +1,12 @@
+{
+  "name": "agente-whatsapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agente que aceita no grupo do WhatsApp quem ja' e' membro da plataforma.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/servidor.js",
+    "teste": "node --test"
+  }
+}

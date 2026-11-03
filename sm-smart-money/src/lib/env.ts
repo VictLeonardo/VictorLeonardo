@@ -61,6 +61,9 @@ const schema = z.object({
   ZAPI_INSTANCE_ID: z.string().optional(),
   ZAPI_TOKEN: z.string().optional(),
   ZAPI_CLIENT_TOKEN: z.string().optional(),
+  // Segredo compartilhado com o agente que roda na VPS. Sem ele, a rota de
+  // decisao de entrada no grupo recusa todo mundo -- inclusive o agente.
+  AGENTE_SECRET: z.string().optional(),
   // Explicito so' quando os dois estiverem configurados ao mesmo tempo, o que
   // acontece durante uma troca. Fora disso, quem decide e' a presenca.
   WHATSAPP_PROVIDER: z.enum(['waha', 'zapi']).optional(),
@@ -120,6 +123,7 @@ export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP
  * desempata quando isso nao for verdade.
  */
 export const zapiConfigured = Boolean(env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN);
+export const agenteConfigurado = Boolean(env.AGENTE_SECRET);
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);
 
 /**

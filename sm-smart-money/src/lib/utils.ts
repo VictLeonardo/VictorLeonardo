@@ -163,6 +163,37 @@ export function telefoneBrasileiro(bruto: string | null | undefined): {
   return { valor: `55${local}` };
 }
 
+/**
+ * A forma comparavel de um telefone brasileiro.
+ *
+ * O WhatsApp reporta celular brasileiro ora com o nono digito, ora sem: linhas
+ * antigas costumam aparecer sem ele, porque o 9 foi acrescentado pelas
+ * operadoras depois. Comparar texto com texto recusaria um membro pagante por
+ * causa de um digito que ele nunca escolheu ter.
+ *
+ * A chave e' 55 + DDD + os oito digitos finais -- os mesmos nas duas formas.
+ * Isso confunde um fixo com um celular que terminem igual no mesmo DDD, o que
+ * nao acontece na pratica porque fixo nao comeca com 9 nem com 8.
+ */
+export function chaveDeTelefone(bruto: string | null | undefined): string | null {
+  const digitos = normalizePhone(bruto ?? '');
+  if (!digitos) return null;
+
+  // O 55 inicial so' e' codigo de pais quando sobra numero demais para ser DDD
+  // -- o DDD 55 existe (Santa Maria, RS) e nao pode ser comido por engano.
+  const local = digitos.startsWith('55') && digitos.length > 11 ? digitos.slice(2) : digitos;
+  if (local.length !== 10 && local.length !== 11) return null;
+
+  const ddd = local.slice(0, 2);
+  if (!DDDS.has(Number(ddd))) return null;
+  // Mesma regra de `telefoneBrasileiro`: celular de 11 digitos tem 9 apos o
+  // DDD. Sem ela, um numero impossivel como 11 8876-54321 cairia na mesma
+  // chave de um numero real -- e dois cadastros diferentes casariam.
+  if (local.length === 11 && local[2] !== '9') return null;
+
+  return `55${ddd}${local.slice(-8)}`;
+}
+
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return '—';
   const digits = normalizePhone(phone);

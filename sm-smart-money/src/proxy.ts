@@ -38,6 +38,9 @@ const PUBLIC_PREFIXES = [
   '/api/cron',
   // O Stripe chama sem cookie nenhum; a prova e' a assinatura do corpo.
   '/api/stripe',
+  // O agente da VPS chega sem cookie nenhum; a prova e' o segredo compartilhado
+  // que a propria rota confere.
+  '/api/whatsapp',
   // As rotas de assinatura conferem a sessao por conta propria e respondem 401.
   // Deixar o proxy redirecionar devolveria HTML de login para um fetch.
   '/api/assinatura',
