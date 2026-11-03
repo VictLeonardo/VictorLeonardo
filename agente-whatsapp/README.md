@@ -105,6 +105,22 @@ sudo systemctl enable --now sm-agente
 curl localhost:8080/saude
 ```
 
+### Conferir antes de ligar
+
+Com o arquivo de ambiente pronto, rode a verificação **antes** de apontar o
+webhook. Ela confere a corrente inteira sem mexer em ninguém — a sonda de
+aprovação usa um número impossível, então ninguém entra no grupo por causa dela:
+
+```bash
+cd /opt/sm/agente-whatsapp
+set -a; . /etc/sm-agente.env; set +a
+npm run verificar
+```
+
+A saída não contém nenhum valor de segredo, só se está presente e se funciona —
+pode ser colada em qualquer lugar. Ela termina em erro enquanto houver item
+pendente, então serve também de porta no deploy.
+
 ### Endereço público e webhook
 
 O agente fala HTTP puro: quem termina o TLS é o nginx (ou o Caddy) da VPS,
