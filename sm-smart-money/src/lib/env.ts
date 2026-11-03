@@ -124,6 +124,18 @@ export const mailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP
  * desempata quando isso nao for verdade.
  */
 export const zapiConfigured = Boolean(env.ZAPI_INSTANCE_ID && env.ZAPI_TOKEN);
+
+/**
+ * Presenca de cada variavel da Z-API, para a tela dizer qual falta.
+ *
+ * Um "nao configurado" sozinho manda conferir as tres uma por uma; dizer qual
+ * esta' vazia resolve na primeira olhada.
+ */
+export const variaveisDaZapi = {
+  ZAPI_INSTANCE_ID: Boolean(env.ZAPI_INSTANCE_ID),
+  ZAPI_TOKEN: Boolean(env.ZAPI_TOKEN),
+  ZAPI_CLIENT_TOKEN: Boolean(env.ZAPI_CLIENT_TOKEN),
+};
 export const agenteConfigurado = Boolean(env.AGENTE_SECRET);
 export const conviteDoGrupoConfigurado = Boolean(env.WHATSAPP_GROUP_URL);
 export const wahaConfigured = Boolean(env.WAHA_BASE_URL);

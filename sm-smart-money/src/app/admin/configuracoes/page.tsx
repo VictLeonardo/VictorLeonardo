@@ -8,6 +8,7 @@ import {
   armazenamentoConfigurado,
   mailConfigured,
   provedorWhatsapp,
+  variaveisDaZapi,
   variaveisDoArmazenamento,
   whatsappConfigured,
 } from '@/lib/env';
@@ -89,11 +90,23 @@ export default async function AdminSettingsPage() {
                     ? `WhatsApp (${NOME_DO_PROVEDOR[provedorWhatsapp]})`
                     : 'WhatsApp'}
                 </dt>
-                <dd className="text-xs text-text-3">
-                  {whatsappConfigured && provedorWhatsapp === 'waha'
-                    ? 'WAHA_BASE_URL · WAHA_API_KEY · WAHA_SESSION'
-                    : 'ZAPI_INSTANCE_ID · ZAPI_TOKEN · ZAPI_CLIENT_TOKEN (opcional)'}
-                </dd>
+                {whatsappConfigured && provedorWhatsapp === 'waha' ? (
+                  <dd className="text-xs text-text-3">
+                    WAHA_BASE_URL · WAHA_API_KEY · WAHA_SESSION
+                  </dd>
+                ) : (
+                  <>
+                    <dd className="font-mono text-[11px] text-text-3">
+                      {Object.entries(variaveisDaZapi)
+                        .map(([nome, presente]) => `${presente ? '✓' : '✗'} ${nome}`)
+                        .join('   ')}
+                    </dd>
+                    <dd className="mt-1 text-xs text-text-3">
+                      O Client-Token nasce desligado na Z-API: enquanto estiver assim, ele é
+                      dispensável. Depois de ligado lá, toda chamada sem ele é recusada.
+                    </dd>
+                  </>
+                )}
               </div>
               <Badge tone={whatsappConfigured ? 'positive' : 'warning'}>
                 {whatsappConfigured ? 'Configurado' : 'Não configurado'}
