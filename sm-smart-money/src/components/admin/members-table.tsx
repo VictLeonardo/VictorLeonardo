@@ -19,6 +19,7 @@ import { Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { PLAN_LABELS, STATUS_LABELS, TIER_LABELS } from '@/lib/domain';
 import { cn, formatDate, formatPhone } from '@/lib/utils';
+import { rota } from '@/lib/rotas';
 
 export type MemberTableRow = {
   id: string;
@@ -105,7 +106,7 @@ export function MembersTable({
   /** Edicao inline de plano e status — os dois campos que o admin mais mexe. */
   async function patch(id: string, data: Record<string, string>) {
     setBusy(id);
-    const res = await fetch(`/api/admin/membros/${id}`, {
+    const res = await fetch(rota(`/api/admin/membros/${id}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

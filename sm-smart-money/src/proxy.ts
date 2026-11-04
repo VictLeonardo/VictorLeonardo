@@ -52,6 +52,21 @@ const PUBLIC_PREFIXES = [
   '/sitemap.xml',
 ];
 
+/**
+ * Um destino de redirecionamento que respeita o prefixo da aplicacao.
+ *
+ * Quando a plataforma e' servida dentro de um caminho do dominio -- por
+ * exemplo /viplounge --, `new URL('/login', request.url)` apaga o prefixo e
+ * manda a pessoa para uma pagina que nao existe. Clonar `nextUrl` preserva o
+ * basePath, que o Next recoloca ao serializar.
+ */
+function paraOnde(request: NextRequest, caminho: string): URL {
+  const url = request.nextUrl.clone();
+  url.pathname = caminho;
+  url.search = '';
+  return url;
+}
+
 function isPortalPath(pathname: string) {
   return PORTAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -82,21 +97,21 @@ export default async function proxy(request: NextRequest) {
   if (!claims) {
     const hasRefresh = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
     if (hasRefresh) {
-      const url = new URL('/api/auth/refresh', request.url);
+      const url = paraOnde(request, '/api/auth/refresh');
       url.searchParams.set('next', `${pathname}${search}`);
       return NextResponse.redirect(url);
     }
-    const login = new URL('/login', request.url);
+    const login = paraOnde(request, '/login');
     login.searchParams.set('next', `${pathname}${search}`);
     return NextResponse.redirect(login);
   }
 
   if (isAdminPath && claims.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(paraOnde(request, '/dashboard'));
   }
 
   if (claims.role !== 'ADMIN' && claims.status === 'CANCELADO' && pathname !== '/reativar') {
-    return NextResponse.redirect(new URL('/reativar', request.url));
+    return NextResponse.redirect(paraOnde(request, '/reativar'));
   }
 
   return NextResponse.next();

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/toast';
 import { JOURNEY_CATEGORY_LABELS } from '@/lib/domain';
 import { cn } from '@/lib/utils';
 import type { QuestionRow } from '@/server/journey';
+import { rota } from '@/lib/rotas';
 
 /**
  * Questionario passo a passo. Uma pergunta por tela mantem o foco e deixa a barra
@@ -33,7 +34,7 @@ export function JourneyWizard({ questions }: { questions: QuestionRow[] }) {
 
   async function submit() {
     setPending(true);
-    const res = await fetch('/api/journey', {
+    const res = await fetch(rota('/api/journey'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

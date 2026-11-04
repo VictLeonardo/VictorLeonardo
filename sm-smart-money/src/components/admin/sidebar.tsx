@@ -24,6 +24,7 @@ import { MemberAvatar } from '@/components/ui/avatar';
 import { isActivePath } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 import type { SessionUser } from '@/lib/auth/session';
+import { rota } from '@/lib/rotas';
 
 const ADMIN_NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -62,7 +63,7 @@ export function AdminShell({
   }
 
   async function signOut() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await fetch(rota('/api/auth/logout'), { method: 'POST' });
     router.replace('/login');
     router.refresh();
   }

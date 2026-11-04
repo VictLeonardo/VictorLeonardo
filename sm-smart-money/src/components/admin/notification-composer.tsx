@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { AUDIENCE_LABELS, PLAN_LABELS } from '@/lib/domain';
+import { rota } from '@/lib/rotas';
 
 type Audience = NotificationAudience;
 
@@ -31,7 +32,7 @@ export function NotificationComposer() {
 
   async function submit() {
     setPending(true);
-    const res = await fetch('/api/admin/notificacoes', {
+    const res = await fetch(rota('/api/admin/notificacoes'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

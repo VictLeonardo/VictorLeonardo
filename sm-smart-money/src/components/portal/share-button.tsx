@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Check, Link2 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import { urlAbsoluta } from '@/lib/rotas';
 
 /**
  * Compartilhamento interno: copia o link do portal para outro membro. Nao ha'
@@ -13,7 +14,7 @@ export function ShareButton({ path, label = 'Copiar link' }: { path: string; lab
   const [copied, setCopied] = React.useState(false);
 
   async function copy() {
-    const url = `${window.location.origin}${path}`;
+    const url = urlAbsoluta(path);
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);

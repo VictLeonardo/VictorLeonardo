@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { PLAN_LABELS, STATUS_LABELS, TIER_LABELS } from '@/lib/domain';
+import { rota } from '@/lib/rotas';
 
 export function NewMemberButton() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function NewMemberButton() {
     setPending(true);
 
     const data = new FormData(event.currentTarget);
-    const res = await fetch('/api/admin/membros', {
+    const res = await fetch(rota('/api/admin/membros'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

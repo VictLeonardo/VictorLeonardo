@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
+import { rota } from '@/lib/rotas';
 
 export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: boolean }) {
   const router = useRouter();
@@ -20,7 +21,7 @@ export function LoginForm({ next, podeAssinar }: { next?: string; podeAssinar: b
 
     const data = new FormData(event.currentTarget);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(rota('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/toast';
 import { formatDate } from '@/lib/utils';
 import { STATUS_LABELS } from '@/lib/domain';
 import type { MemberStatus } from '@prisma/client';
+import { rota } from '@/lib/rotas';
 
 type Administrador = {
   id: string;
@@ -51,7 +52,7 @@ export function AdminList({
   async function promover() {
     if (!promovendo) return;
     setPendente('promover');
-    const res = await fetch('/api/admin/administradores', {
+    const res = await fetch(rota('/api/admin/administradores'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: promovendo }),
@@ -70,7 +71,7 @@ export function AdminList({
 
   async function rebaixar(alvo: Administrador) {
     setPendente(alvo.id);
-    const res = await fetch(`/api/admin/administradores/${alvo.id}`, { method: 'DELETE' });
+    const res = await fetch(rota(`/api/admin/administradores/${alvo.id}`), { method: 'DELETE' });
     const payload = await res.json().catch(() => ({}));
     setPendente(null);
     setARebaixar(null);

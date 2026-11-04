@@ -6,6 +6,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { ProfileForm } from '@/components/portal/profile-form';
 import { armazenamentoConfigurado, env } from '@/lib/env';
 import { appHost } from '@/lib/utils';
+import { prefixo } from '@/lib/rotas';
 
 export const metadata: Metadata = { title: 'Meu Perfil' };
 export const dynamic = 'force-dynamic';
@@ -39,7 +40,7 @@ export default async function ProfilePage() {
           congelado no build e a mesma imagem deixaria de servir varios ambientes. */}
       <ProfileForm
         podeEnviarArquivo={armazenamentoConfigurado}
-        host={appHost(env.NEXT_PUBLIC_APP_URL)}
+        host={`${appHost(env.NEXT_PUBLIC_APP_URL)}${prefixo()}`}
         user={{
           name: user.name,
           email: user.email,

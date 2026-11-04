@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { PLAN_LABELS, STATUS_LABELS, TIER_LABELS } from '@/lib/domain';
+import { rota } from '@/lib/rotas';
 
 export function MemberEditForm({
   member,
@@ -43,7 +44,7 @@ export function MemberEditForm({
 
     setPending(true);
     const data = new FormData(form);
-    const res = await fetch(`/api/admin/membros/${member.id}`, {
+    const res = await fetch(rota(`/api/admin/membros/${member.id}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

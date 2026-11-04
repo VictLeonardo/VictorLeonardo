@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
+import { rota } from '@/lib/rotas';
 
 export type LectureFormValues = {
   id?: string;
@@ -74,7 +75,7 @@ export function LectureForm({
 
   async function remove() {
     setPending(true);
-    const res = await fetch(`/api/admin/palestras/${initial.id}`, { method: 'DELETE' });
+    const res = await fetch(rota(`/api/admin/palestras/${initial.id}`), { method: 'DELETE' });
     setPending(false);
     if (!res.ok) {
       toast('Não foi possível excluir', 'error');

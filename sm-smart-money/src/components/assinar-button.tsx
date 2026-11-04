@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { rota } from '@/lib/rotas';
 
 /**
  * Botao que leva ao checkout do Stripe.
@@ -36,7 +37,7 @@ export function AssinarButton({
     setError(null);
     setPending(true);
     try {
-      const res = await fetch('/api/assinatura/checkout', { method: 'POST' });
+      const res = await fetch(rota('/api/assinatura/checkout'), { method: 'POST' });
       const payload = await res.json();
 
       if (!res.ok || !payload.url) {

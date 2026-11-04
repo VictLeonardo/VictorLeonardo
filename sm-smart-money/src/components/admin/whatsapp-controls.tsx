@@ -6,6 +6,7 @@ import { CheckCircle2, Loader2, PowerOff, QrCode, RefreshCw } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, Modal } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
+import { rota } from '@/lib/rotas';
 
 /**
  * O WhatsApp invalida o QR Code a cada vinte segundos. Renovamos antes disso,
@@ -50,7 +51,7 @@ export function WhatsappControls({
 
   async function acao(action: 'reiniciar' | 'desconectar') {
     setPending(true);
-    const res = await fetch('/api/admin/whatsapp', {
+    const res = await fetch(rota('/api/admin/whatsapp'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action }),
@@ -80,7 +81,7 @@ export function WhatsappControls({
     };
 
     async function renovarQr() {
-      const res = await fetch('/api/admin/whatsapp', {
+      const res = await fetch(rota('/api/admin/whatsapp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'qrcode' }),
@@ -91,7 +92,7 @@ export function WhatsappControls({
     }
 
     async function consultarEstado() {
-      const res = await fetch('/api/admin/whatsapp');
+      const res = await fetch(rota('/api/admin/whatsapp'));
       const estado = await res.json().catch(() => ({}));
       if (!ativo || !res.ok) return;
       if (estado.connected) {

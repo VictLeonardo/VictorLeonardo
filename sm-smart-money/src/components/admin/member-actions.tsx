@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog, Modal } from '@/components/ui/confirm-dialog';
 import { Field, Input, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
+import { rota } from '@/lib/rotas';
 
 type Member = {
   id: string;
@@ -29,7 +30,7 @@ export function MemberActions({ member }: { member: Member }) {
 
   async function act(body: Record<string, unknown>) {
     setPending(true);
-    const res = await fetch(`/api/admin/membros/${member.id}/acoes`, {
+    const res = await fetch(rota(`/api/admin/membros/${member.id}/acoes`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -51,7 +52,7 @@ export function MemberActions({ member }: { member: Member }) {
 
   async function remove() {
     setPending(true);
-    const res = await fetch(`/api/admin/membros/${member.id}`, { method: 'DELETE' });
+    const res = await fetch(rota(`/api/admin/membros/${member.id}`), { method: 'DELETE' });
     const payload = await res.json().catch(() => ({}));
     setPending(false);
 

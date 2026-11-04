@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/toast';
 import { TIER_LABELS } from '@/lib/domain';
+import { rota } from '@/lib/rotas';
 
 type Tela = { href: string; label: string };
 
@@ -57,7 +58,7 @@ export function AcessoTelas({
 
   async function salvar() {
     setSalvando(true);
-    const res = await fetch('/api/admin/acesso', {
+    const res = await fetch(rota('/api/admin/acesso'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ matriz }),

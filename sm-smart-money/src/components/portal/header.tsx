@@ -10,6 +10,7 @@ import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { NotificationBell } from './notification-bell';
 import type { SessionUser } from '@/lib/auth/session';
+import { rota } from '@/lib/rotas';
 
 export function PortalHeader({
   user,
@@ -21,7 +22,7 @@ export function PortalHeader({
   const router = useRouter();
 
   async function signOut() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await fetch(rota('/api/auth/logout'), { method: 'POST' });
     router.replace('/login');
     router.refresh();
   }

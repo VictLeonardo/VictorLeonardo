@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { rota } from '@/lib/rotas';
 
 /** Marcador manual de "assistido" / "lido", persistido em ContentView.completed. */
 export function WatchedToggle({
@@ -23,7 +24,7 @@ export function WatchedToggle({
     const next = !done;
     setDone(next);
     setPending(true);
-    await fetch(`/api/conteudo/${contentId}/concluido`, {
+    await fetch(rota(`/api/conteudo/${contentId}/concluido`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ completed: next }),

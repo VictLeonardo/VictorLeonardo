@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
+import { rota } from '@/lib/rotas';
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
@@ -25,7 +26,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     }
 
     setPending(true);
-    const res = await fetch('/api/auth/redefinir-senha', {
+    const res = await fetch(rota('/api/auth/redefinir-senha'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, password }),

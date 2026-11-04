@@ -4,6 +4,7 @@ import * as React from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
+import { rota } from '@/lib/rotas';
 
 export function ForgotPasswordForm() {
   const [sent, setSent] = React.useState(false);
@@ -13,7 +14,7 @@ export function ForgotPasswordForm() {
     event.preventDefault();
     setPending(true);
     const data = new FormData(event.currentTarget);
-    await fetch('/api/auth/esqueci-senha', {
+    await fetch(rota('/api/auth/esqueci-senha'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: data.get('email') }),

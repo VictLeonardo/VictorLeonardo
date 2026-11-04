@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
+import { rota } from '@/lib/rotas';
 
 /** O campo unico da tela de pendencia do LinkedIn. */
 export function FormularioLinkedin() {
@@ -18,7 +19,7 @@ export function FormularioLinkedin() {
     setErro(null);
     setEnviando(true);
 
-    const res = await fetch('/api/perfil/linkedin', {
+    const res = await fetch(rota('/api/perfil/linkedin'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ linkedinUrl: valor }),

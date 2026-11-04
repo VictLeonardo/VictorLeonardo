@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
 import { DigitalCard } from '@/components/portal/digital-card';
 import { publicBadge } from '@/lib/domain';
+import { rota } from '@/lib/rotas';
 
 type ProfileData = {
   slug: string;
@@ -78,7 +79,7 @@ export function ProfileForm({
     setPending(true);
 
     const data = new FormData(event.currentTarget);
-    const res = await fetch('/api/perfil', {
+    const res = await fetch(rota('/api/perfil'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

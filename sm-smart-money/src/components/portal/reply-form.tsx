@@ -6,6 +6,7 @@ import { Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
+import { rota } from '@/lib/rotas';
 
 export function ReplyForm({ topicId }: { topicId: string }) {
   const router = useRouter();
@@ -17,7 +18,7 @@ export function ReplyForm({ topicId }: { topicId: string }) {
     event.preventDefault();
     setPending(true);
 
-    const res = await fetch(`/api/comunidade/topicos/${topicId}/respostas`, {
+    const res = await fetch(rota(`/api/comunidade/topicos/${topicId}/respostas`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ body: value }),

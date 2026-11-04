@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Field, Input, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { formatDate } from '@/lib/utils';
+import { rota } from '@/lib/rotas';
 
 type Template = {
   channel: 'EMAIL' | 'WHATSAPP';
@@ -33,7 +34,7 @@ export function TemplateEditor({ templates }: { templates: Template[] }) {
     setPendingKey(id);
 
     const data = new FormData(event.currentTarget);
-    const res = await fetch('/api/admin/templates', {
+    const res = await fetch(rota('/api/admin/templates'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

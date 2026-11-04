@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Bell, Loader2 } from 'lucide-react';
 import { relativeTime } from '@/lib/utils';
+import { rota } from '@/lib/rotas';
 
 type Item = {
   id: string;
@@ -27,7 +28,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
   const unread = dismissed ? 0 : initialUnread;
 
   async function load() {
-    const res = await fetch('/api/notificacoes');
+    const res = await fetch(rota('/api/notificacoes'));
     if (!res.ok) return;
     const data = await res.json();
     setItems(data.items);
@@ -36,7 +37,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
   async function markAllRead() {
     setDismissed(true);
     setItems((prev) => prev?.map((i) => ({ ...i, readAt: new Date().toISOString() })) ?? null);
-    await fetch('/api/notificacoes', { method: 'POST' });
+    await fetch(rota('/api/notificacoes'), { method: 'POST' });
     router.refresh();
   }
 

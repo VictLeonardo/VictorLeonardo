@@ -8,6 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { formatDate } from '@/lib/utils';
 import type { ResumoAssinatura } from '@/server/subscriptions';
+import { rota } from '@/lib/rotas';
 
 /**
  * Controles da assinatura do proprio membro.
@@ -26,7 +27,7 @@ export function SubscriptionPanel({ resumo }: { resumo: ResumoAssinatura }) {
   async function chamar(acao: 'cancelar' | 'retomar' | 'portal') {
     setPendente(acao);
     try {
-      const res = await fetch(`/api/assinatura/${acao}`, { method: 'POST' });
+      const res = await fetch(rota(`/api/assinatura/${acao}`), { method: 'POST' });
       const payload = await res.json();
 
       if (!res.ok) {

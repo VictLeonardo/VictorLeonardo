@@ -12,6 +12,7 @@ import { RichEditor } from '@/components/admin/rich-editor';
 import { useToast } from '@/components/ui/toast';
 import { CONTENT_TYPE_LABELS, VISIBILITY_LABELS, categoriesFor } from '@/lib/domain';
 import { CampoArquivo } from '@/components/ui/campo-arquivo';
+import { rota } from '@/lib/rotas';
 
 export type ContentFormValues = {
   id?: string;
@@ -133,7 +134,7 @@ export function ContentForm({
 
   async function remove() {
     setPending(true);
-    const res = await fetch(`/api/admin/conteudo/${initial.id}`, { method: 'DELETE' });
+    const res = await fetch(rota(`/api/admin/conteudo/${initial.id}`), { method: 'DELETE' });
     setPending(false);
 
     if (!res.ok) {

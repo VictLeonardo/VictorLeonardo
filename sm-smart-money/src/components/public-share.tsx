@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 import { QrCode, Share2 } from 'lucide-react';
 import { Modal } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
+import { urlAbsoluta } from '@/lib/rotas';
 
 /** Cartão digital na versao publica do perfil: QR Code + share nativo. */
 export function PublicShare({ name, slug }: { name: string; slug: string }) {
@@ -15,7 +16,7 @@ export function PublicShare({ name, slug }: { name: string; slug: string }) {
   React.useEffect(() => {
     if (!open) return;
     let active = true;
-    QRCode.toDataURL(`${window.location.origin}/${slug}`, {
+    QRCode.toDataURL(urlAbsoluta(`/${slug}`), {
       width: 512,
       margin: 1,
       color: { dark: '#02201f', light: '#ffffff' },
@@ -32,7 +33,7 @@ export function PublicShare({ name, slug }: { name: string; slug: string }) {
   }, [open, slug]);
 
   async function share() {
-    const url = `${window.location.origin}/${slug}`;
+    const url = urlAbsoluta(`/${slug}`);
     if (navigator.share) {
       try {
         await navigator.share({ title: `${name} · SM Smart Money`, url });

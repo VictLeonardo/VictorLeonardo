@@ -6,6 +6,7 @@ import { QrCode, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
+import { urlAbsoluta } from '@/lib/rotas';
 
 /**
  * Cartão digital: compartilha a URL do perfil pelo share nativo do dispositivo e,
@@ -26,7 +27,7 @@ export function DigitalCard({ slug, name }: { slug: string; name: string }) {
       return;
     }
     let active = true;
-    const target = `${window.location.origin}/${slug}`;
+    const target = urlAbsoluta(`/${slug}`);
     QRCode.toDataURL(target, {
       width: 512,
       margin: 1,
@@ -44,7 +45,7 @@ export function DigitalCard({ slug, name }: { slug: string; name: string }) {
   }, [open, slug]);
 
   async function share() {
-    const target = `${window.location.origin}/${slug}`;
+    const target = urlAbsoluta(`/${slug}`);
     if (navigator.share) {
       try {
         await navigator.share({ title: `${name} · SM Smart Money`, url: target });
