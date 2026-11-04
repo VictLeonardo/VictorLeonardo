@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 /**
  * Caminho em que a plataforma esta montada, derivado de NEXT_PUBLIC_APP_URL.
  *
@@ -25,6 +27,43 @@ function pathnameDe(url) {
 }
 
 const prefixo = caminhoPublico();
+
+/**
+ * Os crons vivem no vercel.json, que e' JSON estatico e nao le variavel de
+ * ambiente. Se a plataforma passa a responder num prefixo, o caminho deles tem
+ * de acompanhar: `/api/cron/x` com basePath `/viplounge` da' 404, e os dois jobs
+ * diarios (agendamentos e saude do WhatsApp) param sem avisar ninguem.
+ *
+ * Conferir aqui troca esse erro silencioso por uma falha de build. O prefixo
+ * continua vindo de um lugar so' -- NEXT_PUBLIC_APP_URL --; o vercel.json apenas
+ * tem de concordar com ele.
+ */
+function conferirCronsDoVercel(prefixo) {
+  const arquivo = new URL('./vercel.json', import.meta.url);
+  let crons;
+  try {
+    crons = JSON.parse(readFileSync(arquivo, 'utf8')).crons;
+  } catch {
+    return; // sem vercel.json (Docker, dev): nada a conferir
+  }
+  if (!Array.isArray(crons)) return;
+
+  const fora = crons
+    .map((c) => c?.path)
+    .filter((caminho) => typeof caminho === 'string')
+    .filter((caminho) => (prefixo ? !caminho.startsWith(`${prefixo}/`) : caminho.startsWith('/viplounge/')));
+
+  if (fora.length) {
+    throw new Error(
+      `vercel.json: cron(s) ${fora.join(', ')} nao batem com o basePath ` +
+        `${prefixo ? `"${prefixo}"` : '(raiz)'} derivado de NEXT_PUBLIC_APP_URL. ` +
+        `Sem o prefixo correto a chamada da Vercel da' 404 e o job para em silencio. ` +
+        `Ajuste "crons[].path" no vercel.json para ${prefixo || ''}/api/cron/...`,
+    );
+  }
+}
+
+conferirCronsDoVercel(prefixo);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
