@@ -35,6 +35,25 @@ formas para a mesma linha, e recusar por causa disso barraria cliente pagante.
 
 Ubuntu/Debian. Não há dependências npm para instalar — só Node 20+.
 
+> **VPS nova, do zero?** `deploy/hostinger.md` tem o procedimento completo para
+> uma VPS da Hostinger: criar a máquina, proteger o acesso, firewall, DNS,
+> HTTPS e webhook, com um "conferir" em cada etapa. O que está aqui é a parte
+> do agente, que esse roteiro também usa.
+
+A parte mecânica desta seção está em `deploy/instalar.sh`, que pode rodar mais
+de uma vez sem estragar nada:
+
+```bash
+sudo ./deploy/instalar.sh
+```
+
+Ele instala o Node se faltar, cria o usuário de sistema, copia o código como
+somente leitura, sorteia `AGENTE_SECRET` e `WEBHOOK_SEGREDO`, e instala o
+serviço com o caminho real do Node resolvido. Não sobrescreve
+`/etc/sm-agente.env` se ele já existir, e não inicia o serviço enquanto
+houver valor por preencher. O resto desta seção é o que ele faz, passo a
+passo, para quem preferir na mão.
+
 A ordem importa: o agente não sobe sem o id do grupo, e a verificação existe
 para falhar **antes** de a Z-API começar a mandar pedidos de verdade.
 
