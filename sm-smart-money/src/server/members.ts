@@ -112,7 +112,7 @@ export const memberRowSelect = {
   isPartner: true,
   joinedAt: true,
   lastLoginAt: true,
-  profile: { select: { slug: true, isPublic: true, avatarUrl: true } },
+  profile: { select: { slug: true, isPublic: true, avatarUrl: true, linkedinUrl: true } },
 } satisfies Prisma.UserSelect;
 
 export type MemberRow = Prisma.UserGetPayload<{ select: typeof memberRowSelect }>;
@@ -219,6 +219,10 @@ export function membersToCsv(rows: MemberRow[]): string {
     'Data de entrada',
     'Último login',
     'Perfil público',
+    // O LinkedIn e' obrigatorio para navegar, entao a coluna serve para achar
+    // quem ainda nao preencheu -- sobretudo quem nunca entra no portal e por
+    // isso nunca viu a tela de pendencia.
+    'LinkedIn',
   ];
 
   // Escapa aspas duplicando-as, conforme RFC 4180.
@@ -237,6 +241,7 @@ export function membersToCsv(rows: MemberRow[]): string {
       row.joinedAt.toISOString().slice(0, 10),
       row.lastLoginAt ? row.lastLoginAt.toISOString().slice(0, 10) : '',
       row.profile ? (row.profile.isPublic ? 'Ativo' : 'Privado') : 'Sem perfil',
+      row.profile?.linkedinUrl ?? '',
     ]
       .map(escape)
       .join(','),

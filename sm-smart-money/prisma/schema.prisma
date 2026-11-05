@@ -370,6 +370,7 @@ enum NotificationAudience {
   POR_PLANO
   VIP
   ACADEMY
+  SEM_LINKEDIN
 }
 
 model Notification {

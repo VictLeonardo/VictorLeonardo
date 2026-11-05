@@ -33,12 +33,24 @@ export async function dispatchNotification(notificationId: string) {
 
   // Os dois niveis sao audiencias possiveis: com apenas VIP, o Academy ficaria
   // sem como ser avisado de nada que nao fosse para todo mundo.
+  // Quem ainda nao vinculou o LinkedIn: o portao so' cobra quem acessa o
+  // portal, entao quem nunca entra nunca ve' a tela de pendencia. Este publico
+  // existe para alcançar essas pessoas sem incomodar quem ja' preencheu.
+  // Perfil ausente conta junto com perfil de LinkedIn vazio.
+  const semLinkedin = {
+    role: 'MEMBER' as const,
+    status: 'ATIVO' as const,
+    OR: [{ profile: { is: null } }, { profile: { linkedinUrl: null } }],
+  };
+
   const where =
     notification.audience === 'VIP' || notification.audience === 'ACADEMY'
       ? { role: 'MEMBER' as const, status: 'ATIVO' as const, tier: notification.audience }
-      : notification.audience === 'POR_PLANO' && notification.planFilter
-        ? { role: 'MEMBER' as const, status: 'ATIVO' as const, plan: notification.planFilter }
-        : { role: 'MEMBER' as const, status: 'ATIVO' as const };
+      : notification.audience === 'SEM_LINKEDIN'
+        ? semLinkedin
+        : notification.audience === 'POR_PLANO' && notification.planFilter
+          ? { role: 'MEMBER' as const, status: 'ATIVO' as const, plan: notification.planFilter }
+          : { role: 'MEMBER' as const, status: 'ATIVO' as const };
 
   const users = await prisma.user.findMany({ where, select: { id: true } });
 

@@ -52,6 +52,7 @@ export const AUDIENCE_LABELS: Record<NotificationAudience, string> = {
   POR_PLANO: 'Segmento por plano',
   VIP: 'Somente VIP',
   ACADEMY: 'Somente Academy',
+  SEM_LINKEDIN: 'Somente quem ainda não vinculou o LinkedIn',
 };
 
 export function isVisibility(valor: unknown): valor is Visibility {

@@ -19,9 +19,11 @@ export async function GET(request: Request) {
     status: STATUSES.includes(params.get('status') as MemberStatus)
       ? (params.get('status') as MemberStatus)
       : undefined,
+    // `sem-linkedin` faltava aqui: quem filtrava por ele na tabela e exportava
+    // levava a lista inteira, contrariando a promessa de "os mesmos filtros".
     profile:
-      perfil === 'ativo' || perfil === 'privado' || perfil === 'sem'
-        ? (perfil as 'ativo' | 'privado' | 'sem')
+      perfil === 'ativo' || perfil === 'privado' || perfil === 'sem' || perfil === 'sem-linkedin'
+        ? (perfil as 'ativo' | 'privado' | 'sem' | 'sem-linkedin')
         : undefined,
     from: params.get('de') ?? undefined,
     to: params.get('ate') ?? undefined,

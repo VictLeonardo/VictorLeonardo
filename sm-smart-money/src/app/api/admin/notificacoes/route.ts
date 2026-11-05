@@ -11,7 +11,7 @@ const schema = z.object({
   title: z.string().trim().min(4, 'Título muito curto').max(120),
   body: z.string().trim().min(10, 'Escreva a mensagem').max(1000),
   url: opcional(z.string().trim().max(300)),
-  audience: z.enum(['TODOS', 'POR_PLANO', 'VIP', 'ACADEMY']),
+  audience: z.enum(['TODOS', 'POR_PLANO', 'VIP', 'ACADEMY', 'SEM_LINKEDIN']),
   planFilter: z.enum(['PADRAO', 'COM_DESCONTO', 'CORTESIA']).optional(),
   scheduledFor: opcional(z.string()),
   sendNow: z.boolean().default(false),
