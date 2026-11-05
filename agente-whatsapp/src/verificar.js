@@ -107,6 +107,14 @@ async function verificar() {
   //    que esta' no codigo segue a convencao dos que ja' funcionam aqui. Um 404
   //    diria que a convencao nao vale para este. A sonda usa um numero
   //    impossivel: o endpoint recusa, e ninguem entra no grupo por causa dela.
+  //
+  //    Medido em 2026-11 contra api.z-api.io com instancia falsa: /status,
+  //    /device, /groups, /group-metadata e /approve-participant todos respondem
+  //    "Instance not found" -- o roteador acha a rota e barra na instancia.
+  //    Rota que nao existe responde "404 page not found", que e' o que o
+  //    zapi.omni.z-api.io devolve para todos esses caminhos: o Omni nao serve
+  //    o formato /instances/{id}/token/{token}/..., entao migrar para ele nao
+  //    e' trocar ZAPI_BASE_URL, e' refazer o cliente.
   try {
     const r = await fetch(urlZapi('/approve-participant'), {
       method: 'POST',
