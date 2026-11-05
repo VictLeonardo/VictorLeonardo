@@ -46,6 +46,25 @@ function mesmoNumero(a, b) {
 async function verificar() {
   console.log('\nVerificação do agente do grupo\n');
 
+  // 0. A base e' uma que serve os endpoints de grupo?
+  //
+  //    O Omni (zapi.omni.z-api.io) e' uma camada de compatibilidade sobre a API
+  //    oficial da Meta, e dos endpoints que usamos ela serve so' /send-text.
+  //    Medido em 2026-11 com credencial falsa: /send-text responde
+  //    "instance not found" (achou a rota), enquanto /status, /device, /groups,
+  //    /group-metadata e /approve-participant respondem "404 page not found"
+  //    (rota inexistente). Sem este aviso, apontar ZAPI_BASE_URL para la' daria
+  //    uma pilha de 404 sem dizer o porque.
+  if (/omni\.z-api\.io/i.test(config.zapi.base)) {
+    anota(
+      'base da Z-API',
+      false,
+      'o Omni não serve os endpoints de grupo — o agente não funciona nesta base',
+    );
+  } else {
+    anota('base da Z-API', true, config.zapi.base);
+  }
+
   // 1. Configuracao. O config.js ja' derruba o processo se faltar o obrigatorio,
   //    entao chegar aqui ja' prova as presencas; o que falta dizer e' o opcional.
   anota('variáveis obrigatórias', true, 'presentes');
