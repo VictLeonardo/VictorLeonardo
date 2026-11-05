@@ -174,11 +174,31 @@ dig +short agente.smpartner.com.br
 
 ## Parte D — o agente (VPS)
 
-12. Traga o código e rode o instalador:
+12. Traga o código para a VPS. São oito arquivos pequenos, e copiar do seu
+    computador é melhor que clonar: a VPS não precisa de credencial do
+    repositório para nada.
+
+    **[MAC]** — do diretório onde você tem o repositório:
+
+```bash
+scp -r agente-whatsapp victor@<IP-DA-VPS>:/tmp/agente-whatsapp
+```
+
+    **[VPS]**:
 
 ```bash
 sudo mkdir -p /opt/sm
-sudo git clone <URL-DO-REPOSITORIO> /opt/sm/repo
+sudo mv /tmp/agente-whatsapp /opt/sm/repo-agente
+cd /opt/sm/repo-agente
+sudo ./deploy/instalar.sh
+```
+
+    Se preferir clonar na VPS, **atenção ao branch**: o agente com o
+    instalador, a checagem de admin e o aviso do Omni está no branch de
+    trabalho, não no `main`.
+
+```bash
+sudo git clone -b claude/sm-smart-money-platform-unyv60 <URL-DO-REPOSITORIO> /opt/sm/repo
 cd /opt/sm/repo/agente-whatsapp
 sudo ./deploy/instalar.sh
 ```
