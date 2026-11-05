@@ -38,9 +38,19 @@ export async function POST(request: Request) {
 
   if (parsed.data.action === 'qrcode') {
     const qr = await getWhatsappQrCode();
-    return qr
-      ? NextResponse.json({ ok: true, qr })
-      : NextResponse.json({ error: 'QR Code indisponível no momento' }, { status: 502 });
+    if (qr) {
+      return NextResponse.json({ ok: true, qr });
+    }
+    // "Indisponivel" sozinho manda a pessoa ficar esperando. O estado da
+    // instancia costuma dizer o motivo de verdade -- credencial que nao existe,
+    // endereco errado, instancia fora do ar -- e so' e' consultado aqui, quando
+    // ja' deu errado.
+    const estado = await getWhatsappStatus();
+    const motivo = estado.detail ? ` A instância respondeu: ${estado.detail}.` : '';
+    return NextResponse.json(
+      { error: `QR Code indisponível.${motivo}` },
+      { status: 502 },
+    );
   }
 
   const result =

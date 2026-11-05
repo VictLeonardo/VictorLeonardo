@@ -45,6 +45,10 @@ export function WhatsappControls({
   const [qrOpen, setQrOpen] = React.useState(false);
   const [qr, setQr] = React.useState<string | null>(null);
   const [expirou, setExpirou] = React.useState(false);
+  // Motivo da ultima tentativa de buscar o QR ter falhado. Sem isto a tela ficava
+  // em "Buscando o codigo..." ate' o timeout e entao culpava quem nao leu --
+  // quando o codigo nunca tinha sido gerado.
+  const [erroQr, setErroQr] = React.useState<string | null>(null);
   const [pareou, setPareou] = React.useState(false);
   // Trocar este numero reinicia o ciclo de renovacao e consulta.
   const [tentativa, setTentativa] = React.useState(0);
@@ -63,6 +67,7 @@ export function WhatsappControls({
 
   function abrirConexao() {
     setQr(null);
+    setErroQr(null);
     setExpirou(false);
     setPareou(false);
     setTentativa((n) => n + 1);
@@ -88,7 +93,14 @@ export function WhatsappControls({
       });
       const payload = await res.json().catch(() => ({}));
       if (!ativo) return;
-      if (res.ok && payload.qr) setQr(payload.qr);
+      if (res.ok && payload.qr) {
+        setQr(payload.qr);
+        setErroQr(null);
+        return;
+      }
+      // A falha tem de aparecer: ela quase sempre quer dizer que a instancia
+      // configurada nao existe ou nao responde, e isso nao se resolve esperando.
+      setErroQr(payload.error ?? `A instância não respondeu (HTTP ${res.status}).`);
     }
 
     async function consultarEstado() {
@@ -198,8 +210,20 @@ export function WhatsappControls({
               </>
             ) : expirou ? (
               <>
-                <span className="font-medium text-text-1">O código expirou</span>
-                <span>Ninguém leu a tempo. Gere um novo para tentar de novo.</span>
+                <span className="font-medium text-text-1">
+                  {qr ? 'O código expirou' : 'Nenhum código foi gerado'}
+                </span>
+                <span>
+                  {qr
+                    ? 'Ninguém leu a tempo. Gere um novo para tentar de novo.'
+                    : (erroQr ?? 'A instância não devolveu nenhum código.')}
+                </span>
+              </>
+            ) : erroQr && !qr ? (
+              <>
+                <span className="font-medium text-text-1">Não consegui buscar o código</span>
+                <span>{erroQr}</span>
+                <span className="text-xs">Continuo tentando a cada 15 segundos.</span>
               </>
             ) : qr ? (
               // eslint-disable-next-line @next/next/no-img-element -- data URL vinda do provedor
