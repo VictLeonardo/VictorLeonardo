@@ -1,10 +1,12 @@
 import { createServer } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
-import { config } from './config.js';
+import { config, exigirGrupo } from './config.js';
 import { lerPedido } from './pedido.js';
 import { perguntarSePodeEntrar } from './plataforma.js';
 import { aprovarEntrada } from './zapi.js';
 import { anotar } from './registro.js';
+
+exigirGrupo();
 
 const TENTATIVAS = 4;
 const ESPERA_MS = [1000, 4000, 15000];
@@ -127,11 +129,12 @@ function responder(res, status, corpo) {
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
-servidor.listen(config.porta, () => {
+servidor.listen(config.porta, config.endereco, () => {
   console.log(
     JSON.stringify({
       quando: new Date().toISOString(),
       tipo: 'no-ar',
+      endereco: config.endereco,
       porta: config.porta,
       grupo: config.grupoId,
       segredoDeWebhook: Boolean(config.webhookSegredo),

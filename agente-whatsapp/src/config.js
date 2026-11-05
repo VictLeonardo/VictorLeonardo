@@ -17,6 +17,12 @@ function obrigatorio(nome) {
 export const config = {
   porta: Number(process.env.PORTA ?? 8080),
 
+  // Escuta so' no localhost por padrao. O webhook da Z-API chega por HTTPS
+  // atraves do nginx, que fica na mesma maquina; o segredo vai na URL, e em
+  // HTTP aberto na internet ele viajaria em claro para quem estiver no caminho.
+  // Para expor direto (tunel, outro proxy), defina ESCUTAR_EM=0.0.0.0.
+  endereco: process.env.ESCUTAR_EM ?? '127.0.0.1',
+
   // A plataforma na Vercel: quem decide se o numero pode entrar.
   plataformaUrl: obrigatorio('PLATAFORMA_URL').replace(/\/+$/, ''),
   plataformaSegredo: obrigatorio('AGENTE_SECRET'),
@@ -38,11 +44,25 @@ export const config = {
 
   // So' este grupo e' atendido. Sem a trava, um pedido em qualquer outro grupo
   // da mesma instancia entraria na mesma regra.
-  grupoId: obrigatorio('ZAPI_GRUPO_ID'),
+  //
+  // Nao e' exigido na leitura do ambiente, e sim por quem precisa dele: o
+  // comando que lista os grupos existe justamente para descobrir este valor, e
+  // morrer por falta dele deixaria a pessoa sem saida.
+  grupoId: process.env.ZAPI_GRUPO_ID || null,
 
   tempoLimiteMs: Number(process.env.TEMPO_LIMITE_MS ?? 15000),
   arquivoDeEventos: process.env.ARQUIVO_DE_EVENTOS ?? './eventos.jsonl',
 };
+
+/** Para quem nao funciona sem o grupo: o servidor e a verificacao. */
+export function exigirGrupo() {
+  if (!config.grupoId) {
+    console.error('[config] falta a variavel ZAPI_GRUPO_ID');
+    console.error('[config] descubra o id com: npm run grupos');
+    process.exit(1);
+  }
+  return config.grupoId;
+}
 
 export function urlZapi(caminho) {
   const { base, instancia, token } = config.zapi;

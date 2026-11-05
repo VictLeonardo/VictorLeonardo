@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/servidor.js",
     "teste": "node --test",
-    "verificar": "node src/verificar.js"
+    "verificar": "node src/verificar.js",
+    "grupos": "node src/grupos.js"
   }
 }

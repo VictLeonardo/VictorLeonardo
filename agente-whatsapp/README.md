@@ -9,7 +9,7 @@ própria Z-API. Quem não casa fica esperando — o agente nunca recusa sozinho.
 O ciclo fecha com a outra metade, que vive na plataforma: assim que o Stripe
 confirma o pagamento, o novo membro recebe o link do convite por WhatsApp, com o
 pedido de entrar usando o mesmo número. Esse número é o que o agente confere
-aqui. A variável do link é `WHATSAPP_GRUPO_CONVITE`, nas variáveis do projeto na
+aqui. A variável do link é `WHATSAPP_GROUP_URL`, nas variáveis do projeto na
 Vercel — não aqui na VPS.
 
 ## Por que ele existe fora da plataforma
@@ -33,83 +33,88 @@ formas para a mesma linha, e recusar por causa disso barraria cliente pagante.
 
 ## Instalação na VPS
 
-Precisa de Node 20 ou mais novo. Não há dependências para instalar.
+Ubuntu/Debian. Não há dependências npm para instalar — só Node 20+.
+
+A ordem importa: o agente não sobe sem o id do grupo, e a verificação existe
+para falhar **antes** de a Z-API começar a mandar pedidos de verdade.
+
+### 1. Node, usuário e diretórios
+
+O unit chama `/usr/bin/node`. O pacote oficial da NodeSource põe o binário
+nesse caminho; nvm e tarball não. Confira com `command -v node` e ajuste o
+`ExecStart` se der outro lugar.
 
 ```bash
-# na VPS, como o usuário que vai rodar o serviço
-git clone <o repositório> /opt/sm
-cd /opt/sm/agente-whatsapp
-node --version        # 20+
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+command -v node && node --version        # /usr/bin/node, v22.x
+
+sudo useradd --system --create-home --home-dir /home/sm --shell /usr/sbin/nologin sm
+sudo mkdir -p /opt/sm
+sudo git clone <o repositório> /opt/sm/repo
+sudo cp -r /opt/sm/repo/agente-whatsapp /opt/sm/agente-whatsapp
+sudo chown -R root:root /opt/sm/agente-whatsapp      # o serviço só lê
 ```
 
-### Variáveis
+Não é preciso criar `/var/log/sm-agente`: o unit declara `LogsDirectory` e o
+systemd cria no dono certo.
 
-Crie `/etc/sm-agente.env` com permissão restrita (`chmod 600`), porque ele
-guarda segredos:
+### 2. Variáveis
+
+`/etc/sm-agente.env`, legível pelo serviço e por mais ninguém:
 
 ```ini
-PORTA=8080
 PLATAFORMA_URL=https://<o endereço da plataforma>
 AGENTE_SECRET=<o mesmo valor configurado na Vercel>
 ZAPI_INSTANCE_ID=<id da instância>
 ZAPI_TOKEN=<token da instância>
 ZAPI_CLIENT_TOKEN=<token da conta, se estiver ativo>
-ZAPI_GRUPO_ID=<id do grupo, ex.: 120363019502650977-group>
+ZAPI_GRUPO_ID=<descoberto no passo 3>
 WEBHOOK_SEGREDO=<um valor aleatório que você escolhe>
-ARQUIVO_DE_EVENTOS=/var/log/sm-agente/eventos.jsonl
-```
-
-Gere os dois segredos que são seus (`AGENTE_SECRET` e `WEBHOOK_SEGREDO`) com
-`openssl rand -hex 32`. O `AGENTE_SECRET` tem de ser idêntico ao que está nas
-variáveis do projeto na Vercel.
-
-Falta de variável derruba o processo na partida, de propósito: um agente que
-sobe sem o segredo ficaria recebendo pedidos e jogando todos fora.
-
-### Serviço
-
-`/etc/systemd/system/sm-agente.service`:
-
-```ini
-[Unit]
-Description=Agente do grupo no WhatsApp (SM Smart Money)
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=sm
-WorkingDirectory=/opt/sm/agente-whatsapp
-EnvironmentFile=/etc/sm-agente.env
-ExecStart=/usr/bin/node src/servidor.js
-Restart=always
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
-
-# O processo não precisa de mais nada do sistema do que o próprio diretório.
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/log/sm-agente
-
-[Install]
-WantedBy=multi-user.target
 ```
 
 ```bash
-sudo mkdir -p /var/log/sm-agente && sudo chown sm:sm /var/log/sm-agente
+sudo chown root:sm /etc/sm-agente.env
+sudo chmod 640 /etc/sm-agente.env    # o grupo sm lê, para rodar a verificação
+```
+
+Gere os dois segredos que são seus (`AGENTE_SECRET` e `WEBHOOK_SEGREDO`) com
+`openssl rand -hex 32`. O `AGENTE_SECRET` tem de ser **idêntico** ao das
+variáveis do projeto na Vercel; na plataforma ele é opcional, e faltando lá a
+rota responde 401 a tudo — a verificação diz isso com essas palavras.
+
+`PORTA` (8080) e `ESCUTAR_EM` (127.0.0.1) têm padrão e normalmente não entram
+no arquivo. O agente escuta só no localhost de propósito: quem atende a
+internet é o nginx. Para expor direto (túnel, outro proxy), defina
+`ESCUTAR_EM=0.0.0.0` — e saiba que o segredo do webhook viaja na URL.
+
+### 3. Descobrir o id do grupo
+
+O valor não está em lugar óbvio no painel. Com as credenciais da Z-API já no
+arquivo (sem o id ainda):
+
+```bash
+cd /opt/sm/agente-whatsapp
+set -a; . /etc/sm-agente.env; set +a
+npm run grupos
+```
+
+Lista os grupos da instância com a linha pronta para colar. Só lê — não entra
+em grupo, não aprova ninguém.
+
+### 4. Serviço
+
+O unit está em `deploy/sm-agente.service`, versionado junto do código:
+
+```bash
+sudo cp /opt/sm/agente-whatsapp/deploy/sm-agente.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now sm-agente
+systemctl status sm-agente --no-pager
 curl localhost:8080/saude
 ```
 
-### Conferir antes de ligar
-
-Com o arquivo de ambiente pronto, rode a verificação **antes** de apontar o
-webhook. Ela confere a corrente inteira sem mexer em ninguém — a sonda de
-aprovação usa um número impossível, então ninguém entra no grupo por causa dela:
+### 5. Conferir antes de ligar o webhook
 
 ```bash
 cd /opt/sm/agente-whatsapp
@@ -117,25 +122,66 @@ set -a; . /etc/sm-agente.env; set +a
 npm run verificar
 ```
 
-A saída não contém nenhum valor de segredo, só se está presente e se funciona —
-pode ser colada em qualquer lugar. Ela termina em erro enquanto houver item
-pendente, então serve também de porta no deploy.
+Confere a corrente inteira sem mexer em ninguém — a sonda de aprovação usa um
+número impossível. Nenhum valor de segredo aparece na saída, só se está
+presente e se funciona, então ela pode ser colada em qualquer lugar. Termina em
+erro enquanto houver item pendente, e serve de porta no deploy.
 
-### Endereço público e webhook
+Dois itens dela merecem atenção, porque falham calados em produção:
 
-O agente fala HTTP puro: quem termina o TLS é o nginx (ou o Caddy) da VPS,
-apontando um subdomínio para `localhost:8080`. **Não exponha a porta direto** —
-o webhook viaja pela internet e carrega número de telefone de gente.
+- **número conectado é admin** — sem ser administrador do grupo, a aprovação
+  não acontece e ninguém percebe até um membro reclamar que não entrou.
+- **grupo pede aprovação** — é o "Aprovar novos participantes" do grupo. Com
+  ele desligado, ninguém pede entrada e o agente nunca recebe nada.
 
-Na Z-API, configure o webhook **"Ao receber"** para:
+Se a Z-API não responder o `group-metadata`, esses dois saem como `aviso` em
+vez de falha: a verificação não tem como confirmar, e dizer "reprovado" seria
+mentir. Aí a prova é o teste real do passo 7.
+
+### 6. Endereço público (HTTPS) e webhook
+
+O agente fala HTTP puro no localhost. Quem termina TLS é o nginx, e isso não é
+capricho: a Z-API não assina o corpo nem aceita cabeçalho próprio, então o
+nosso segredo vai na query string. Em HTTP aberto ele viajaria em claro.
+
+`deploy/nginx-agente.conf` já traz o bloco pronto — inclusive um formato de log
+que **não** grava a query string, senão o segredo ficaria em texto puro no
+disco a cada pedido.
+
+```bash
+sudo apt-get install -y nginx certbot python3-certbot-nginx
+sudo cp /opt/sm/agente-whatsapp/deploy/nginx-agente.conf /etc/nginx/sites-available/agente
+sudo sed -i 's/agente.SEU-DOMINIO/agente.seudominio.com.br/' /etc/nginx/sites-available/agente
+sudo ln -sf /etc/nginx/sites-available/agente /etc/nginx/sites-enabled/agente
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d agente.seudominio.com.br
+```
+
+O DNS do subdomínio tem de apontar para o IP da VPS. Atrás do Cloudflare,
+deixe o registro **sem proxy** (nuvem cinza) enquanto o certbot valida; depois
+pode religar, mas então use Full (strict), porque com Flexible a perna
+Cloudflare→VPS volta a ser HTTP puro.
+
+Na Z-API, aponte o webhook **"Ao receber"** para:
 
 ```
-https://<seu subdomínio>/webhook?s=<WEBHOOK_SEGREDO>
+https://agente.seudominio.com.br/webhook?s=<WEBHOOK_SEGREDO>
 ```
 
-O segredo vai na URL porque a Z-API não assina o corpo nem permite cabeçalho
-próprio. Sem ele, qualquer um que descubra o endereço consegue mandar pedidos
-falsos de entrada.
+### 7. Teste real, com um número de verdade
+
+A verificação cobre a corrente, mas só um pedido real prova que a aprovação
+funciona — é ali que aparece, por exemplo, o número conectado não ser admin.
+
+Com um número que **é** membro ativo, peça entrada no grupo pelo link do
+convite e acompanhe:
+
+```bash
+journalctl -u sm-agente -f
+```
+
+Deve sair `pedido-recebido` e, em seguida, `aprovado`. Se sair `falhou`, a
+linha traz a resposta da Z-API — é ela que diz o motivo.
 
 ## Acompanhamento
 

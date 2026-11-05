@@ -8,6 +8,8 @@ Type=simple
 User=sm
 WorkingDirectory=/opt/sm/agente-whatsapp
 EnvironmentFile=/etc/sm-agente.env
+# Conferir com `command -v node` antes de instalar: o pacote oficial da
+# NodeSource poe o node aqui, mas instalacao por nvm ou tarball nao.
 ExecStart=/usr/bin/node src/servidor.js
 Restart=always
 RestartSec=5
@@ -19,7 +21,15 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/log/sm-agente
+
+# O diário de eventos precisa de um lugar gravável, e o diretório da aplicação
+# não é um: com ProtectSystem=strict ele fica somente leitura. Sem isto o
+# agente atende normalmente e perde toda linha do diário com EACCES -- e o
+# diário é justamente o que permite recuperar um pedido, porque a Z-API não
+# tem como listar pendentes. LogsDirectory cria /var/log/sm-agente já no dono
+# certo e o torna gravável, então não há passo manual para esquecer.
+LogsDirectory=sm-agente
+Environment=ARQUIVO_DE_EVENTOS=/var/log/sm-agente/eventos.jsonl
 
 [Install]
 WantedBy=multi-user.target
