@@ -208,6 +208,23 @@ sudo nano /etc/sm-agente.env
 | `AGENTE_SECRET` | já sorteado — **copie para a Vercel** |
 | `WEBHOOK_SEGREDO` | já sorteado — vai na URL do webhook, passo 18 |
 
+**Não defina `ZAPI_BASE_URL`.** O padrão é `https://api.z-api.io`, e é lá que
+os endpoints de grupo existem. O endereço do Omni
+(`zapi.omni.z-api.io`) **não serve** os endpoints que o agente precisa:
+medido com credencial falsa, só `/send-text` responde "instance not found"
+(rota existe); `/status`, `/device`, `/groups`, `/group-metadata` e
+`/approve-participant` respondem "404 page not found". A camada de
+compatibilidade do Omni roda sobre a API oficial da Meta, e a documentação
+dela avisa que só atende canal WhatsApp Oficial.
+
+Se a conta tiver sido migrada para o Omni no painel, isso por si não muda nada
+aqui — o que importa é qual base ainda serve a instância. O `npm run grupos`
+do passo 15 responde: se ele lista os grupos sem você definir
+`ZAPI_BASE_URL`, a API clássica está servindo e o agente funciona. Se parar de
+servir algum dia, a aprovação automática precisa ser repensada, não
+reconfigurada — vale perguntar ao suporte da Z-API se o `approve-participant`
+vai existir no Omni.
+
 14. **Vercel**: cadastre `AGENTE_SECRET` nas variáveis do projeto com o mesmo
     valor, e faça redeploy. Na plataforma essa variável é *opcional*: faltando
     lá, a rota do agente responde **401 a tudo**.
