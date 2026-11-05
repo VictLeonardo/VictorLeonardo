@@ -12,6 +12,33 @@ pedido de entrar usando o mesmo número. Esse número é o que o agente confere
 aqui. A variável do link é `WHATSAPP_GROUP_URL`, nas variáveis do projeto na
 Vercel — não aqui na VPS.
 
+## Exige a Z-API clássica, não o Omni
+
+Este agente **não funciona** com o Z-API Omni. Não é configuração: o Omni roda
+sobre a API Oficial da Meta, e os endpoints de grupo não existem lá.
+
+Pela página de limitações do próprio Omni, em 2026-11:
+
+| Endpoint | Status no Omni |
+|---|---|
+| `approve-participant` | Em desenvolvimento |
+| `group-metadata` | Em desenvolvimento |
+| buscar / listar grupos | Não suportado |
+| `add-participant` | Não suportado |
+
+Confere com a medição: em `zapi.omni.z-api.io`, dos onze endpoints que a
+plataforma e o agente usam, só `/send-text` responde; os outros dez devolvem
+`404 page not found`. O índice da documentação do Omni, com 141 páginas, não
+tem nenhuma sobre grupos.
+
+A Z-API diz que vai acrescentando conforme a Meta liberar. Enquanto isso, a
+aprovação automática precisa de uma **instância clássica** (`api.z-api.io`,
+pareada por QR Code), que tem os endpoints de grupo completos. O envio do
+convite após o pagamento, esse sim, funciona nos dois — é só `send-text`.
+
+Por isso `npm run verificar` reprova de saída uma base `*.omni.z-api.io`, em
+vez de deixar a pessoa descobrir por uma pilha de 404.
+
 ## Por que ele existe fora da plataforma
 
 A decisão de quem pode entrar mora na plataforma, não aqui. Este processo só
